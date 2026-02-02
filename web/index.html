@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rig Reavers Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <div>
+          <p class="tag">Wasteland PBBG Prototype</p>
+          <h1>Rig Reavers</h1>
+          <p class="subtitle">
+            Start as a war band rookie. Scavenge for scrap, water, and fuel. Build toward your
+            first war rig.
+          </p>
+        </div>
+        <div class="status">
+          <div>
+            <p class="label">Level</p>
+            <p id="level" class="value">1</p>
+          </div>
+          <div>
+            <p class="label">AP</p>
+            <p id="ap" class="value">10</p>
+          </div>
+          <div>
+            <p class="label">Morale</p>
+            <p id="morale" class="value">Stable</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid">
+        <article class="panel">
+          <h2>Resources</h2>
+          <div class="resources">
+            <div>
+              <p class="label">Scrap</p>
+              <p id="scrap" class="value">0</p>
+            </div>
+            <div>
+              <p class="label">Water</p>
+              <p id="water" class="value">0</p>
+            </div>
+            <div>
+              <p class="label">Fuel</p>
+              <p id="fuel" class="value">0</p>
+            </div>
+            <div>
+              <p class="label">Tech Parts</p>
+              <p id="tech" class="value">0</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Scavenge Actions</h2>
+          <p class="hint">Spend AP to search zones. Higher tiers cost more AP but pay out more.</p>
+          <div class="actions">
+            <button type="button" data-zone="rust">Rust Flats (2 AP)</button>
+            <button type="button" data-zone="ash">Ash Dunes (3 AP)</button>
+            <button type="button" data-zone="glass">Glass Wastes (5 AP)</button>
+          </div>
+          <p class="timer" id="ap-timer">AP regenerates every 8s.</p>
+        </article>
+
+        <article class="panel">
+          <h2>War Rig Project</h2>
+          <div class="rig">
+            <div>
+              <p class="label">Blueprint</p>
+              <p id="blueprint" class="value">Locked</p>
+            </div>
+            <div>
+              <p class="label">Progress</p>
+              <p id="rig-progress" class="value">0 / 120</p>
+            </div>
+            <div>
+              <p class="label">Status</p>
+              <p id="rig-status" class="value">Unavailable</p>
+            </div>
+          </div>
+          <button id="build-rig" type="button" class="primary" disabled>
+            Contribute Scrap (10)
+          </button>
+        </article>
+
+        <article class="panel log">
+          <h2>Scout Log</h2>
+          <ul id="log"></ul>
+        </article>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
