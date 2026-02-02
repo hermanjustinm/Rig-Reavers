@@ -229,33 +229,46 @@ const refs = {
   nextUnlock: document.getElementById("next-unlock"),
   taskName: document.getElementById("task-name"),
   taskTimer: document.getElementById("task-timer"),
+  taskProgress: document.getElementById("task-progress"),
   taskButton: document.getElementById("start-task"),
   craftName: document.getElementById("craft-name"),
   craftTimer: document.getElementById("craft-timer"),
+  craftProgress: document.getElementById("craft-progress"),
+  craftRequirements: document.getElementById("craft-requirements"),
   blueprint: document.getElementById("blueprint"),
   rigProgress: document.getElementById("rig-progress"),
   rigStatus: document.getElementById("rig-status"),
   rigBenefit: document.getElementById("rig-benefit"),
   rigButton: document.getElementById("build-rig"),
+  rigProgressBar: document.getElementById("rig-progress-bar"),
   missionName: document.getElementById("mission-name"),
   missionTimer: document.getElementById("mission-timer"),
+  missionProgress: document.getElementById("mission-progress"),
+  missionRequirements: document.getElementById("mission-requirements"),
   crewSlots: document.getElementById("crew-slots"),
   recruitStatus: document.getElementById("recruit-status"),
   hireCrew: document.getElementById("hire-crew"),
   rallyStatus: document.getElementById("rally-status"),
   rallyTimer: document.getElementById("rally-timer"),
+  rallyProgress: document.getElementById("rally-progress"),
   startRally: document.getElementById("start-rally"),
   injuryStatus: document.getElementById("injury-status"),
   maxAp: document.getElementById("max-ap"),
   useMedkit: document.getElementById("use-medkit"),
   contractName: document.getElementById("contract-name"),
   contractTimer: document.getElementById("contract-timer"),
+  contractProgress: document.getElementById("contract-progress"),
+  contractRequirements: document.getElementById("contract-requirements"),
   takeContract: document.getElementById("take-contract"),
   outpostStage: document.getElementById("outpost-stage"),
   outpostStatus: document.getElementById("outpost-status"),
   outpostButton: document.getElementById("start-outpost"),
+  outpostProgress: document.getElementById("outpost-progress"),
+  outpostRequirements: document.getElementById("outpost-requirements"),
   perkList: document.getElementById("perk-list"),
   log: document.getElementById("log"),
+  tabs: document.querySelectorAll(".tab"),
+  panels: document.querySelectorAll(".tab-panel"),
 };
 
 const logEntries = [];
@@ -269,6 +282,21 @@ const formatTimer = (seconds) => {
   return minutes > 0
     ? `${minutes}m ${remainingSeconds.toString().padStart(2, "0")}s`
     : `${remainingSeconds}s`;
+};
+
+const formatCost = (costs) =>
+  Object.entries(costs)
+    .map(([key, value]) => `${value} ${key}`)
+    .join(" + ");
+
+const setProgress = (element, current, total) => {
+  if (!element) return;
+  if (!total || total <= 0) {
+    element.style.width = "0%";
+    return;
+  }
+  const pct = Math.min(100, Math.max(0, (current / total) * 100));
+  element.style.width = `${pct}%`;
 };
 
 const addLog = (message) => {
@@ -352,6 +380,7 @@ const updateTaskUi = () => {
     refs.taskName.textContent = state.activeTask.name;
     refs.taskTimer.textContent = formatTimer(state.activeTask.remaining);
     refs.taskButton.disabled = true;
+    setProgress(refs.taskProgress, state.activeTask.total - state.activeTask.remaining, state.activeTask.total);
   } else {
     refs.taskName.textContent = "Idle";
     refs.taskTimer.textContent = "--";
@@ -361,6 +390,7 @@ const updateTaskUi = () => {
       state.tech < 2 ||
       state.scrap < 10 ||
       state.water < 5;
+    setProgress(refs.taskProgress, 0, 1);
   }
 };
 
@@ -368,9 +398,17 @@ const updateCraftUi = () => {
   if (state.activeCraft) {
     refs.craftName.textContent = state.activeCraft.name;
     refs.craftTimer.textContent = formatTimer(state.activeCraft.remaining);
+    refs.craftRequirements.textContent = `Requires ${formatCost(state.activeCraft.costs)}.`;
+    setProgress(
+      refs.craftProgress,
+      state.activeCraft.total - state.activeCraft.remaining,
+      state.activeCraft.total,
+    );
   } else {
     refs.craftName.textContent = "None";
     refs.craftTimer.textContent = "--";
+    refs.craftRequirements.textContent = "Requires materials.";
+    setProgress(refs.craftProgress, 0, 1);
   }
   document.querySelectorAll("button[data-recipe]").forEach((button) => {
     button.disabled = state.activeCraft !== null;
@@ -381,9 +419,17 @@ const updateMissionUi = () => {
   if (state.activeMission) {
     refs.missionName.textContent = state.activeMission.name;
     refs.missionTimer.textContent = formatTimer(state.activeMission.remaining);
+    refs.missionRequirements.textContent = "Fuel cost paid.";
+    setProgress(
+      refs.missionProgress,
+      state.activeMission.total - state.activeMission.remaining,
+      state.activeMission.total,
+    );
   } else {
     refs.missionName.textContent = "None";
     refs.missionTimer.textContent = "--";
+    refs.missionRequirements.textContent = "Requires fuel + reputation tier.";
+    setProgress(refs.missionProgress, 0, 1);
   }
 };
 
@@ -392,14 +438,27 @@ const updateContractUi = () => {
     refs.contractName.textContent = state.activeContract.name;
     refs.contractTimer.textContent = formatTimer(state.activeContract.remaining);
     refs.takeContract.disabled = true;
+    refs.contractRequirements.textContent = "Contract active.";
+    setProgress(
+      refs.contractProgress,
+      state.activeContract.total - state.activeContract.remaining,
+      state.activeContract.total,
+    );
   } else if (state.contractCooldown > 0) {
     refs.contractName.textContent = "Cooldown";
     refs.contractTimer.textContent = formatTimer(state.contractCooldown);
     refs.takeContract.disabled = true;
+    refs.contractRequirements.textContent = "Waiting for board refresh.";
+    setProgress(refs.contractProgress, 0, 1);
   } else {
     refs.contractName.textContent = "Available";
     refs.contractTimer.textContent = "--";
     refs.takeContract.disabled = false;
+    const next = contracts.find((contract) => state.reputation < contract.unlockRep);
+    refs.contractRequirements.textContent = next
+      ? `Requires ${next.unlockRep}+ rep for higher-tier contracts.`
+      : "All contract tiers unlocked.";
+    setProgress(refs.contractProgress, 0, 1);
   }
 };
 
@@ -419,10 +478,12 @@ const updateRallyUi = () => {
     refs.rallyStatus.textContent = "Rallying";
     refs.rallyTimer.textContent = formatTimer(state.rallyTask.remaining);
     refs.startRally.disabled = true;
+    setProgress(refs.rallyProgress, state.rallyTask.total - state.rallyTask.remaining, state.rallyTask.total);
   } else {
     refs.rallyStatus.textContent = "Idle";
     refs.rallyTimer.textContent = "--";
     refs.startRally.disabled = state.water < 4;
+    setProgress(refs.rallyProgress, 0, 1);
   }
 };
 
@@ -438,25 +499,36 @@ const updateOutpostUi = () => {
   if (!state.rigOperational) {
     refs.outpostStatus.textContent = "Unavailable";
     refs.outpostButton.disabled = true;
+    refs.outpostRequirements.textContent = "Requires operational war rig.";
+    setProgress(refs.outpostProgress, 0, 1);
     return;
   }
 
   if (state.outpostTask) {
     refs.outpostStatus.textContent = `${state.outpostTask.name}`;
     refs.outpostButton.disabled = true;
+    setProgress(
+      refs.outpostProgress,
+      state.outpostTask.total - state.outpostTask.remaining,
+      state.outpostTask.total,
+    );
     return;
   }
 
   if (state.outpostStage >= outpostStages.length) {
     refs.outpostStatus.textContent = "Completed";
     refs.outpostButton.disabled = true;
+    refs.outpostRequirements.textContent = "All stages complete.";
+    setProgress(refs.outpostProgress, 1, 1);
     return;
   }
 
   const stage = outpostStages[state.outpostStage];
   refs.outpostStatus.textContent = "Ready";
-  refs.outpostButton.textContent = `Start ${stage.name} (${stage.duration}s, ${formatCost(stage.costs)})`;
+  refs.outpostButton.textContent = `Start ${stage.name} (${stage.duration}s)`;
+  refs.outpostRequirements.textContent = `Requires ${formatCost(stage.costs)}.`;
   refs.outpostButton.disabled = !hasCosts(stage.costs);
+  setProgress(refs.outpostProgress, 0, stage.duration);
 };
 
 const updatePerkUi = () => {
@@ -486,6 +558,7 @@ const updateUi = () => {
   refs.rigProgress.textContent = `${state.rigProgress} / ${state.rigTarget}`;
   refs.rep.textContent = state.reputation;
   refs.storage.textContent = `${getStorageUsed()} / ${getStorageCap()}`;
+  setProgress(refs.rigProgressBar, state.rigProgress, state.rigTarget);
   updateMorale();
   updateRigStatus();
   updateNextUnlock();
@@ -499,11 +572,6 @@ const updateUi = () => {
   updateOutpostUi();
   updatePerkUi();
 };
-
-const formatCost = (costs) =>
-  Object.entries(costs)
-    .map(([key, value]) => `${value} ${key}`)
-    .join(" + ");
 
 const hasCosts = (costs) =>
   Object.entries(costs).every(([key, value]) => state[key] >= value);
@@ -593,8 +661,7 @@ const handleScavenge = (zoneKey) => {
   maybeUnlockBlueprint();
 
   const injuryRoll = Math.random();
-  const baseInjury =
-    zoneKey === "dead" ? 0.2 : zoneKey === "glass" ? 0.12 : 0.05;
+  const baseInjury = zoneKey === "dead" ? 0.2 : zoneKey === "glass" ? 0.12 : 0.05;
   const moralePenalty = state.morale <= 30 ? 0.05 : 0;
   const injuryChance = baseInjury + moralePenalty;
   if (injuryRoll < injuryChance) {
@@ -618,6 +685,7 @@ const handleRigContribution = () => {
     state.activeTask = {
       name: "Rig Assembly",
       remaining: 90,
+      total: 90,
     };
     addLog("Rig chassis complete. Assembly begins (90s).");
   } else {
@@ -638,6 +706,7 @@ const startBlueprintTask = () => {
   state.activeTask = {
     name: "Blueprint Research",
     remaining: 60,
+    total: 60,
   };
   addLog("Workshop queue started: Blueprint research.");
   updateUi();
@@ -677,9 +746,11 @@ const startMission = (missionKey) => {
   state.activeMission = {
     name: mission.name,
     remaining: mission.duration,
+    total: mission.duration,
     rewards: mission.rewards,
     rep: mission.rep,
   };
+  refs.missionRequirements.textContent = `Requires ${mission.fuelCost} Fuel.`;
   addLog(`War rig deployed: ${mission.name} (fuel -${mission.fuelCost}).`);
   updateUi();
 };
@@ -707,8 +778,11 @@ const startCrafting = (recipeKey) => {
   state.activeCraft = {
     name: recipe.name,
     remaining: recipe.duration,
+    total: recipe.duration,
     output: recipe.output,
+    costs: recipe.costs,
   };
+  refs.craftRequirements.textContent = `Requires ${formatCost(recipe.costs)}.`;
   addLog(`Crafting started: ${recipe.name}.`);
   updateUi();
 };
@@ -738,6 +812,7 @@ const startRally = () => {
   state.water -= 4;
   state.rallyTask = {
     remaining: 90,
+    total: 90,
   };
   addLog("Camp rally underway. Spirits are rising.");
   updateUi();
@@ -769,6 +844,7 @@ const startRecruiting = () => {
   state.water -= 6;
   state.recruiting = {
     remaining: 90,
+    total: 90,
   };
   addLog("Recruitment started: scavenger candidate.");
   updateUi();
@@ -796,6 +872,7 @@ const startOutpostStage = () => {
   state.outpostTask = {
     name: stage.name,
     remaining: stage.duration,
+    total: stage.duration,
     bonus: stage.bonus,
   };
   addLog(`Outpost project started: ${stage.name}.`);
@@ -821,9 +898,11 @@ const startContract = () => {
   state.activeContract = {
     name: contract.name,
     remaining: contract.duration,
+    total: contract.duration,
     rewards: contract.rewards,
     rep: contract.rep,
   };
+  refs.contractRequirements.textContent = `Requires ${contract.unlockRep}+ rep.`;
   addLog(`Contract accepted: ${contract.name}.`);
   updateUi();
 };
@@ -931,6 +1010,18 @@ const passiveOutpostTick = () => {
   updateUi();
 };
 
+const bindTabs = () => {
+  refs.tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      refs.tabs.forEach((item) => item.classList.remove("active"));
+      refs.panels.forEach((panel) => panel.classList.remove("active"));
+      tab.classList.add("active");
+      const target = tab.dataset.tab;
+      document.querySelector(`[data-panel="${target}"]`).classList.add("active");
+    });
+  });
+};
+
 const bindEvents = () => {
   document.querySelectorAll("button[data-zone]").forEach((button) => {
     button.addEventListener("click", () => handleScavenge(button.dataset.zone));
@@ -955,6 +1046,7 @@ const bindEvents = () => {
   });
 };
 
+bindTabs();
 bindEvents();
 updateMaxAp();
 updateUi();
