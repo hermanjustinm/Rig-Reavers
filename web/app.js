@@ -8,8 +8,9 @@ const state = {
   fuel: 0,
   tech: 0,
   rigProgress: 0,
-  rigTarget: 120,
+  rigTarget: 300,
   blueprintUnlocked: false,
+  rigOperational: false,
   activeTask: null,
   activeMission: null,
 };
@@ -41,18 +42,21 @@ const zones = {
 const missions = {
   short: {
     name: "Short Run",
-    duration: 45,
-    rewards: { scrap: [10, 18], water: [3, 6], fuel: [1, 2] },
+    duration: 90,
+    rewards: { scrap: [12, 20], water: [4, 7], fuel: [1, 2] },
+    fuelCost: 2,
   },
   medium: {
     name: "Medium Run",
-    duration: 90,
-    rewards: { scrap: [18, 28], water: [5, 9], fuel: [2, 4], tech: [0, 1] },
+    duration: 180,
+    rewards: { scrap: [20, 32], water: [6, 10], fuel: [2, 4], tech: [0, 1] },
+    fuelCost: 4,
   },
   long: {
     name: "Long Run",
-    duration: 150,
-    rewards: { scrap: [26, 40], water: [8, 12], fuel: [3, 5], tech: [1, 2] },
+    duration: 300,
+    rewards: { scrap: [30, 46], water: [10, 14], fuel: [3, 6], tech: [1, 2] },
+    fuelCost: 6,
   },
 };
 
@@ -72,6 +76,7 @@ const refs = {
   blueprint: document.getElementById("blueprint"),
   rigProgress: document.getElementById("rig-progress"),
   rigStatus: document.getElementById("rig-status"),
+  rigBenefit: document.getElementById("rig-benefit"),
   rigButton: document.getElementById("build-rig"),
   missionName: document.getElementById("mission-name"),
   missionTimer: document.getElementById("mission-timer"),
@@ -115,19 +120,27 @@ const updateRigStatus = () => {
   if (!state.blueprintUnlocked) {
     refs.blueprint.textContent = "Locked";
     refs.rigStatus.textContent = "Unavailable";
+    refs.rigBenefit.textContent = "--";
     refs.rigButton.disabled = true;
-  } else if (state.rigProgress >= state.rigTarget) {
+  } else if (state.rigOperational) {
     refs.blueprint.textContent = "Secured";
     refs.rigStatus.textContent = "Operational";
+    refs.rigBenefit.textContent = "Auto-scavenge + 10% mission yield";
+    refs.rigButton.disabled = true;
+  } else if (state.rigProgress >= state.rigTarget && state.activeTask) {
+    refs.blueprint.textContent = "Secured";
+    refs.rigStatus.textContent = "Assembling";
+    refs.rigBenefit.textContent = "Assembly in progress";
     refs.rigButton.disabled = true;
   } else {
     refs.blueprint.textContent = "Secured";
     refs.rigStatus.textContent = "Building";
-    refs.rigButton.disabled = state.scrap < 10;
+    refs.rigBenefit.textContent = "Unlock auto-scavenge";
+    refs.rigButton.disabled = state.scrap < 15 || state.fuel < 2;
   }
 
   document.querySelectorAll("button[data-mission]").forEach((button) => {
-    button.disabled = state.rigProgress < state.rigTarget || state.activeMission !== null;
+    button.disabled = !state.rigOperational || state.activeMission !== null;
   });
 };
 
@@ -149,7 +162,12 @@ const updateTaskUi = () => {
   } else {
     refs.taskName.textContent = "Idle";
     refs.taskTimer.textContent = "--";
-    refs.taskButton.disabled = state.blueprintUnlocked;
+    refs.taskButton.disabled =
+      state.blueprintUnlocked ||
+      state.level < 2 ||
+      state.tech < 2 ||
+      state.scrap < 10 ||
+      state.water < 5;
   }
 };
 
@@ -179,16 +197,17 @@ const updateUi = () => {
   updateMissionUi();
 };
 
-const gainResources = (rewards) => {
+const gainResources = (rewards, multiplier = 1) => {
   Object.entries(rewards).forEach(([key, range]) => {
-    const amount = randomBetween(range[0], range[1]);
+    const amount = Math.round(randomBetween(range[0], range[1]) * multiplier);
     state[key] += amount;
   });
 };
 
 const maybeUnlockBlueprint = () => {
   if (!state.blueprintUnlocked && state.level >= 2 && !state.activeTask) {
-    refs.taskButton.disabled = false;
+    refs.taskButton.disabled =
+      state.tech < 2 || state.scrap < 10 || state.water < 5;
   }
 };
 
@@ -215,13 +234,18 @@ const handleScavenge = (zoneKey) => {
 };
 
 const handleRigContribution = () => {
-  if (!state.blueprintUnlocked || state.scrap < 10) {
+  if (!state.blueprintUnlocked || state.scrap < 15 || state.fuel < 2) {
     return;
   }
-  state.scrap -= 10;
+  state.scrap -= 15;
+  state.fuel -= 2;
   state.rigProgress = Math.min(state.rigTarget, state.rigProgress + 10);
-  if (state.rigProgress >= state.rigTarget) {
-    addLog("The war rig roars to life. Auto-scavenge routes are now possible.");
+  if (state.rigProgress >= state.rigTarget && !state.rigOperational) {
+    state.activeTask = {
+      name: "Rig Assembly",
+      remaining: 90,
+    };
+    addLog("Rig chassis complete. Assembly begins (90s).");
   } else {
     addLog("You reinforced the war rig frame with salvaged scrap.");
   }
@@ -230,15 +254,30 @@ const handleRigContribution = () => {
 
 const startBlueprintTask = () => {
   if (state.blueprintUnlocked || state.activeTask) return;
+  if (state.tech < 2 || state.scrap < 10 || state.water < 5) {
+    addLog("Not enough resources to start blueprint research.");
+    return;
+  }
+  state.tech -= 2;
+  state.scrap -= 10;
+  state.water -= 5;
   state.activeTask = {
     name: "Blueprint Research",
-    remaining: 30,
+    remaining: 60,
   };
   addLog("Workshop queue started: Blueprint research.");
   updateUi();
 };
 
 const finishBlueprintTask = () => {
+  if (state.activeTask?.name === "Rig Assembly") {
+    state.activeTask = null;
+    state.rigOperational = true;
+    addLog("War rig assembly complete. Auto-scavenge unlocked.");
+    updateUi();
+    return;
+  }
+
   state.blueprintUnlocked = true;
   state.activeTask = null;
   addLog("Blueprint research completed. The rig design is now available.");
@@ -246,20 +285,25 @@ const finishBlueprintTask = () => {
 };
 
 const startMission = (missionKey) => {
-  if (state.activeMission || state.rigProgress < state.rigTarget) return;
+  if (state.activeMission || !state.rigOperational) return;
   const mission = missions[missionKey];
+  if (state.fuel < mission.fuelCost) {
+    addLog("Not enough fuel to launch the war rig.");
+    return;
+  }
+  state.fuel -= mission.fuelCost;
   state.activeMission = {
     name: mission.name,
     remaining: mission.duration,
     rewards: mission.rewards,
   };
-  addLog(`War rig deployed: ${mission.name}.`);
+  addLog(`War rig deployed: ${mission.name} (fuel -${mission.fuelCost}).`);
   updateUi();
 };
 
 const finishMission = () => {
   if (!state.activeMission) return;
-  gainResources(state.activeMission.rewards);
+  gainResources(state.activeMission.rewards, state.rigOperational ? 1.1 : 1);
   addLog(`War rig returned from ${state.activeMission.name} with salvage.`);
   state.activeMission = null;
   updateUi();

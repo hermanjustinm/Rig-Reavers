@@ -89,7 +89,9 @@
               <p id="task-timer" class="value">--</p>
             </div>
           </div>
-          <button id="start-task" type="button">Start Blueprint Research (30s)</button>
+          <button id="start-task" type="button">
+            Start Blueprint Research (60s, 2 Tech + 10 Scrap + 5 Water)
+          </button>
         </article>
 
         <article class="panel">
@@ -101,15 +103,19 @@
             </div>
             <div>
               <p class="label">Progress</p>
-              <p id="rig-progress" class="value">0 / 120</p>
+              <p id="rig-progress" class="value">0 / 300</p>
             </div>
             <div>
               <p class="label">Status</p>
               <p id="rig-status" class="value">Unavailable</p>
             </div>
+            <div>
+              <p class="label">Benefit</p>
+              <p id="rig-benefit" class="value">--</p>
+            </div>
           </div>
           <button id="build-rig" type="button" class="primary" disabled>
-            Contribute Scrap (10)
+            Contribute Scrap (15 + 2 Fuel)
           </button>
         </article>
 
@@ -117,9 +123,9 @@
           <h2>Auto-Scavenge Runs</h2>
           <p class="hint">Available once the war rig is operational. Runs take real time.</p>
           <div class="actions">
-            <button type="button" data-mission="short" disabled>Short Run (45s)</button>
-            <button type="button" data-mission="medium" disabled>Medium Run (90s)</button>
-            <button type="button" data-mission="long" disabled>Long Run (150s)</button>
+            <button type="button" data-mission="short" disabled>Short Run (90s)</button>
+            <button type="button" data-mission="medium" disabled>Medium Run (180s)</button>
+            <button type="button" data-mission="long" disabled>Long Run (300s)</button>
           </div>
           <div class="queue">
             <div>

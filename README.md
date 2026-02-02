@@ -9,4 +9,5 @@ Open `web/index.html` in a browser.
 - Add a backend for persistence.
 - Introduce crafting recipes and modular rig parts.
 - Expand timed queues for missions, repairs, and crafting.
+- Balance time gates and resource costs for rig assembly.
 - Connect scavenging outcomes to a timed mission system.
