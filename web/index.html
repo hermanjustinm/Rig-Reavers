@@ -11,68 +11,78 @@
       <header class="hero">
         <div class="hero-title">
           <p class="tag">Wasteland PBBG Prototype</p>
-          <div class="title-row">
-            <h1>Rig Reavers</h1>
-            <p class="subtitle">
-              Scavenge, craft, and build your war rig while expanding camp influence.
-            </p>
+          <h1>Rig Reavers</h1>
+          <p class="subtitle">
+            Lead a warband, scavenge the wastes, and build your war rig into a mobile outpost.
+          </p>
+          <div class="hero-cta">
+            <div>
+              <p class="label">Next Objective</p>
+              <p class="value">Reach Lv 2 to unlock Ash Dunes</p>
+              <p class="hint">Scavenge Rust Flats twice to hit the XP target.</p>
+            </div>
+            <button class="primary section-jump" type="button" data-section="scavenge">
+              Scavenge Now
+            </button>
           </div>
         </div>
-        <div class="hero-resources">
-          <div class="resource-pill">
-            <p class="label">Scrap</p>
-            <p id="scrap" class="value">0</p>
+        <div class="hero-meta">
+          <div class="hero-resources">
+            <div class="resource-pill">
+              <p class="label">Scrap</p>
+              <p id="scrap" class="value">0</p>
+            </div>
+            <div class="resource-pill">
+              <p class="label">Water</p>
+              <p id="water" class="value">0</p>
+            </div>
+            <div class="resource-pill">
+              <p class="label">Fuel</p>
+              <p id="fuel" class="value">0</p>
+            </div>
+            <div class="resource-pill">
+              <p class="label">Tech</p>
+              <p id="tech" class="value">0</p>
+            </div>
+            <div class="resource-pill">
+              <p class="label">Armor</p>
+              <p id="armor" class="value">0</p>
+            </div>
+            <div class="resource-pill">
+              <p class="label">Electronics</p>
+              <p id="electronics" class="value">0</p>
+            </div>
+            <div class="resource-pill">
+              <p class="label">Medkits</p>
+              <p id="medkits" class="value">0</p>
+            </div>
+            <div class="resource-pill">
+              <p class="label">Storage</p>
+              <p id="storage" class="value">0 / 0</p>
+            </div>
           </div>
-          <div class="resource-pill">
-            <p class="label">Water</p>
-            <p id="water" class="value">0</p>
-          </div>
-          <div class="resource-pill">
-            <p class="label">Fuel</p>
-            <p id="fuel" class="value">0</p>
-          </div>
-          <div class="resource-pill">
-            <p class="label">Tech</p>
-            <p id="tech" class="value">0</p>
-          </div>
-          <div class="resource-pill">
-            <p class="label">Armor</p>
-            <p id="armor" class="value">0</p>
-          </div>
-          <div class="resource-pill">
-            <p class="label">Electronics</p>
-            <p id="electronics" class="value">0</p>
-          </div>
-          <div class="resource-pill">
-            <p class="label">Medkits</p>
-            <p id="medkits" class="value">0</p>
-          </div>
-          <div class="resource-pill">
-            <p class="label">Storage</p>
-            <p id="storage" class="value">0 / 0</p>
-          </div>
-        </div>
-        <div class="status">
-          <div>
-            <p class="label">Level</p>
-            <p id="level" class="value">1</p>
-          </div>
-          <div>
-            <p class="label">AP</p>
-            <p id="ap" class="value">10</p>
-          </div>
-          <div>
-            <p class="label">Morale</p>
-            <p id="morale" class="value">Stable</p>
-            <p id="morale-detail" class="hint">Morale affects yields and injuries.</p>
-          </div>
-          <div>
-            <p class="label">Reputation</p>
-            <p id="rep" class="value">0</p>
-          </div>
-          <div>
-            <p class="label">Injuries</p>
-            <p id="injuries" class="value">0</p>
+          <div class="status status-compact">
+            <div class="status-pill">
+              <p class="label">Level</p>
+              <p id="level" class="value">1</p>
+            </div>
+            <div class="status-pill">
+              <p class="label">AP</p>
+              <p id="ap" class="value">10</p>
+            </div>
+            <div class="status-pill">
+              <p class="label">Morale</p>
+              <p id="morale" class="value">Stable</p>
+              <p id="morale-detail" class="hint">Morale affects yields and injuries.</p>
+            </div>
+            <div class="status-pill">
+              <p class="label">Reputation</p>
+              <p id="rep" class="value">0</p>
+            </div>
+            <div class="status-pill">
+              <p class="label">Injuries</p>
+              <p id="injuries" class="value">0</p>
+            </div>
           </div>
         </div>
       </header>
@@ -95,6 +105,25 @@
 
         <section class="content">
           <article class="panel page-panel active" data-section="overview">
+            <h2>Quick Start</h2>
+            <div class="grid">
+              <div class="panel">
+                <h3>First 5 Minutes</h3>
+                <ol class="list ordered">
+                  <li>Spend AP in Rust Flats to gather scrap + water.</li>
+                  <li>Queue Blueprint Research to unlock rig work.</li>
+                  <li>Craft armor plates to prep for camps and missions.</li>
+                </ol>
+              </div>
+              <div class="panel">
+                <h3>Core Loop</h3>
+                <ol class="list ordered">
+                  <li>Scavenge → Craft → Reinforce camp.</li>
+                  <li>Build rig → Unlock missions → Earn rep.</li>
+                  <li>Invest in perks and factions for bonuses.</li>
+                </ol>
+              </div>
+            </div>
             <h2>Progression</h2>
             <div class="progression">
               <div>

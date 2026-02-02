@@ -1223,17 +1223,25 @@ const passiveOutpostTick = () => {
 };
 
 const bindNav = () => {
+  const switchSection = (target) => {
+    refs.navLinks.forEach((item) => item.classList.remove("active"));
+    refs.sections.forEach((panel) => panel.classList.remove("active"));
+    const activeLink = document.querySelector(`.nav-link[data-section="${target}"]`);
+    const targetPanel = document.querySelector(`.page-panel[data-section="${target}"]`);
+    if (activeLink) {
+      activeLink.classList.add("active");
+    }
+    if (targetPanel) {
+      targetPanel.classList.add("active");
+    }
+  };
+
   refs.navLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      refs.navLinks.forEach((item) => item.classList.remove("active"));
-      refs.sections.forEach((panel) => panel.classList.remove("active"));
-      link.classList.add("active");
-      const target = link.dataset.section;
-      const targetPanel = document.querySelector(`.page-panel[data-section="${target}"]`);
-      if (targetPanel) {
-        targetPanel.classList.add("active");
-      }
-    });
+    link.addEventListener("click", () => switchSection(link.dataset.section));
+  });
+
+  document.querySelectorAll(".section-jump").forEach((button) => {
+    button.addEventListener("click", () => switchSection(button.dataset.section));
   });
 };
 
