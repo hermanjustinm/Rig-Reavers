@@ -28,11 +28,11 @@ body {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
-  gap: 18px 24px;
-  padding: 20px 22px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 14px 20px;
+  padding: 14px 18px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #2a2020, #15131a 60%);
+  background: linear-gradient(135deg, #181a22, #101216 60%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
@@ -56,38 +56,19 @@ body {
 }
 
 h1 {
-  font-size: 1.7rem;
+  font-size: 1.55rem;
   margin: 0;
 }
 
 .subtitle {
-  max-width: 520px;
+  max-width: 460px;
   color: #c6c6c6;
-  font-size: 0.9rem;
-}
-
-.hero-cta {
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(20, 20, 28, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.hero-cta .value {
-  font-size: 1rem;
-}
-
-.hero-cta button {
-  align-self: flex-start;
+  font-size: 0.88rem;
 }
 
 .hero-meta {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .layout {
@@ -136,14 +117,14 @@ h1 {
 
 .hero-resources {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
 }
 
 .resource-pill {
-  background: rgba(18, 18, 23, 0.7);
+  background: rgba(18, 18, 23, 0.6);
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
@@ -151,7 +132,7 @@ h1 {
 }
 
 .resource-pill .value {
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .status {
@@ -162,13 +143,14 @@ h1 {
 }
 
 .status-compact {
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
 }
 
 .status-pill {
-  background: rgba(18, 18, 23, 0.7);
+  background: rgba(18, 18, 23, 0.6);
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
@@ -201,6 +183,11 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.objective-banner {
+  background: rgba(255, 111, 61, 0.08);
+  border-color: rgba(255, 111, 61, 0.2);
 }
 
 .panel > h2 {

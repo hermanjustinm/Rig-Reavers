@@ -1240,9 +1240,6 @@ const bindNav = () => {
     link.addEventListener("click", () => switchSection(link.dataset.section));
   });
 
-  document.querySelectorAll(".section-jump").forEach((button) => {
-    button.addEventListener("click", () => switchSection(button.dataset.section));
-  });
 };
 
 const bindEvents = () => {
