@@ -78,24 +78,34 @@
             </div>
           </div>
           <h2>Sections</h2>
-          <p class="hint">Pick a system to manage your warband.</p>
-          <button type="button" class="nav-link active" data-section="scavenge">
-            Scavenging
-          </button>
-          <button type="button" class="nav-link" data-section="camp">Base Operations</button>
+          <p class="hint">Start with the core loop and expand from there.</p>
+          <button type="button" class="nav-link active" data-section="overview">Overview</button>
+          <button type="button" class="nav-link" data-section="scavenge">Scavenging</button>
           <button type="button" class="nav-link" data-section="crafting">Workshop</button>
-          <button type="button" class="nav-link" data-section="rig">Garage</button>
-          <button type="button" class="nav-link" data-section="contracts">Trading Post</button>
-          <button type="button" class="nav-link" data-section="perks">Achievements</button>
-          <button type="button" class="nav-link" data-section="overview">Statistics</button>
+          <button type="button" class="nav-link" data-section="camp">Base Operations</button>
         </aside>
 
         <section class="content">
-          <article class="panel page-panel" data-section="overview">
+          <article class="panel page-panel active" data-section="overview">
             <div class="panel objective-banner">
               <p class="label">Current Objective</p>
               <p class="value">Reach Lv 2 to unlock Ash Dunes</p>
               <p class="hint">Scavenge Rust Flats twice and start Blueprint Research.</p>
+            </div>
+            <h2>Baseline Loop</h2>
+            <div class="grid">
+              <div class="panel">
+                <h3>Step 1: Scavenge</h3>
+                <p class="hint">Spend AP to gather scrap, water, and fuel.</p>
+              </div>
+              <div class="panel">
+                <h3>Step 2: Craft</h3>
+                <p class="hint">Turn salvage into armor, electronics, and tools.</p>
+              </div>
+              <div class="panel">
+                <h3>Step 3: Improve Base</h3>
+                <p class="hint">Upgrade camp to raise storage and unlock missions.</p>
+              </div>
             </div>
             <h2>Progression</h2>
             <div class="progression">
@@ -140,7 +150,7 @@
             </div>
           </article>
 
-          <article class="panel page-panel active" data-section="scavenge">
+          <article class="panel page-panel" data-section="scavenge">
             <div class="section-card">
               <div class="card-header">
                 <h2>Quick Scavenging</h2>
@@ -186,17 +196,6 @@
                   <div class="card-actions">
                     <span class="chip danger">Radiation</span>
                     <button type="button" data-zone="ash">Launch Expedition</button>
-                  </div>
-                </div>
-                <div class="expedition-card">
-                  <div>
-                    <h3>Glass Wastes</h3>
-                    <p class="hint">Interstate wreckage.</p>
-                    <p class="hint">Rewards: scrap +12-22, fuel +2-4</p>
-                  </div>
-                  <div class="card-actions">
-                    <span class="chip danger">Vehicle damage</span>
-                    <button type="button" data-zone="glass">Launch Expedition</button>
                   </div>
                 </div>
               </div>
