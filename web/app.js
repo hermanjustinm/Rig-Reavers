@@ -9,11 +9,13 @@ const state = {
   tech: 0,
   armor: 0,
   electronics: 0,
+  medkits: 0,
   rigProgress: 0,
   rigTarget: 300,
   blueprintUnlocked: false,
   rigOperational: false,
   reputation: 0,
+  injuries: 0,
   crew: 2,
   crewCap: 2,
   activeTask: null,
@@ -22,6 +24,9 @@ const state = {
   recruiting: null,
   outpostStage: 0,
   outpostTask: null,
+  activeContract: null,
+  contractCooldown: 0,
+  perks: new Set(),
 };
 
 const zones = {
@@ -120,6 +125,12 @@ const recipes = {
     costs: { electronics: 2, tech: 2, scrap: 10 },
     output: { rep: 5 },
   },
+  medkit: {
+    name: "Medkit",
+    duration: 75,
+    costs: { water: 4, tech: 1 },
+    output: { medkits: 1 },
+  },
 };
 
 const outpostStages = [
@@ -146,17 +157,71 @@ const outpostStages = [
   },
 ];
 
+const contracts = [
+  {
+    name: "Water Relay Repair",
+    duration: 120,
+    rewards: { water: [8, 12], scrap: [10, 16] },
+    rep: 6,
+    unlockRep: 0,
+  },
+  {
+    name: "Signal Recovery",
+    duration: 180,
+    rewards: { tech: [2, 4], scrap: [12, 18] },
+    rep: 10,
+    unlockRep: 20,
+  },
+  {
+    name: "Fuel Depot Sweep",
+    duration: 240,
+    rewards: { fuel: [6, 10], scrap: [14, 22] },
+    rep: 14,
+    unlockRep: 45,
+  },
+];
+
+const perks = [
+  {
+    id: "scavenger",
+    name: "Scavenger Instincts",
+    cost: 15,
+    description: "+10% scavenge yield.",
+  },
+  {
+    id: "quartermaster",
+    name: "Quartermaster",
+    cost: 25,
+    description: "+25 storage capacity.",
+  },
+  {
+    id: "veteran",
+    name: "Veteran Crew",
+    cost: 40,
+    description: "+1 max AP.",
+  },
+  {
+    id: "salvager",
+    name: "Salvage Optics",
+    cost: 55,
+    description: "+10% mission yield.",
+  },
+];
+
 const refs = {
   level: document.getElementById("level"),
   ap: document.getElementById("ap"),
   morale: document.getElementById("morale"),
   rep: document.getElementById("rep"),
+  injuries: document.getElementById("injuries"),
   scrap: document.getElementById("scrap"),
   water: document.getElementById("water"),
   fuel: document.getElementById("fuel"),
   tech: document.getElementById("tech"),
   armor: document.getElementById("armor"),
   electronics: document.getElementById("electronics"),
+  medkits: document.getElementById("medkits"),
+  storage: document.getElementById("storage"),
   xp: document.getElementById("xp"),
   nextUnlock: document.getElementById("next-unlock"),
   taskName: document.getElementById("task-name"),
@@ -174,9 +239,16 @@ const refs = {
   crewSlots: document.getElementById("crew-slots"),
   recruitStatus: document.getElementById("recruit-status"),
   hireCrew: document.getElementById("hire-crew"),
+  injuryStatus: document.getElementById("injury-status"),
+  maxAp: document.getElementById("max-ap"),
+  useMedkit: document.getElementById("use-medkit"),
+  contractName: document.getElementById("contract-name"),
+  contractTimer: document.getElementById("contract-timer"),
+  takeContract: document.getElementById("take-contract"),
   outpostStage: document.getElementById("outpost-stage"),
   outpostStatus: document.getElementById("outpost-status"),
   outpostButton: document.getElementById("start-outpost"),
+  perkList: document.getElementById("perk-list"),
   log: document.getElementById("log"),
 };
 
@@ -298,6 +370,22 @@ const updateMissionUi = () => {
   }
 };
 
+const updateContractUi = () => {
+  if (state.activeContract) {
+    refs.contractName.textContent = state.activeContract.name;
+    refs.contractTimer.textContent = formatTimer(state.activeContract.remaining);
+    refs.takeContract.disabled = true;
+  } else if (state.contractCooldown > 0) {
+    refs.contractName.textContent = "Cooldown";
+    refs.contractTimer.textContent = formatTimer(state.contractCooldown);
+    refs.takeContract.disabled = true;
+  } else {
+    refs.contractName.textContent = "Available";
+    refs.contractTimer.textContent = "--";
+    refs.takeContract.disabled = false;
+  }
+};
+
 const updateCrewUi = () => {
   refs.crewSlots.textContent = `${state.crew} / ${state.crewCap}`;
   if (state.recruiting) {
@@ -307,6 +395,13 @@ const updateCrewUi = () => {
     refs.recruitStatus.textContent = "Idle";
     refs.hireCrew.disabled = state.crew >= state.crewCap || state.water < 6;
   }
+};
+
+const updateHealthUi = () => {
+  refs.injuries.textContent = state.injuries;
+  refs.injuryStatus.textContent = state.injuries;
+  refs.maxAp.textContent = state.maxAp;
+  refs.useMedkit.disabled = state.medkits < 1 || state.injuries < 1;
 };
 
 const updateOutpostUi = () => {
@@ -335,6 +430,19 @@ const updateOutpostUi = () => {
   refs.outpostButton.disabled = !hasCosts(stage.costs);
 };
 
+const updatePerkUi = () => {
+  refs.perkList.innerHTML = perks
+    .map((perk) => {
+      const owned = state.perks.has(perk.id);
+      const disabled = owned || state.reputation < perk.cost;
+      return `<button type="button" data-perk="${perk.id}" ${disabled ? "disabled" : ""}>
+        ${owned ? "Unlocked" : `Unlock (${perk.cost} rep)`}: ${perk.name}
+        <span class="hint">${perk.description}</span>
+      </button>`;
+    })
+    .join("");
+};
+
 const updateUi = () => {
   refs.level.textContent = state.level;
   refs.ap.textContent = `${state.ap} / ${state.maxAp}`;
@@ -344,17 +452,22 @@ const updateUi = () => {
   refs.tech.textContent = state.tech;
   refs.armor.textContent = state.armor;
   refs.electronics.textContent = state.electronics;
+  refs.medkits.textContent = state.medkits;
   refs.xp.textContent = `${state.xp} / ${state.level * 20}`;
   refs.rigProgress.textContent = `${state.rigProgress} / ${state.rigTarget}`;
   refs.rep.textContent = state.reputation;
+  refs.storage.textContent = `${getStorageUsed()} / ${getStorageCap()}`;
   updateMorale();
   updateRigStatus();
   updateNextUnlock();
   updateTaskUi();
   updateCraftUi();
   updateMissionUi();
+  updateContractUi();
   updateCrewUi();
+  updateHealthUi();
   updateOutpostUi();
+  updatePerkUi();
 };
 
 const formatCost = (costs) =>
@@ -371,11 +484,53 @@ const spendCosts = (costs) => {
   });
 };
 
+const getStorageCap = () => {
+  const base = 120;
+  const outpostBonus = state.outpostStage * 40;
+  const perkBonus = state.perks.has("quartermaster") ? 25 : 0;
+  return base + outpostBonus + perkBonus;
+};
+
+const getStorageUsed = () =>
+  state.scrap +
+  state.water +
+  state.fuel +
+  state.tech +
+  state.armor +
+  state.electronics +
+  state.medkits;
+
+const clampStorage = () => {
+  const cap = getStorageCap();
+  let overflow = getStorageUsed() - cap;
+  if (overflow <= 0) return;
+  const dumpOrder = ["scrap", "water", "fuel", "tech", "armor", "electronics", "medkits"];
+  dumpOrder.forEach((key) => {
+    if (overflow <= 0) return;
+    const available = state[key];
+    const removed = Math.min(available, overflow);
+    state[key] -= removed;
+    overflow -= removed;
+  });
+  addLog("Storage full. Excess supplies were left behind.");
+};
+
+const getScavengeMultiplier = () => (state.perks.has("scavenger") ? 1.1 : 1);
+const getMissionMultiplier = () => (state.perks.has("salvager") ? 1.1 : 1);
+
+const updateMaxAp = () => {
+  const perkBonus = state.perks.has("veteran") ? 1 : 0;
+  const injuryPenalty = Math.min(3, state.injuries);
+  state.maxAp = Math.max(6, 10 + perkBonus - injuryPenalty);
+  state.ap = Math.min(state.ap, state.maxAp);
+};
+
 const gainResources = (rewards, multiplier = 1) => {
   Object.entries(rewards).forEach(([key, range]) => {
     const amount = Math.round(randomBetween(range[0], range[1]) * multiplier);
     state[key] += amount;
   });
+  clampStorage();
 };
 
 const maybeUnlockBlueprint = () => {
@@ -397,11 +552,19 @@ const handleScavenge = (zoneKey) => {
   }
 
   state.ap -= zone.cost;
-  gainResources(zone.rewards);
+  gainResources(zone.rewards, getScavengeMultiplier());
   state.xp += zone.xp;
   state.reputation += zone.rep;
   state.level = Math.min(15, Math.floor(state.xp / 20) + 1);
   maybeUnlockBlueprint();
+
+  const injuryRoll = Math.random();
+  const injuryChance = zoneKey === "dead" ? 0.2 : zoneKey === "glass" ? 0.12 : 0.05;
+  if (injuryRoll < injuryChance) {
+    state.injuries += 1;
+    updateMaxAp();
+    addLog("You suffered a minor injury during the run.");
+  }
 
   addLog(`You scouted ${zone.name} and brought back salvage.`);
   updateUi();
@@ -486,7 +649,10 @@ const startMission = (missionKey) => {
 
 const finishMission = () => {
   if (!state.activeMission) return;
-  gainResources(state.activeMission.rewards, state.rigOperational ? 1.1 : 1);
+  gainResources(
+    state.activeMission.rewards,
+    state.rigOperational ? 1.1 * getMissionMultiplier() : 1,
+  );
   state.reputation += state.activeMission.rep;
   addLog(`War rig returned from ${state.activeMission.name} with salvage.`);
   state.activeMission = null;
@@ -525,6 +691,15 @@ const finishCrafting = () => {
   updateUi();
 };
 
+const useMedkit = () => {
+  if (state.medkits < 1 || state.injuries < 1) return;
+  state.medkits -= 1;
+  state.injuries -= 1;
+  updateMaxAp();
+  addLog("Medkit used. Injuries stabilized.");
+  updateUi();
+};
+
 const startRecruiting = () => {
   if (state.recruiting || state.crew >= state.crewCap) return;
   if (state.water < 6) {
@@ -535,7 +710,7 @@ const startRecruiting = () => {
   state.recruiting = {
     remaining: 90,
   };
-  addLog("Recruitment started: scavenger candidate." );
+  addLog("Recruitment started: scavenger candidate.");
   updateUi();
 };
 
@@ -575,6 +750,48 @@ const finishOutpostStage = () => {
   updateUi();
 };
 
+const startContract = () => {
+  if (state.activeContract || state.contractCooldown > 0) return;
+  const available = contracts.filter((contract) => state.reputation >= contract.unlockRep);
+  if (available.length === 0) {
+    addLog("No contracts available for your reputation tier.");
+    return;
+  }
+  const contract = available[Math.floor(Math.random() * available.length)];
+  state.activeContract = {
+    name: contract.name,
+    remaining: contract.duration,
+    rewards: contract.rewards,
+    rep: contract.rep,
+  };
+  addLog(`Contract accepted: ${contract.name}.`);
+  updateUi();
+};
+
+const finishContract = () => {
+  if (!state.activeContract) return;
+  gainResources(state.activeContract.rewards, 1);
+  state.reputation += state.activeContract.rep;
+  addLog(`Contract complete: ${state.activeContract.name}.`);
+  state.activeContract = null;
+  state.contractCooldown = 120;
+  updateUi();
+};
+
+const unlockPerk = (perkId) => {
+  const perk = perks.find((item) => item.id === perkId);
+  if (!perk || state.perks.has(perk.id)) return;
+  if (state.reputation < perk.cost) {
+    addLog("Not enough reputation to unlock that perk.");
+    return;
+  }
+  state.reputation -= perk.cost;
+  state.perks.add(perk.id);
+  updateMaxAp();
+  addLog(`Perk unlocked: ${perk.name}.`);
+  updateUi();
+};
+
 const tickTimers = () => {
   if (state.activeTask) {
     state.activeTask.remaining -= 1;
@@ -611,10 +828,23 @@ const tickTimers = () => {
     }
   }
 
+  if (state.activeContract) {
+    state.activeContract.remaining -= 1;
+    if (state.activeContract.remaining <= 0) {
+      finishContract();
+    }
+  }
+
+  if (state.contractCooldown > 0) {
+    state.contractCooldown -= 1;
+  }
+
   updateTaskUi();
   updateCraftUi();
   updateMissionUi();
+  updateContractUi();
   updateCrewUi();
+  updateHealthUi();
   updateOutpostUi();
 };
 
@@ -647,9 +877,17 @@ const bindEvents = () => {
   refs.taskButton.addEventListener("click", startBlueprintTask);
   refs.hireCrew.addEventListener("click", startRecruiting);
   refs.outpostButton.addEventListener("click", startOutpostStage);
+  refs.useMedkit.addEventListener("click", useMedkit);
+  refs.takeContract.addEventListener("click", startContract);
+  refs.perkList.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-perk]");
+    if (!button) return;
+    unlockPerk(button.dataset.perk);
+  });
 };
 
 bindEvents();
+updateMaxAp();
 updateUi();
 addLog("You arrive at the Rust Flats with a half-full canteen.");
 
