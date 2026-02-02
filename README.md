@@ -1,6 +1,6 @@
 # Rig Reavers
 
-A browser-based prototype for a wasteland PBBG concept. This front-end sandbox now includes long-term progression loops: scavenging, timed crafting, injuries and recovery, crew recruitment, reputation gating, contracts, perk unlocks, war rig assembly, and a multi-stage outpost that adds passive income.
+A browser-based prototype for a wasteland PBBG concept. This front-end sandbox now includes long-term progression loops: scavenging, timed crafting, morale and injury recovery, crew recruitment, reputation gating, contracts, perk unlocks, war rig assembly, and a multi-stage outpost that adds passive income.
 
 ## Run locally
 Open `web/index.html` in a browser.

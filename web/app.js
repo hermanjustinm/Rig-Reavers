@@ -16,12 +16,14 @@ const state = {
   rigOperational: false,
   reputation: 0,
   injuries: 0,
+  morale: 50,
   crew: 2,
   crewCap: 2,
   activeTask: null,
   activeMission: null,
   activeCraft: null,
   recruiting: null,
+  rallyTask: null,
   outpostStage: 0,
   outpostTask: null,
   activeContract: null,
@@ -212,6 +214,7 @@ const refs = {
   level: document.getElementById("level"),
   ap: document.getElementById("ap"),
   morale: document.getElementById("morale"),
+  moraleDetail: document.getElementById("morale-detail"),
   rep: document.getElementById("rep"),
   injuries: document.getElementById("injuries"),
   scrap: document.getElementById("scrap"),
@@ -239,6 +242,9 @@ const refs = {
   crewSlots: document.getElementById("crew-slots"),
   recruitStatus: document.getElementById("recruit-status"),
   hireCrew: document.getElementById("hire-crew"),
+  rallyStatus: document.getElementById("rally-status"),
+  rallyTimer: document.getElementById("rally-timer"),
+  startRally: document.getElementById("start-rally"),
   injuryStatus: document.getElementById("injury-status"),
   maxAp: document.getElementById("max-ap"),
   useMedkit: document.getElementById("use-medkit"),
@@ -276,13 +282,24 @@ const addLog = (message) => {
 };
 
 const updateMorale = () => {
-  if (state.ap <= 2) {
-    refs.morale.textContent = "Drained";
-  } else if (state.ap <= 5) {
-    refs.morale.textContent = "Tense";
-  } else {
-    refs.morale.textContent = "Stable";
-  }
+  const target =
+    50 +
+    state.reputation * 0.3 +
+    state.crew * 3 -
+    state.injuries * 10 -
+    (state.maxAp - state.ap) * 3;
+  state.morale = Math.max(0, Math.min(100, Math.round(target)));
+  let label = "Stable";
+  if (state.morale >= 75) label = "Inspired";
+  if (state.morale <= 30) label = "Shaken";
+  if (state.morale <= 15) label = "Broken";
+  refs.morale.textContent = `${label} (${state.morale})`;
+  refs.moraleDetail.textContent =
+    state.morale >= 70
+      ? "+5% scavenge yield"
+      : state.morale <= 30
+        ? "Higher injury risk"
+        : "Baseline yields";
 };
 
 const updateRigStatus = () => {
@@ -397,6 +414,18 @@ const updateCrewUi = () => {
   }
 };
 
+const updateRallyUi = () => {
+  if (state.rallyTask) {
+    refs.rallyStatus.textContent = "Rallying";
+    refs.rallyTimer.textContent = formatTimer(state.rallyTask.remaining);
+    refs.startRally.disabled = true;
+  } else {
+    refs.rallyStatus.textContent = "Idle";
+    refs.rallyTimer.textContent = "--";
+    refs.startRally.disabled = state.water < 4;
+  }
+};
+
 const updateHealthUi = () => {
   refs.injuries.textContent = state.injuries;
   refs.injuryStatus.textContent = state.injuries;
@@ -465,6 +494,7 @@ const updateUi = () => {
   updateMissionUi();
   updateContractUi();
   updateCrewUi();
+  updateRallyUi();
   updateHealthUi();
   updateOutpostUi();
   updatePerkUi();
@@ -515,7 +545,11 @@ const clampStorage = () => {
   addLog("Storage full. Excess supplies were left behind.");
 };
 
-const getScavengeMultiplier = () => (state.perks.has("scavenger") ? 1.1 : 1);
+const getScavengeMultiplier = () => {
+  const perkBonus = state.perks.has("scavenger") ? 1.1 : 1;
+  const moraleBonus = state.morale >= 70 ? 1.05 : state.morale <= 30 ? 0.9 : 1;
+  return perkBonus * moraleBonus;
+};
 const getMissionMultiplier = () => (state.perks.has("salvager") ? 1.1 : 1);
 
 const updateMaxAp = () => {
@@ -559,7 +593,10 @@ const handleScavenge = (zoneKey) => {
   maybeUnlockBlueprint();
 
   const injuryRoll = Math.random();
-  const injuryChance = zoneKey === "dead" ? 0.2 : zoneKey === "glass" ? 0.12 : 0.05;
+  const baseInjury =
+    zoneKey === "dead" ? 0.2 : zoneKey === "glass" ? 0.12 : 0.05;
+  const moralePenalty = state.morale <= 30 ? 0.05 : 0;
+  const injuryChance = baseInjury + moralePenalty;
   if (injuryRoll < injuryChance) {
     state.injuries += 1;
     updateMaxAp();
@@ -688,6 +725,29 @@ const finishCrafting = () => {
   });
   addLog(`Crafting complete: ${state.activeCraft.name}.`);
   state.activeCraft = null;
+  updateUi();
+};
+
+const startRally = () => {
+  if (state.rallyTask || state.water < 4) {
+    if (state.water < 4) {
+      addLog("Not enough water to hold a rally.");
+    }
+    return;
+  }
+  state.water -= 4;
+  state.rallyTask = {
+    remaining: 90,
+  };
+  addLog("Camp rally underway. Spirits are rising.");
+  updateUi();
+};
+
+const finishRally = () => {
+  if (!state.rallyTask) return;
+  state.rallyTask = null;
+  state.morale = Math.min(100, state.morale + 10);
+  addLog("Rally complete. Morale improved.");
   updateUi();
 };
 
@@ -839,11 +899,19 @@ const tickTimers = () => {
     state.contractCooldown -= 1;
   }
 
+  if (state.rallyTask) {
+    state.rallyTask.remaining -= 1;
+    if (state.rallyTask.remaining <= 0) {
+      finishRally();
+    }
+  }
+
   updateTaskUi();
   updateCraftUi();
   updateMissionUi();
   updateContractUi();
   updateCrewUi();
+  updateRallyUi();
   updateHealthUi();
   updateOutpostUi();
 };
@@ -876,6 +944,7 @@ const bindEvents = () => {
   refs.rigButton.addEventListener("click", handleRigContribution);
   refs.taskButton.addEventListener("click", startBlueprintTask);
   refs.hireCrew.addEventListener("click", startRecruiting);
+  refs.startRally.addEventListener("click", startRally);
   refs.outpostButton.addEventListener("click", startOutpostStage);
   refs.useMedkit.addEventListener("click", useMedkit);
   refs.takeContract.addEventListener("click", startContract);
