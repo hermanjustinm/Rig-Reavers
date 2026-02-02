@@ -130,6 +130,36 @@ h1 {
   gap: 12px;
 }
 
+details.panel > summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+details.panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.panel > summary::after {
+  content: "▾";
+  float: right;
+  color: #9b9b9b;
+}
+
+details.panel[open] > summary::after {
+  content: "▴";
+}
+
+details.panel > article {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .resources,
 .rig,
 .progression,
