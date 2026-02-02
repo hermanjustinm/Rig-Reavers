@@ -1229,7 +1229,10 @@ const bindNav = () => {
       refs.sections.forEach((panel) => panel.classList.remove("active"));
       link.classList.add("active");
       const target = link.dataset.section;
-      document.querySelector(`[data-section="${target}"]`).classList.add("active");
+      const targetPanel = document.querySelector(`.page-panel[data-section="${target}"]`);
+      if (targetPanel) {
+        targetPanel.classList.add("active");
+      }
     });
   });
 };

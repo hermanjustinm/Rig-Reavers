@@ -97,13 +97,6 @@ h1 {
   gap: 16px;
 }
 
-.page-panel {
-  display: none;
-}
-
-.page-panel.active {
-  display: flex;
-}
 
 .status {
   display: grid;
@@ -138,6 +131,14 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.panel.page-panel {
+  display: none;
+}
+
+.panel.page-panel.active {
+  display: flex;
 }
 
 .resources,
