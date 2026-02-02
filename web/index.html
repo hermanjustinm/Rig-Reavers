@@ -9,13 +9,48 @@
   <body>
     <main class="app">
       <header class="hero">
-        <div>
+        <div class="hero-title">
           <p class="tag">Wasteland PBBG Prototype</p>
-          <h1>Rig Reavers</h1>
-          <p class="subtitle">
-            Start as a war band rookie. Scavenge for scrap, water, and fuel. Build toward your
-            first war rig, a mobile outpost, and long-term faction standing.
-          </p>
+          <div class="title-row">
+            <h1>Rig Reavers</h1>
+            <p class="subtitle">
+              Scavenge, craft, and build your war rig while expanding camp influence.
+            </p>
+          </div>
+        </div>
+        <div class="hero-resources">
+          <div class="resource-pill">
+            <p class="label">Scrap</p>
+            <p id="scrap" class="value">0</p>
+          </div>
+          <div class="resource-pill">
+            <p class="label">Water</p>
+            <p id="water" class="value">0</p>
+          </div>
+          <div class="resource-pill">
+            <p class="label">Fuel</p>
+            <p id="fuel" class="value">0</p>
+          </div>
+          <div class="resource-pill">
+            <p class="label">Tech</p>
+            <p id="tech" class="value">0</p>
+          </div>
+          <div class="resource-pill">
+            <p class="label">Armor</p>
+            <p id="armor" class="value">0</p>
+          </div>
+          <div class="resource-pill">
+            <p class="label">Electronics</p>
+            <p id="electronics" class="value">0</p>
+          </div>
+          <div class="resource-pill">
+            <p class="label">Medkits</p>
+            <p id="medkits" class="value">0</p>
+          </div>
+          <div class="resource-pill">
+            <p class="label">Storage</p>
+            <p id="storage" class="value">0 / 0</p>
+          </div>
         </div>
         <div class="status">
           <div>
@@ -60,41 +95,6 @@
 
         <section class="content">
           <article class="panel page-panel active" data-section="overview">
-            <h2>Resources</h2>
-            <div class="resources">
-              <div>
-                <p class="label">Scrap</p>
-                <p id="scrap" class="value">0</p>
-              </div>
-              <div>
-                <p class="label">Water</p>
-                <p id="water" class="value">0</p>
-              </div>
-              <div>
-                <p class="label">Fuel</p>
-                <p id="fuel" class="value">0</p>
-              </div>
-              <div>
-                <p class="label">Tech Parts</p>
-                <p id="tech" class="value">0</p>
-              </div>
-              <div>
-                <p class="label">Armor Plates</p>
-                <p id="armor" class="value">0</p>
-              </div>
-              <div>
-                <p class="label">Electronics</p>
-                <p id="electronics" class="value">0</p>
-              </div>
-              <div>
-                <p class="label">Medkits</p>
-                <p id="medkits" class="value">0</p>
-              </div>
-              <div>
-                <p class="label">Storage</p>
-                <p id="storage" class="value">0 / 0</p>
-              </div>
-            </div>
             <h2>Progression</h2>
             <div class="progression">
               <div>
@@ -104,6 +104,25 @@
               <div>
                 <p class="label">Next Unlock</p>
                 <p id="next-unlock" class="value">Ash Dunes @ Lv 2</p>
+              </div>
+            </div>
+            <h2>Inventory Focus</h2>
+            <div class="grid">
+              <div class="panel">
+                <h3>Storage Plan</h3>
+                <p class="hint">Upgrade lockers to avoid overflow and boost salvage efficiency.</p>
+                <ul class="list">
+                  <li>Current cap tied to outpost stages.</li>
+                  <li>Overflow causes scrap decay each hour.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Material Mix</h3>
+                <p class="hint">Balance tech and armor to unlock rig systems faster.</p>
+                <ul class="list">
+                  <li>Tech unlocks drone automation.</li>
+                  <li>Armor hardens convoy defenses.</li>
+                </ul>
               </div>
             </div>
             <div class="queue">
@@ -133,6 +152,24 @@
               <button type="button" data-zone="dead">Dead Grid (7 AP)</button>
             </div>
             <p class="timer" id="ap-timer">AP regenerates every 8s.</p>
+            <div class="grid">
+              <div class="panel">
+                <h3>Scavenger Intel</h3>
+                <p class="hint">Intel boosts grant +1 random drop per run.</p>
+                <ul class="list">
+                  <li>Scout ahead to reduce injury risk.</li>
+                  <li>Use drones to reveal hidden caches.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Zone Hazards</h3>
+                <p class="hint">Weather and raider patrols modify yields.</p>
+                <ul class="list">
+                  <li>Sandstorms reduce water gains.</li>
+                  <li>Raider alerts increase rep rewards.</li>
+                </ul>
+              </div>
+            </div>
           </article>
 
           <article class="panel page-panel" data-section="crafting">
@@ -143,6 +180,24 @@
               <button type="button" data-recipe="electronics">Assemble Electronics (60s) · 2 Tech + 5 Scrap</button>
               <button type="button" data-recipe="drone">Build Scout Drone (120s) · 2 Electronics + 2 Tech + 10 Scrap</button>
               <button type="button" data-recipe="medkit">Assemble Medkit (75s) · 4 Water + 1 Tech</button>
+            </div>
+            <div class="grid">
+              <div class="panel">
+                <h3>Blueprint Slots</h3>
+                <p class="hint">Unlock secondary blueprints with reputation.</p>
+                <ul class="list">
+                  <li>Slot A: Rig upgrades.</li>
+                  <li>Slot B: Camp utilities.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Quality Tiers</h3>
+                <p class="hint">Rare craft rolls grant extra durability.</p>
+                <ul class="list">
+                  <li>Fine: +5% output.</li>
+                  <li>Masterwork: +15% output.</li>
+                </ul>
+              </div>
             </div>
             <div class="queue">
               <div>
@@ -179,6 +234,24 @@
             </div>
             <p class="hint" id="tool-repair-requirements">Repair requires 8 Scrap + 1 Tech.</p>
             <button id="repair-tool" type="button">Repair Tool (60s)</button>
+            <div class="grid">
+              <div class="panel">
+                <h3>Tool Mods</h3>
+                <p class="hint">Attach mods for extra yield and resilience.</p>
+                <ul class="list">
+                  <li>Reinforced casing: +20 durability.</li>
+                  <li>Shock absorbers: -1 AP cost.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Maintenance Bay</h3>
+                <p class="hint">Build a bay to cut repair timers in half.</p>
+                <ul class="list">
+                  <li>Requires 2 armor + 6 scrap.</li>
+                  <li>Unlocks batch repairs.</li>
+                </ul>
+              </div>
+            </div>
           </article>
 
           <article class="panel page-panel" data-section="missions">
@@ -189,6 +262,24 @@
               <button type="button" data-mission="medium" disabled>Medium Run (180s)</button>
               <button type="button" data-mission="long" disabled>Long Run (300s)</button>
               <button type="button" data-mission="convoy" disabled>Convoy Escort (6m)</button>
+            </div>
+            <div class="grid">
+              <div class="panel">
+                <h3>Mission Loadout</h3>
+                <p class="hint">Assign crew specialists to influence rewards.</p>
+                <ul class="list">
+                  <li>Mechanic: +fuel yield.</li>
+                  <li>Scout: +tech yield.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Route Intel</h3>
+                <p class="hint">Spend reputation to reveal safe routes.</p>
+                <ul class="list">
+                  <li>Safe routes reduce injuries.</li>
+                  <li>Risk routes offer bonus loot.</li>
+                </ul>
+              </div>
             </div>
             <div class="queue">
               <div>
@@ -219,6 +310,24 @@
                 <p id="contract-timer" class="value">--</p>
               </div>
             </div>
+            <div class="grid">
+              <div class="panel">
+                <h3>Contract Types</h3>
+                <p class="hint">Mix short jobs with long-haul deliveries.</p>
+                <ul class="list">
+                  <li>Salvage recovery for tech drops.</li>
+                  <li>Escort jobs for rep boosts.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Broker Requests</h3>
+                <p class="hint">Unlock brokers at higher rep tiers.</p>
+                <ul class="list">
+                  <li>Broker I: +1 contract slot.</li>
+                  <li>Broker II: rare loot crates.</li>
+                </ul>
+              </div>
+            </div>
             <div class="progress-bar" aria-hidden="true">
               <span id="contract-progress"></span>
             </div>
@@ -241,6 +350,24 @@
             <p class="hint">Requires 6 Water.</p>
             <button id="hire-crew" type="button">Hire Scavenger (90s)</button>
             <p class="hint">More crew increases mission yield and unlocks convoy events.</p>
+            <div class="grid">
+              <div class="panel">
+                <h3>Camp Upkeep</h3>
+                <p class="hint">Pay upkeep to keep morale high.</p>
+                <ul class="list">
+                  <li>Daily water ration.</li>
+                  <li>Fuel reserve for generators.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Training Drills</h3>
+                <p class="hint">Run drills to reduce injury chance.</p>
+                <ul class="list">
+                  <li>First aid training: +1 medkit efficiency.</li>
+                  <li>Combat drills: +rep from missions.</li>
+                </ul>
+              </div>
+            </div>
             <h2>Camp Morale</h2>
             <p class="hint">Boost morale to improve yields and reduce injuries.</p>
             <div class="resources">
@@ -301,6 +428,24 @@
             <button id="build-rig" type="button" class="primary" disabled>
               Contribute to Rig (10 pts)
             </button>
+            <div class="grid">
+              <div class="panel">
+                <h3>Rig Systems</h3>
+                <p class="hint">Unlock systems as progress advances.</p>
+                <ul class="list">
+                  <li>Drive core: enables missions.</li>
+                  <li>Scanner array: boosts scrap yields.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Armor Bays</h3>
+                <p class="hint">Install bays to reduce convoy damage.</p>
+                <ul class="list">
+                  <li>Front bay: +10% defense.</li>
+                  <li>Rear bay: protects cargo.</li>
+                </ul>
+              </div>
+            </div>
           </article>
 
           <article class="panel page-panel" data-section="outpost">
@@ -323,12 +468,48 @@
             <button id="start-outpost" type="button" disabled>
               Start Stage 1 (180s)
             </button>
+            <div class="grid">
+              <div class="panel">
+                <h3>Outpost Facilities</h3>
+                <p class="hint">Plan expansions to boost passive income.</p>
+                <ul class="list">
+                  <li>Water stills increase morale.</li>
+                  <li>Trade stalls unlock barter deals.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Security Watch</h3>
+                <p class="hint">Guard rotations reduce raid losses.</p>
+                <ul class="list">
+                  <li>Hire sentries with water.</li>
+                  <li>Install alarm grids with tech.</li>
+                </ul>
+              </div>
+            </div>
           </article>
 
           <article class="panel page-panel" data-section="perks">
             <h2>Perk Upgrades</h2>
             <p class="hint">Spend reputation to unlock permanent bonuses.</p>
             <div class="actions" id="perk-list"></div>
+            <div class="grid">
+              <div class="panel">
+                <h3>Perk Paths</h3>
+                <p class="hint">Choose a specialization to unlock advanced perks.</p>
+                <ul class="list">
+                  <li>Scavenger path: higher zone yields.</li>
+                  <li>Operator path: faster mission timers.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Legacy Perks</h3>
+                <p class="hint">Prestige perks unlock after tier 3 reputation.</p>
+                <ul class="list">
+                  <li>Legacy stash: +10 storage cap.</li>
+                  <li>Negotiator: +10% contract payouts.</li>
+                </ul>
+              </div>
+            </div>
           </article>
 
           <article class="panel page-panel" data-section="factions">
@@ -349,6 +530,24 @@
               </div>
             </div>
             <div class="actions" id="faction-list"></div>
+            <div class="grid">
+              <div class="panel">
+                <h3>Faction Demands</h3>
+                <p class="hint">Complete demand chains to rank up faster.</p>
+                <ul class="list">
+                  <li>Deliver fuel to secure bonuses.</li>
+                  <li>Protect caravans for favor.</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Faction Projects</h3>
+                <p class="hint">Pool resources with allies for shared buffs.</p>
+                <ul class="list">
+                  <li>Signal towers boost contract payouts.</li>
+                  <li>Shared armory adds tool options.</li>
+                </ul>
+              </div>
+            </div>
           </article>
         </section>
 
