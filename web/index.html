@@ -68,6 +68,31 @@
         </article>
 
         <article class="panel">
+          <h2>Progression</h2>
+          <div class="progression">
+            <div>
+              <p class="label">XP</p>
+              <p id="xp" class="value">0 / 20</p>
+            </div>
+            <div>
+              <p class="label">Next Unlock</p>
+              <p id="next-unlock" class="value">Ash Dunes @ Lv 2</p>
+            </div>
+          </div>
+          <div class="queue">
+            <div>
+              <p class="label">Workshop Task</p>
+              <p id="task-name" class="value">Idle</p>
+            </div>
+            <div>
+              <p class="label">Time Remaining</p>
+              <p id="task-timer" class="value">--</p>
+            </div>
+          </div>
+          <button id="start-task" type="button">Start Blueprint Research (30s)</button>
+        </article>
+
+        <article class="panel">
           <h2>War Rig Project</h2>
           <div class="rig">
             <div>
@@ -86,6 +111,26 @@
           <button id="build-rig" type="button" class="primary" disabled>
             Contribute Scrap (10)
           </button>
+        </article>
+
+        <article class="panel">
+          <h2>Auto-Scavenge Runs</h2>
+          <p class="hint">Available once the war rig is operational. Runs take real time.</p>
+          <div class="actions">
+            <button type="button" data-mission="short" disabled>Short Run (45s)</button>
+            <button type="button" data-mission="medium" disabled>Medium Run (90s)</button>
+            <button type="button" data-mission="long" disabled>Long Run (150s)</button>
+          </div>
+          <div class="queue">
+            <div>
+              <p class="label">Active Run</p>
+              <p id="mission-name" class="value">None</p>
+            </div>
+            <div>
+              <p class="label">Time Remaining</p>
+              <p id="mission-timer" class="value">--</p>
+            </div>
+          </div>
         </article>
 
         <article class="panel log">
