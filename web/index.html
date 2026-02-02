@@ -8,14 +8,6 @@
   </head>
   <body>
     <main class="app">
-      <header class="hero">
-        <div class="hero-title">
-          <p class="tag">Wasteland PBBG Prototype</p>
-          <h1>Rig Reavers</h1>
-          <p class="subtitle">Wasteland Scavenging Empire</p>
-        </div>
-      </header>
-
       <div class="layout">
         <aside class="sidebar-nav">
           <div class="sidebar-brand">
@@ -87,44 +79,23 @@
           </div>
           <h2>Sections</h2>
           <p class="hint">Pick a system to manage your warband.</p>
-          <button type="button" class="nav-link active" data-section="overview">Overview</button>
-          <button type="button" class="nav-link" data-section="scavenge">Scavenge</button>
-          <button type="button" class="nav-link" data-section="crafting">Crafting</button>
-          <button type="button" class="nav-link" data-section="tools">Tools</button>
-          <button type="button" class="nav-link" data-section="missions">Missions</button>
-          <button type="button" class="nav-link" data-section="contracts">Contracts</button>
-          <button type="button" class="nav-link" data-section="camp">Camp</button>
-          <button type="button" class="nav-link" data-section="rig">War Rig</button>
-          <button type="button" class="nav-link" data-section="outpost">Outpost</button>
-          <button type="button" class="nav-link" data-section="perks">Perks</button>
-          <button type="button" class="nav-link" data-section="factions">Factions</button>
+          <button type="button" class="nav-link active" data-section="scavenge">
+            Scavenging
+          </button>
+          <button type="button" class="nav-link" data-section="camp">Base Operations</button>
+          <button type="button" class="nav-link" data-section="crafting">Workshop</button>
+          <button type="button" class="nav-link" data-section="rig">Garage</button>
+          <button type="button" class="nav-link" data-section="contracts">Trading Post</button>
+          <button type="button" class="nav-link" data-section="perks">Achievements</button>
+          <button type="button" class="nav-link" data-section="overview">Statistics</button>
         </aside>
 
         <section class="content">
-          <article class="panel page-panel active" data-section="overview">
+          <article class="panel page-panel" data-section="overview">
             <div class="panel objective-banner">
               <p class="label">Current Objective</p>
               <p class="value">Reach Lv 2 to unlock Ash Dunes</p>
               <p class="hint">Scavenge Rust Flats twice and start Blueprint Research.</p>
-            </div>
-            <h2>Quick Start</h2>
-            <div class="grid">
-              <div class="panel">
-                <h3>First 5 Minutes</h3>
-                <ol class="list ordered">
-                  <li>Spend AP in Rust Flats to gather scrap + water.</li>
-                  <li>Queue Blueprint Research to unlock rig work.</li>
-                  <li>Craft armor plates to prep for camps and missions.</li>
-                </ol>
-              </div>
-              <div class="panel">
-                <h3>Core Loop</h3>
-                <ol class="list ordered">
-                  <li>Scavenge → Craft → Reinforce camp.</li>
-                  <li>Build rig → Unlock missions → Earn rep.</li>
-                  <li>Invest in perks and factions for bonuses.</li>
-                </ol>
-              </div>
             </div>
             <h2>Progression</h2>
             <div class="progression">
@@ -140,7 +111,7 @@
             <div class="progress-bar" aria-hidden="true">
               <span id="xp-progress"></span>
             </div>
-            <h2>Inventory Focus</h2>
+            <h2>Inventory</h2>
             <div class="grid">
               <div class="panel">
                 <h3>Storage Plan</h3>
@@ -159,21 +130,6 @@
                 </ul>
               </div>
             </div>
-            <div class="queue">
-              <div>
-                <p class="label">Workshop Task</p>
-                <p id="task-name" class="value">Idle</p>
-              </div>
-              <div>
-                <p class="label">Time Remaining</p>
-                <p id="task-timer" class="value">--</p>
-              </div>
-            </div>
-            <div class="progress-bar" aria-hidden="true">
-              <span id="task-progress"></span>
-            </div>
-            <p class="hint">Requires 2 Tech + 10 Scrap + 5 Water.</p>
-            <button id="start-task" type="button">Start Blueprint Research (60s)</button>
             <div class="panel overflow-panel">
               <p class="label">Overflow Cache</p>
               <p class="value"><span id="salvage-cache">0</span> scrap in reserve</p>
@@ -184,32 +140,65 @@
             </div>
           </article>
 
-          <article class="panel page-panel" data-section="scavenge">
-            <h2>Scavenge Actions</h2>
-            <p class="hint">Spend AP to search zones. Higher tiers cost more AP but pay out more.</p>
-            <div class="actions">
-              <button type="button" data-zone="rust">Rust Flats (2 AP)</button>
-              <button type="button" data-zone="ash">Ash Dunes (3 AP)</button>
-              <button type="button" data-zone="glass">Glass Wastes (5 AP)</button>
-              <button type="button" data-zone="dead">Dead Grid (7 AP)</button>
-            </div>
-            <p class="timer" id="ap-timer">AP regenerates every 8s.</p>
-            <div class="grid">
-              <div class="panel">
-                <h3>Scavenger Intel</h3>
-                <p class="hint">Intel boosts grant +1 random drop per run.</p>
-                <ul class="list">
-                  <li>Scout ahead to reduce injury risk.</li>
-                  <li>Use drones to reveal hidden caches.</li>
-                </ul>
+          <article class="panel page-panel active" data-section="scavenge">
+            <div class="section-card">
+              <div class="card-header">
+                <h2>Quick Scavenging</h2>
+                <span class="chip">Low risk</span>
               </div>
-              <div class="panel">
-                <h3>Zone Hazards</h3>
-                <p class="hint">Weather and raider patrols modify yields.</p>
-                <ul class="list">
-                  <li>Sandstorms reduce water gains.</li>
-                  <li>Raider alerts increase rep rewards.</li>
-                </ul>
+              <p class="hint">
+                Search nearby debris for small salvage. Low risk, small rewards.
+              </p>
+              <div class="card-note">
+                <p class="label">Latest Scavenge</p>
+                <p class="value" id="latest-scavenge">
+                  Search rubble to kick off your first run.
+                </p>
+              </div>
+              <button type="button" data-zone="rust" class="primary">
+                Search Debris (2 AP)
+              </button>
+              <p class="timer" id="ap-timer">AP regenerates every 8s.</p>
+            </div>
+            <div class="section-card">
+              <div class="card-header">
+                <h2>Expedition Locations</h2>
+                <span class="chip">Choose a route</span>
+              </div>
+              <div class="expedition-list">
+                <div class="expedition-card">
+                  <div>
+                    <h3>Rust Flats</h3>
+                    <p class="hint">Old residential district.</p>
+                    <p class="hint">Rewards: scrap +4-10, water +1-3</p>
+                  </div>
+                  <div class="card-actions">
+                    <span class="chip warning">Low risk</span>
+                    <button type="button" data-zone="rust">Launch Expedition</button>
+                  </div>
+                </div>
+                <div class="expedition-card">
+                  <div>
+                    <h3>Ash Dunes</h3>
+                    <p class="hint">Wind-scoured industrial ridge.</p>
+                    <p class="hint">Rewards: scrap +8-14, tech +0-1</p>
+                  </div>
+                  <div class="card-actions">
+                    <span class="chip danger">Radiation</span>
+                    <button type="button" data-zone="ash">Launch Expedition</button>
+                  </div>
+                </div>
+                <div class="expedition-card">
+                  <div>
+                    <h3>Glass Wastes</h3>
+                    <p class="hint">Interstate wreckage.</p>
+                    <p class="hint">Rewards: scrap +12-22, fuel +2-4</p>
+                  </div>
+                  <div class="card-actions">
+                    <span class="chip danger">Vehicle damage</span>
+                    <button type="button" data-zone="glass">Launch Expedition</button>
+                  </div>
+                </div>
               </div>
             </div>
           </article>
@@ -222,6 +211,24 @@
               <button type="button" data-recipe="electronics">Assemble Electronics (60s) · 2 Tech + 5 Scrap</button>
               <button type="button" data-recipe="drone">Build Scout Drone (120s) · 2 Electronics + 2 Tech + 10 Scrap</button>
               <button type="button" data-recipe="medkit">Assemble Medkit (75s) · 4 Water + 1 Tech</button>
+            </div>
+            <div class="panel objective-banner">
+              <p class="label">Blueprint Research</p>
+              <div class="queue">
+                <div>
+                  <p class="label">Workshop Task</p>
+                  <p id="task-name" class="value">Idle</p>
+                </div>
+                <div>
+                  <p class="label">Time Remaining</p>
+                  <p id="task-timer" class="value">--</p>
+                </div>
+              </div>
+              <div class="progress-bar" aria-hidden="true">
+                <span id="task-progress"></span>
+              </div>
+              <p class="hint">Requires 2 Tech + 10 Scrap + 5 Water.</p>
+              <button id="start-task" type="button">Start Blueprint Research (60s)</button>
             </div>
             <div class="grid">
               <div class="panel">

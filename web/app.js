@@ -368,6 +368,12 @@ const addLog = (message) => {
     .join("");
 };
 
+const updateLatestScavenge = (message) => {
+  const latest = document.getElementById("latest-scavenge");
+  if (!latest) return;
+  latest.textContent = message;
+};
+
 const updateMorale = () => {
   const target =
     50 +
@@ -844,6 +850,9 @@ const handleScavenge = (zoneKey) => {
   }
 
   addLog(`You scouted ${zone.name} and brought back salvage.`);
+  updateLatestScavenge(
+    `Scouted ${zone.name} for ${zone.cost} AP. Salvage secured and loaded.`,
+  );
   updateUi();
 };
 
