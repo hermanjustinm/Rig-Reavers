@@ -1,6 +1,6 @@
 # Rig Reavers
 
-A browser-based prototype for a wasteland PBBG concept. This first cut is a small front-end sandbox for the scavenging loop, resource management, and early timed progression toward a war rig.
+A browser-based prototype for a wasteland PBBG concept. This front-end sandbox now includes long-term progression loops: scavenging, timed crafting, crew recruitment, reputation gating, war rig assembly, and a multi-stage outpost that adds passive income.
 
 ## Run locally
 Open `web/index.html` in a browser.
@@ -9,5 +9,5 @@ Open `web/index.html` in a browser.
 - Add a backend for persistence.
 - Introduce crafting recipes and modular rig parts.
 - Expand timed queues for missions, repairs, and crafting.
-- Balance time gates and resource costs for rig assembly.
-- Connect scavenging outcomes to a timed mission system.
+- Balance time gates, reputation unlocks, and resource costs for the rig/outpost.
+- Add contracts and faction events tied to reputation tiers.

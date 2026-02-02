@@ -20,7 +20,7 @@ body {
 }
 
 .app {
-  width: min(1100px, 100%);
+  width: min(1180px, 100%);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -55,7 +55,7 @@ h1 {
 
 .status {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-items: center;
 }
@@ -68,13 +68,13 @@ h1 {
 }
 
 .value {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
   gap: 20px;
 }
 
@@ -109,7 +109,7 @@ button {
   border: 1px solid transparent;
   border-radius: 10px;
   padding: 10px 14px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }

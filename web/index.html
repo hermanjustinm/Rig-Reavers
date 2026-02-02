@@ -14,7 +14,7 @@
           <h1>Rig Reavers</h1>
           <p class="subtitle">
             Start as a war band rookie. Scavenge for scrap, water, and fuel. Build toward your
-            first war rig.
+            first war rig and a mobile outpost.
           </p>
         </div>
         <div class="status">
@@ -29,6 +29,10 @@
           <div>
             <p class="label">Morale</p>
             <p id="morale" class="value">Stable</p>
+          </div>
+          <div>
+            <p class="label">Reputation</p>
+            <p id="rep" class="value">0</p>
           </div>
         </div>
       </header>
@@ -53,6 +57,14 @@
               <p class="label">Tech Parts</p>
               <p id="tech" class="value">0</p>
             </div>
+            <div>
+              <p class="label">Armor Plates</p>
+              <p id="armor" class="value">0</p>
+            </div>
+            <div>
+              <p class="label">Electronics</p>
+              <p id="electronics" class="value">0</p>
+            </div>
           </div>
         </article>
 
@@ -63,6 +75,7 @@
             <button type="button" data-zone="rust">Rust Flats (2 AP)</button>
             <button type="button" data-zone="ash">Ash Dunes (3 AP)</button>
             <button type="button" data-zone="glass">Glass Wastes (5 AP)</button>
+            <button type="button" data-zone="dead">Dead Grid (7 AP)</button>
           </div>
           <p class="timer" id="ap-timer">AP regenerates every 8s.</p>
         </article>
@@ -92,6 +105,42 @@
           <button id="start-task" type="button">
             Start Blueprint Research (60s, 2 Tech + 10 Scrap + 5 Water)
           </button>
+        </article>
+
+        <article class="panel">
+          <h2>Workshop Crafting</h2>
+          <p class="hint">Crafting uses real time and queues while you scavenge.</p>
+          <div class="actions">
+            <button type="button" data-recipe="armor">Forge Armor Plates (45s)</button>
+            <button type="button" data-recipe="electronics">Assemble Electronics (60s)</button>
+            <button type="button" data-recipe="drone">Build Scout Drone (120s)</button>
+          </div>
+          <div class="queue">
+            <div>
+              <p class="label">Active Craft</p>
+              <p id="craft-name" class="value">None</p>
+            </div>
+            <div>
+              <p class="label">Time Remaining</p>
+              <p id="craft-timer" class="value">--</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Crew & Camp</h2>
+          <div class="resources">
+            <div>
+              <p class="label">Crew Slots</p>
+              <p id="crew-slots" class="value">2 / 2</p>
+            </div>
+            <div>
+              <p class="label">Recruitment</p>
+              <p id="recruit-status" class="value">Idle</p>
+            </div>
+          </div>
+          <button id="hire-crew" type="button">Hire Scavenger (90s, 6 Water)</button>
+          <p class="hint">More crew increases mission yield and unlocks convoy events.</p>
         </article>
 
         <article class="panel">
@@ -126,6 +175,7 @@
             <button type="button" data-mission="short" disabled>Short Run (90s)</button>
             <button type="button" data-mission="medium" disabled>Medium Run (180s)</button>
             <button type="button" data-mission="long" disabled>Long Run (300s)</button>
+            <button type="button" data-mission="convoy" disabled>Convoy Escort (6m)</button>
           </div>
           <div class="queue">
             <div>
@@ -137,6 +187,24 @@
               <p id="mission-timer" class="value">--</p>
             </div>
           </div>
+        </article>
+
+        <article class="panel">
+          <h2>Outpost Project</h2>
+          <p class="hint">Long-term build that unlocks passive income and storage.</p>
+          <div class="resources">
+            <div>
+              <p class="label">Stage</p>
+              <p id="outpost-stage" class="value">0 / 3</p>
+            </div>
+            <div>
+              <p class="label">Status</p>
+              <p id="outpost-status" class="value">Unavailable</p>
+            </div>
+          </div>
+          <button id="start-outpost" type="button" disabled>
+            Start Stage 1 (180s, 60 Scrap + 20 Water + 5 Armor)
+          </button>
         </article>
 
         <article class="panel log">
