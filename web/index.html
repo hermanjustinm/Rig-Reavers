@@ -86,6 +86,7 @@
             </div>
           </div>
           <h2>Sections</h2>
+          <p class="hint">Pick a system to manage your warband.</p>
           <button type="button" class="nav-link active" data-section="overview">Overview</button>
           <button type="button" class="nav-link" data-section="scavenge">Scavenge</button>
           <button type="button" class="nav-link" data-section="crafting">Crafting</button>
@@ -136,6 +137,9 @@
                 <p id="next-unlock" class="value">Ash Dunes @ Lv 2</p>
               </div>
             </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="xp-progress"></span>
+            </div>
             <h2>Inventory Focus</h2>
             <div class="grid">
               <div class="panel">
@@ -170,6 +174,14 @@
             </div>
             <p class="hint">Requires 2 Tech + 10 Scrap + 5 Water.</p>
             <button id="start-task" type="button">Start Blueprint Research (60s)</button>
+            <div class="panel overflow-panel">
+              <p class="label">Overflow Cache</p>
+              <p class="value"><span id="salvage-cache">0</span> scrap in reserve</p>
+              <p class="hint">
+                Extra supplies are packed into a cache instead of lost when storage is full.
+              </p>
+              <button id="recover-cache" type="button">Recover Cache</button>
+            </div>
           </article>
 
           <article class="panel page-panel" data-section="scavenge">

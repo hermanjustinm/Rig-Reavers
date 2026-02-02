@@ -32,6 +32,7 @@ const state = {
   contractCooldown: 0,
   activeFaction: null,
   perks: new Set(),
+  salvageCache: 0,
 };
 
 const zones = {
@@ -270,6 +271,9 @@ const refs = {
   electronics: document.getElementById("electronics"),
   medkits: document.getElementById("medkits"),
   storage: document.getElementById("storage"),
+  salvageCache: document.getElementById("salvage-cache"),
+  recoverCache: document.getElementById("recover-cache"),
+  xpProgress: document.getElementById("xp-progress"),
   xp: document.getElementById("xp"),
   nextUnlock: document.getElementById("next-unlock"),
   taskName: document.getElementById("task-name"),
@@ -680,6 +684,9 @@ const updateUi = () => {
   refs.rigProgress.textContent = `${state.rigProgress} / ${state.rigTarget}`;
   refs.rep.textContent = state.reputation;
   refs.storage.textContent = `${getStorageUsed()} / ${getStorageCap()}`;
+  refs.salvageCache.textContent = state.salvageCache;
+  refs.recoverCache.disabled = state.salvageCache <= 0 || getStorageUsed() >= getStorageCap();
+  setProgress(refs.xpProgress, state.xp, state.level * 20);
   setProgress(refs.rigProgressBar, state.rigProgress, state.rigTarget);
   updateMorale();
   updateRigStatus();
@@ -733,8 +740,22 @@ const clampStorage = () => {
     const removed = Math.min(available, overflow);
     state[key] -= removed;
     overflow -= removed;
+    state.salvageCache += removed;
   });
-  addLog("Storage full. Excess supplies were left behind.");
+  addLog("Storage full. Excess supplies were packed into a salvage cache.");
+};
+
+const recoverCache = () => {
+  const freeSpace = getStorageCap() - getStorageUsed();
+  if (freeSpace <= 0 || state.salvageCache <= 0) {
+    addLog("Storage full. Free space before recovering the cache.");
+    return;
+  }
+  const recovered = Math.min(freeSpace, state.salvageCache);
+  state.salvageCache -= recovered;
+  state.scrap += recovered;
+  addLog(`Recovered ${recovered} scrap from the salvage cache.`);
+  updateUi();
 };
 
 const getScavengeMultiplier = () => {
@@ -1260,6 +1281,7 @@ const bindEvents = () => {
   refs.useMedkit.addEventListener("click", useMedkit);
   refs.takeContract.addEventListener("click", startContract);
   refs.repairTool.addEventListener("click", startToolRepair);
+  refs.recoverCache.addEventListener("click", recoverCache);
   refs.toolList.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-tool]");
     if (!button) return;

@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 24px;
+  padding: 20px;
   background: radial-gradient(circle at top, #6b1c17 0%, #1a0f12 55%, #0b0b0c 100%);
 }
 
@@ -23,13 +23,13 @@ body {
   width: min(1180px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .hero {
   display: flex;
   justify-content: space-between;
-  padding: 8px 4px;
+  padding: 4px 2px;
   color: #f4e4dc;
 }
 
@@ -143,6 +143,11 @@ h1 {
   color: #ffb347;
 }
 
+.sidebar-nav .hint {
+  color: #d5a889;
+  font-size: 0.78rem;
+}
+
 .label {
   text-transform: uppercase;
   font-size: 0.7rem;
@@ -169,6 +174,12 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.overflow-panel {
+  margin-top: 12px;
+  background: rgba(20, 14, 16, 0.9);
+  border-color: rgba(255, 179, 71, 0.25);
 }
 
 .objective-banner {
