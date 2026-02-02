@@ -42,14 +42,16 @@
         </div>
       </header>
 
-      <nav class="tabs" role="tablist">
-        <button type="button" class="tab active" data-tab="overview">Overview</button>
-        <button type="button" class="tab" data-tab="operations">Operations</button>
-        <button type="button" class="tab" data-tab="projects">Projects</button>
-      </nav>
+      <div class="layout">
+        <div>
+          <nav class="tabs" role="tablist">
+            <button type="button" class="tab active" data-tab="overview">Overview</button>
+            <button type="button" class="tab" data-tab="operations">Operations</button>
+            <button type="button" class="tab" data-tab="projects">Projects</button>
+          </nav>
 
-      <section class="tab-panel active" data-panel="overview">
-        <div class="grid">
+          <section class="tab-panel active" data-panel="overview">
+            <div class="grid">
           <article class="panel">
             <h2>Resources</h2>
             <div class="resources">
@@ -170,11 +172,11 @@
             <p class="hint">Requires 1 Medkit.</p>
             <button id="use-medkit" type="button">Use Medkit (heal 1)</button>
           </article>
-        </div>
-      </section>
+            </div>
+          </section>
 
-      <section class="tab-panel" data-panel="operations">
-        <div class="grid">
+          <section class="tab-panel" data-panel="operations">
+            <div class="grid">
           <article class="panel">
             <h2>Scavenge Actions</h2>
             <p class="hint">Spend AP to search zones. Higher tiers cost more AP but pay out more.</p>
@@ -277,11 +279,11 @@
             <p class="hint" id="contract-requirements">Requires reputation tier.</p>
             <button id="take-contract" type="button">Accept Contract (120s)</button>
           </article>
-        </div>
-      </section>
+            </div>
+          </section>
 
-      <section class="tab-panel" data-panel="projects">
-        <div class="grid">
+          <section class="tab-panel" data-panel="projects">
+            <div class="grid">
           <article class="panel">
             <h2>War Rig Project</h2>
             <div class="rig">
@@ -358,15 +360,16 @@
             </div>
             <div class="actions" id="faction-list"></div>
           </article>
+            </div>
+          </section>
         </div>
-      </section>
-
-      <section class="grid">
-        <article class="panel log">
-          <h2>Scout Log</h2>
-          <ul id="log"></ul>
-        </article>
-      </section>
+        <aside class="sidebar">
+          <article class="panel log">
+            <h2>Scout Log</h2>
+            <ul id="log"></ul>
+          </article>
+        </aside>
+      </div>
     </main>
 
     <script src="app.js"></script>
