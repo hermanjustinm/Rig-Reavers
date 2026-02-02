@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rig Reavers Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <div>
+          <p class="tag">Wasteland PBBG Prototype</p>
+          <h1>Rig Reavers</h1>
+          <p class="subtitle">
+            Start as a war band rookie. Scavenge for scrap, water, and fuel. Build toward your
+            first war rig, a mobile outpost, and long-term faction standing.
+          </p>
+        </div>
+        <div class="status">
+          <div>
+            <p class="label">Level</p>
+            <p id="level" class="value">1</p>
+          </div>
+          <div>
+            <p class="label">AP</p>
+            <p id="ap" class="value">10</p>
+          </div>
+          <div>
+            <p class="label">Morale</p>
+            <p id="morale" class="value">Stable</p>
+            <p id="morale-detail" class="hint">Morale affects yields and injuries.</p>
+          </div>
+          <div>
+            <p class="label">Reputation</p>
+            <p id="rep" class="value">0</p>
+          </div>
+          <div>
+            <p class="label">Injuries</p>
+            <p id="injuries" class="value">0</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar-nav">
+          <h2>Sections</h2>
+          <button type="button" class="nav-link active" data-section="overview">Overview</button>
+          <button type="button" class="nav-link" data-section="scavenge">Scavenge</button>
+          <button type="button" class="nav-link" data-section="crafting">Crafting</button>
+          <button type="button" class="nav-link" data-section="tools">Tools</button>
+          <button type="button" class="nav-link" data-section="missions">Missions</button>
+          <button type="button" class="nav-link" data-section="contracts">Contracts</button>
+          <button type="button" class="nav-link" data-section="camp">Camp</button>
+          <button type="button" class="nav-link" data-section="rig">War Rig</button>
+          <button type="button" class="nav-link" data-section="outpost">Outpost</button>
+          <button type="button" class="nav-link" data-section="perks">Perks</button>
+          <button type="button" class="nav-link" data-section="factions">Factions</button>
+        </aside>
+
+        <section class="content">
+          <article class="panel page-panel active" data-section="overview">
+            <h2>Resources</h2>
+            <div class="resources">
+              <div>
+                <p class="label">Scrap</p>
+                <p id="scrap" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Water</p>
+                <p id="water" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Fuel</p>
+                <p id="fuel" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Tech Parts</p>
+                <p id="tech" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Armor Plates</p>
+                <p id="armor" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Electronics</p>
+                <p id="electronics" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Medkits</p>
+                <p id="medkits" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Storage</p>
+                <p id="storage" class="value">0 / 0</p>
+              </div>
+            </div>
+            <h2>Progression</h2>
+            <div class="progression">
+              <div>
+                <p class="label">XP</p>
+                <p id="xp" class="value">0 / 20</p>
+              </div>
+              <div>
+                <p class="label">Next Unlock</p>
+                <p id="next-unlock" class="value">Ash Dunes @ Lv 2</p>
+              </div>
+            </div>
+            <div class="queue">
+              <div>
+                <p class="label">Workshop Task</p>
+                <p id="task-name" class="value">Idle</p>
+              </div>
+              <div>
+                <p class="label">Time Remaining</p>
+                <p id="task-timer" class="value">--</p>
+              </div>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="task-progress"></span>
+            </div>
+            <p class="hint">Requires 2 Tech + 10 Scrap + 5 Water.</p>
+            <button id="start-task" type="button">Start Blueprint Research (60s)</button>
+          </article>
+
+          <article class="panel page-panel" data-section="scavenge">
+            <h2>Scavenge Actions</h2>
+            <p class="hint">Spend AP to search zones. Higher tiers cost more AP but pay out more.</p>
+            <div class="actions">
+              <button type="button" data-zone="rust">Rust Flats (2 AP)</button>
+              <button type="button" data-zone="ash">Ash Dunes (3 AP)</button>
+              <button type="button" data-zone="glass">Glass Wastes (5 AP)</button>
+              <button type="button" data-zone="dead">Dead Grid (7 AP)</button>
+            </div>
+            <p class="timer" id="ap-timer">AP regenerates every 8s.</p>
+          </article>
+
+          <article class="panel page-panel" data-section="crafting">
+            <h2>Workshop Crafting</h2>
+            <p class="hint">Crafting uses real time and queues while you scavenge.</p>
+            <div class="actions">
+              <button type="button" data-recipe="armor">Forge Armor Plates (45s) · 8 Scrap</button>
+              <button type="button" data-recipe="electronics">Assemble Electronics (60s) · 2 Tech + 5 Scrap</button>
+              <button type="button" data-recipe="drone">Build Scout Drone (120s) · 2 Electronics + 2 Tech + 10 Scrap</button>
+              <button type="button" data-recipe="medkit">Assemble Medkit (75s) · 4 Water + 1 Tech</button>
+            </div>
+            <div class="queue">
+              <div>
+                <p class="label">Active Craft</p>
+                <p id="craft-name" class="value">None</p>
+              </div>
+              <div>
+                <p class="label">Time Remaining</p>
+                <p id="craft-timer" class="value">--</p>
+              </div>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="craft-progress"></span>
+            </div>
+            <p class="hint" id="craft-requirements">Requires materials.</p>
+          </article>
+
+          <article class="panel page-panel" data-section="tools">
+            <h2>Loadout & Durability</h2>
+            <p class="hint">Equip one tool to boost scavenging. Durability drops on each run.</p>
+            <div class="resources">
+              <div>
+                <p class="label">Active Tool</p>
+                <p id="active-tool" class="value">None</p>
+              </div>
+              <div>
+                <p class="label">Durability</p>
+                <p id="tool-durability" class="value">--</p>
+              </div>
+            </div>
+            <div class="actions" id="tool-list"></div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="tool-progress"></span>
+            </div>
+            <p class="hint" id="tool-repair-requirements">Repair requires 8 Scrap + 1 Tech.</p>
+            <button id="repair-tool" type="button">Repair Tool (60s)</button>
+          </article>
+
+          <article class="panel page-panel" data-section="missions">
+            <h2>Auto-Scavenge Runs</h2>
+            <p class="hint">Available once the war rig is operational. Runs take real time.</p>
+            <div class="actions">
+              <button type="button" data-mission="short" disabled>Short Run (90s)</button>
+              <button type="button" data-mission="medium" disabled>Medium Run (180s)</button>
+              <button type="button" data-mission="long" disabled>Long Run (300s)</button>
+              <button type="button" data-mission="convoy" disabled>Convoy Escort (6m)</button>
+            </div>
+            <div class="queue">
+              <div>
+                <p class="label">Active Run</p>
+                <p id="mission-name" class="value">None</p>
+              </div>
+              <div>
+                <p class="label">Time Remaining</p>
+                <p id="mission-timer" class="value">--</p>
+              </div>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="mission-progress"></span>
+            </div>
+            <p class="hint" id="mission-requirements">Requires fuel.</p>
+          </article>
+
+          <article class="panel page-panel" data-section="contracts">
+            <h2>Contracts Board</h2>
+            <p class="hint">Timed contracts refresh. Higher reputation unlocks bigger payouts.</p>
+            <div class="resources">
+              <div>
+                <p class="label">Active Contract</p>
+                <p id="contract-name" class="value">None</p>
+              </div>
+              <div>
+                <p class="label">Cooldown</p>
+                <p id="contract-timer" class="value">--</p>
+              </div>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="contract-progress"></span>
+            </div>
+            <p class="hint" id="contract-requirements">Requires reputation tier.</p>
+            <button id="take-contract" type="button">Accept Contract (120s)</button>
+          </article>
+
+          <article class="panel page-panel" data-section="camp">
+            <h2>Crew & Camp</h2>
+            <div class="resources">
+              <div>
+                <p class="label">Crew Slots</p>
+                <p id="crew-slots" class="value">2 / 2</p>
+              </div>
+              <div>
+                <p class="label">Recruitment</p>
+                <p id="recruit-status" class="value">Idle</p>
+              </div>
+            </div>
+            <p class="hint">Requires 6 Water.</p>
+            <button id="hire-crew" type="button">Hire Scavenger (90s)</button>
+            <p class="hint">More crew increases mission yield and unlocks convoy events.</p>
+            <h2>Camp Morale</h2>
+            <p class="hint">Boost morale to improve yields and reduce injuries.</p>
+            <div class="resources">
+              <div>
+                <p class="label">Rally Status</p>
+                <p id="rally-status" class="value">Idle</p>
+              </div>
+              <div>
+                <p class="label">Time Remaining</p>
+                <p id="rally-timer" class="value">--</p>
+              </div>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="rally-progress"></span>
+            </div>
+            <p class="hint">Requires 4 Water.</p>
+            <button id="start-rally" type="button">Hold Rally (90s)</button>
+            <h2>Health & Recovery</h2>
+            <p class="hint">Injuries reduce max AP. Use medkits to recover.</p>
+            <div class="resources">
+              <div>
+                <p class="label">Current Injuries</p>
+                <p id="injury-status" class="value">0</p>
+              </div>
+              <div>
+                <p class="label">Max AP</p>
+                <p id="max-ap" class="value">10</p>
+              </div>
+            </div>
+            <p class="hint">Requires 1 Medkit.</p>
+            <button id="use-medkit" type="button">Use Medkit (heal 1)</button>
+          </article>
+
+          <article class="panel page-panel" data-section="rig">
+            <h2>War Rig Project</h2>
+            <div class="rig">
+              <div>
+                <p class="label">Blueprint</p>
+                <p id="blueprint" class="value">Locked</p>
+              </div>
+              <div>
+                <p class="label">Progress</p>
+                <p id="rig-progress" class="value">0 / 300</p>
+              </div>
+              <div>
+                <p class="label">Status</p>
+                <p id="rig-status" class="value">Unavailable</p>
+              </div>
+              <div>
+                <p class="label">Benefit</p>
+                <p id="rig-benefit" class="value">--</p>
+              </div>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="rig-progress-bar"></span>
+            </div>
+            <p class="hint">Requires 15 Scrap + 2 Fuel per contribution.</p>
+            <button id="build-rig" type="button" class="primary" disabled>
+              Contribute to Rig (10 pts)
+            </button>
+          </article>
+
+          <article class="panel page-panel" data-section="outpost">
+            <h2>Outpost Project</h2>
+            <p class="hint">Long-term build that unlocks passive income and storage.</p>
+            <div class="resources">
+              <div>
+                <p class="label">Stage</p>
+                <p id="outpost-stage" class="value">0 / 3</p>
+              </div>
+              <div>
+                <p class="label">Status</p>
+                <p id="outpost-status" class="value">Unavailable</p>
+              </div>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <span id="outpost-progress"></span>
+            </div>
+            <p class="hint" id="outpost-requirements">Requires materials.</p>
+            <button id="start-outpost" type="button" disabled>
+              Start Stage 1 (180s)
+            </button>
+          </article>
+
+          <article class="panel page-panel" data-section="perks">
+            <h2>Perk Upgrades</h2>
+            <p class="hint">Spend reputation to unlock permanent bonuses.</p>
+            <div class="actions" id="perk-list"></div>
+          </article>
+
+          <article class="panel page-panel" data-section="factions">
+            <h2>Faction Standing</h2>
+            <p class="hint">Pledge to a faction to unlock passive bonuses and tier perks.</p>
+            <div class="resources">
+              <div>
+                <p class="label">Faction</p>
+                <p id="faction-name" class="value">Unaligned</p>
+              </div>
+              <div>
+                <p class="label">Tier</p>
+                <p id="faction-tier" class="value">Outsider</p>
+              </div>
+              <div>
+                <p class="label">Bonus</p>
+                <p id="faction-bonus" class="value">--</p>
+              </div>
+            </div>
+            <div class="actions" id="faction-list"></div>
+          </article>
+        </section>
+
+        <aside class="sidebar">
+          <article class="panel log">
+            <h2>Scout Log</h2>
+            <ul id="log"></ul>
+          </article>
+        </aside>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
