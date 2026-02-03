@@ -10,6 +10,8 @@ const statTrainingEls = document.querySelectorAll("[data-train-stat]");
 const statDisplayEls = document.querySelectorAll("[data-stat-display]");
 const combatEls = document.querySelectorAll("[data-combat]");
 const activityLog = document.querySelector("#activity-log");
+const heatTimerEl = document.querySelector("[data-heat-timer]");
+const heatBar = document.querySelector("[data-heat-bar] div");
 
 const state = {
   health: 40,
@@ -33,11 +35,16 @@ const state = {
     strength: 1.0,
     dexterity: 1.0,
     endurance: 1.0,
+    defense: 1.0,
     perception: 1.0,
     charisma: 1.0,
   },
   cooldowns: {
     rest: 0,
+  },
+  heat: {
+    durationMs: 180000,
+    endsAt: Date.now() + 180000,
   },
 };
 
@@ -95,12 +102,16 @@ const updateStats = () => {
   });
 
   const attack = (state.stats.strength + state.stats.dexterity).toFixed(1);
-  const defense = (state.stats.endurance + state.stats.perception).toFixed(1);
+  const defenseRating = (
+    state.stats.endurance +
+    state.stats.defense +
+    state.stats.perception * 0.4
+  ).toFixed(1);
   const crit = clamp(state.stats.perception * 0.6, 1, 15).toFixed(1);
 
   combatEls.forEach((el) => {
     if (el.dataset.combat === "attack") el.textContent = attack;
-    if (el.dataset.combat === "defense") el.textContent = defense;
+    if (el.dataset.combat === "defense") el.textContent = defenseRating;
     if (el.dataset.combat === "crit") el.textContent = `${crit}%`;
     if (el.dataset.combat === "injuries") el.textContent = "0";
   });
@@ -249,6 +260,34 @@ const updateUI = () => {
   updateButtons();
 };
 
+const formatTimer = (ms) => {
+  const totalSeconds = Math.max(Math.floor(ms / 1000), 0);
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
+};
+
+const updateHeat = () => {
+  const now = Date.now();
+  const remaining = state.heat.endsAt - now;
+  if (remaining <= 0) {
+    state.heat.endsAt = now + state.heat.durationMs;
+  }
+  const activeRemaining = state.heat.endsAt - now;
+  heatTimerEl.textContent = `Quiet for ${formatTimer(activeRemaining)}`;
+  const pct = clamp((activeRemaining / state.heat.durationMs) * 100, 0, 100);
+  heatBar.style.width = `${pct}%`;
+};
+
+const startEnergyRegen = () => {
+  setInterval(() => {
+    if (state.energy < state.maxEnergy) {
+      state.energy = clamp(state.energy + 1, 0, state.maxEnergy);
+      updateUI();
+    }
+  }, 60000);
+};
+
 navButtons.forEach((button) => {
   button.addEventListener("click", () => {
     setActivePage(button.dataset.page);
@@ -259,3 +298,6 @@ bindActions();
 setActivePage("scavenging");
 addLog("You wake up in the slums with nothing but a busted rig.");
 updateUI();
+updateHeat();
+setInterval(updateHeat, 1000);
+startEnergyRegen();

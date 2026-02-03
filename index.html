@@ -77,9 +77,9 @@
       <section class="live-ops">
         <h3>Neighborhood Heat</h3>
         <p class="location">Market District Patrol</p>
-        <p class="timer">Quiet for 02:18</p>
-        <div class="bar">
-          <div style="width: 20%"></div>
+        <p class="timer" data-heat-timer>Quiet for 00:00</p>
+        <div class="bar" data-heat-bar>
+          <div></div>
         </div>
       </section>
     </aside>
@@ -97,7 +97,7 @@
         <div class="hero-card">
           <h3>Daily Rhythm</h3>
           <ul>
-            <li>Energy regenerates every 10 minutes.</li>
+            <li>Energy regenerates every minute.</li>
             <li>Health recovers at the Shelter once built.</li>
             <li>Training locks you in for timed sessions.</li>
             <li>District heat affects crime rewards.</li>
@@ -239,7 +239,7 @@
             </div>
             <div class="meta">
               <span>Cost: 10 Energy</span>
-              <span>Duration: 30m</span>
+              <span>Duration: 20m</span>
             </div>
             <button data-action="train" data-stat="strength" data-cost-energy="10">Train Strength</button>
           </article>
@@ -258,7 +258,7 @@
             </div>
             <div class="meta">
               <span>Cost: 10 Energy</span>
-              <span>Duration: 30m</span>
+              <span>Duration: 20m</span>
             </div>
             <button data-action="train" data-stat="dexterity" data-cost-energy="10">Train Dexterity</button>
           </article>
@@ -277,9 +277,28 @@
             </div>
             <div class="meta">
               <span>Cost: 10 Energy</span>
-              <span>Duration: 30m</span>
+              <span>Duration: 20m</span>
             </div>
             <button data-action="train" data-stat="endurance" data-cost-energy="10">Train Endurance</button>
+          </article>
+          <article class="card">
+            <h3>Defense</h3>
+            <p>Improves damage mitigation and survival odds.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="defense">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.3</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 20m</span>
+            </div>
+            <button data-action="train" data-stat="defense" data-cost-energy="10">Train Defense</button>
           </article>
           <article class="card">
             <h3>Perception</h3>
@@ -296,7 +315,7 @@
             </div>
             <div class="meta">
               <span>Cost: 10 Energy</span>
-              <span>Duration: 30m</span>
+              <span>Duration: 20m</span>
             </div>
             <button data-action="train" data-stat="perception" data-cost-energy="10">Train Perception</button>
           </article>
@@ -315,7 +334,7 @@
             </div>
             <div class="meta">
               <span>Cost: 10 Energy</span>
-              <span>Duration: 30m</span>
+              <span>Duration: 20m</span>
             </div>
             <button data-action="train" data-stat="charisma" data-cost-energy="10">Train Charisma</button>
           </article>
@@ -347,7 +366,7 @@
               <span>Unlock: Workshop Level 1</span>
               <span>Slots: 0/2</span>
             </div>
-            <button>Construct Workshop</button>
+            <button disabled>Requires: 40 scrap, 10 parts</button>
           </article>
           <article class="card">
             <h3>Starter Blueprints</h3>
@@ -365,7 +384,7 @@
               <span>Durability Loss: High</span>
               <span>Repair Materials: Parts + Scrap</span>
             </div>
-            <button>Unlock Repairs</button>
+            <button disabled>Requires: Workshop Level 1</button>
           </article>
         </div>
       </section>
@@ -386,7 +405,7 @@
               <span>Unlock: Garage Level 1</span>
               <span>Fuel Cost: 2 per hour</span>
             </div>
-            <button>Construct Garage</button>
+            <button disabled>Requires: 35 scrap, 8 parts, 5 fuel</button>
           </article>
           <article class="card">
             <h3>Vehicle Mods</h3>
@@ -403,7 +422,7 @@
             <div class="meta">
               <span>Reputation: 120 / 500</span>
             </div>
-            <button>Find Hulls</button>
+            <button disabled>Requires: Garage Level 1</button>
           </article>
         </div>
       </section>
@@ -494,6 +513,7 @@
               <li>Strength: <span data-stat-display="strength">0</span></li>
               <li>Dexterity: <span data-stat-display="dexterity">0</span></li>
               <li>Endurance: <span data-stat-display="endurance">0</span></li>
+              <li>Defense: <span data-stat-display="defense">0</span></li>
               <li>Perception: <span data-stat-display="perception">0</span></li>
               <li>Charisma: <span data-stat-display="charisma">0</span></li>
             </ul>
