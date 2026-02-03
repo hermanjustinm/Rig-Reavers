@@ -222,11 +222,63 @@ const SECTION_LIST = [
   { id: "overview", label: "Overview" },
   { id: "scavenge", label: "Scavenge" },
   { id: "base", label: "Base" },
+  { id: "rpg", label: "Wasteland Ops" },
   { id: "expeditions", label: "Expeditions" },
   { id: "crafting", label: "Crafting" },
   { id: "vehicles", label: "Vehicles" },
   { id: "trading", label: "Trading" },
   { id: "achievements", label: "Achievements" },
+];
+
+const FACTIONS = [
+  {
+    id: "dust-vipers",
+    name: "Dust Vipers",
+    focus: "Raiders who respect strength and decisive strikes.",
+  },
+  {
+    id: "sundered-scribes",
+    name: "Sundered Scribes",
+    focus: "Archivists hunting pre-fall tech and rumors.",
+  },
+  {
+    id: "iron-saints",
+    name: "Iron Saints",
+    focus: "A zealous militia protecting caravans and water wells.",
+  },
+];
+
+const CONTRACTS = [
+  {
+    id: "convoy-escort",
+    name: "Convoy Escort",
+    summary: "Protect a caravan crossing the Salt Flats.",
+    duration: 210,
+    requirements: { crew: 3, vehicles: 1 },
+    reward: { credits: 90, rations: 40, reputation: 4 },
+    faction: "iron-saints",
+    narrative: "The Iron Saints will owe you a favor if the cargo survives.",
+  },
+  {
+    id: "relic-recovery",
+    name: "Relic Recovery",
+    summary: "Dive into a collapsed vault and return with artifacts.",
+    duration: 260,
+    requirements: { gear: 1, crafting: true },
+    reward: { relics: 3, components: 35, reputation: 6 },
+    faction: "sundered-scribes",
+    narrative: "The Scribes pay well for anything that still hums.",
+  },
+  {
+    id: "viper-strike",
+    name: "Viper Strike",
+    summary: "Lead a hit-and-run raid against a rival gang.",
+    duration: 300,
+    requirements: { vehicles: 1, crew: 4 },
+    reward: { scrap: 140, fuel: 60, reputation: 5, influence: 1 },
+    faction: "dust-vipers",
+    narrative: "Survive the raid and the Vipers whisper your name with respect.",
+  },
 ];
 
 const initialState = {
@@ -259,8 +311,25 @@ const initialState = {
     buildings: 0,
     crafts: 0,
     trades: 0,
+    contracts: 0,
   },
   achievements: [],
+  character: {
+    name: "Nomad Captain",
+    grit: 1,
+    savvy: 1,
+    tactics: 1,
+    skillPoints: 2,
+  },
+  factionReputation: {
+    "dust-vipers": 0,
+    "sundered-scribes": 0,
+    "iron-saints": 0,
+  },
+  storyLog: [
+    "You arrive at the Rustline with a battered crew and a promise to build something lasting.",
+  ],
+  activeContracts: [],
   lastTick: Date.now(),
 };
 
@@ -338,6 +407,7 @@ const App = () => {
         next.activeBuilds = updateTimers(prev.activeBuilds);
         next.activeCrafts = updateTimers(prev.activeCrafts);
         next.activeExpeditions = updateTimers(prev.activeExpeditions);
+        next.activeContracts = updateTimers(prev.activeContracts);
 
         const completedBuilds = next.activeBuilds.filter((item) => item.remaining <= 0);
         if (completedBuilds.length) {
@@ -372,6 +442,20 @@ const App = () => {
             next.stats.expeditions += 1;
           });
           next.activeExpeditions = next.activeExpeditions.filter((item) => item.remaining > 0);
+        }
+
+        const completedContracts = next.activeContracts.filter((item) => item.remaining <= 0);
+        if (completedContracts.length) {
+          completedContracts.forEach((contract) => {
+            next = applyResourceDelta(next, contract.rewards);
+            next.stats.contracts += 1;
+            next.factionReputation[contract.faction] += contract.reputation;
+            next.storyLog = [
+              `${contract.name} completed — ${contract.summary}`,
+              ...next.storyLog,
+            ].slice(0, 8);
+          });
+          next.activeContracts = next.activeContracts.filter((item) => item.remaining > 0);
         }
 
         const newAchievements = ACHIEVEMENTS.filter(
@@ -509,6 +593,50 @@ const App = () => {
     }));
   }, [state.buildings]);
 
+  const crewCap = 3 + (state.buildings.habitat || 0) * 2;
+  const ownedVehicles = state.vehicles.length;
+
+  const canTakeContract = (contract) => {
+    if (contract.requirements.crew && crewCap < contract.requirements.crew) return false;
+    if (contract.requirements.vehicles && ownedVehicles < contract.requirements.vehicles) return false;
+    if (contract.requirements.gear && state.equipment.length < contract.requirements.gear) return false;
+    if (contract.requirements.crafting && !state.unlocked.crafting) return false;
+    return true;
+  };
+
+  const startContract = (contract) => {
+    if (!canTakeContract(contract)) return;
+    setState((prev) => ({
+      ...prev,
+      activeContracts: [
+        ...prev.activeContracts,
+        {
+          id: contract.id,
+          name: contract.name,
+          summary: contract.summary,
+          endTime: Date.now() + contract.duration * 1000,
+          duration: contract.duration,
+          remaining: contract.duration * 1000,
+          rewards: contract.reward,
+          reputation: contract.reward.reputation || 0,
+          faction: contract.faction,
+        },
+      ],
+    }));
+  };
+
+  const spendSkillPoint = (stat) => {
+    if (state.character.skillPoints <= 0) return;
+    setState((prev) => ({
+      ...prev,
+      character: {
+        ...prev.character,
+        [stat]: prev.character[stat] + 1,
+        skillPoints: prev.character.skillPoints - 1,
+      },
+    }));
+  };
+
   const renderTag = (text) => h("span", { className: "tag" }, text);
 
   return h(
@@ -620,18 +748,101 @@ const App = () => {
               h(
                 "div",
                 { className: "card" },
-                h("h3", null, "Active Operations"),
+                h("h3", null, "Wasteland Operations"),
                 h(
                   "p",
                   null,
-                  "Real-time timers keep expeditions, crafting queues, and base construction moving even when idle. Stack multiple timers to orchestrate a thriving wasteland empire."
+                  "Play like a wasteland RPG: accept contracts, grow faction ties, and invest skill points into your captain while your base powers the long game."
                 ),
                 h(
                   "div",
                   { className: "taglist" },
-                  renderTag(`Build Queue: ${state.activeBuilds.length}`),
-                  renderTag(`Craft Queue: ${state.activeCrafts.length}`),
-                  renderTag(`Expeditions: ${state.activeExpeditions.length}`)
+                  renderTag(`Contracts: ${state.activeContracts.length}`),
+                  renderTag(`Faction Standing: ${Object.values(state.factionReputation).reduce((a, b) => a + b, 0)}`),
+                  renderTag(`Skill Points: ${state.character.skillPoints}`)
+                )
+              )
+            )
+          : null,
+        section === "rpg"
+          ? h(
+              "div",
+              { className: "grid" },
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Captain Profile"),
+                h("p", null, `${state.character.name}`),
+                h(
+                  "div",
+                  { className: "taglist" },
+                  renderTag(`Grit: ${state.character.grit}`),
+                  renderTag(`Savvy: ${state.character.savvy}`),
+                  renderTag(`Tactics: ${state.character.tactics}`)
+                ),
+                h(
+                  "p",
+                  null,
+                  `Skill points available: ${state.character.skillPoints}`
+                ),
+                h(
+                  "div",
+                  { className: "action" },
+                  h(
+                    "button",
+                    {
+                      className: "secondary",
+                      onClick: () => spendSkillPoint("grit"),
+                      disabled: state.character.skillPoints <= 0,
+                    },
+                    "Boost Grit"
+                  ),
+                  h(
+                    "button",
+                    {
+                      className: "secondary",
+                      onClick: () => spendSkillPoint("savvy"),
+                      disabled: state.character.skillPoints <= 0,
+                    },
+                    "Boost Savvy"
+                  ),
+                  h(
+                    "button",
+                    {
+                      className: "secondary",
+                      onClick: () => spendSkillPoint("tactics"),
+                      disabled: state.character.skillPoints <= 0,
+                    },
+                    "Boost Tactics"
+                  )
+                )
+              ),
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Faction Ties"),
+                h(
+                  "ul",
+                  null,
+                  FACTIONS.map((faction) =>
+                    h(
+                      "li",
+                      { key: faction.id },
+                      `${faction.name}: ${state.factionReputation[faction.id]} — ${faction.focus}`
+                    )
+                  )
+                )
+              ),
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Story Log"),
+                h(
+                  "ul",
+                  null,
+                  state.storyLog.map((entry, index) =>
+                    h("li", { key: `${entry}-${index}` }, entry)
+                  )
                 )
               )
             )
@@ -918,6 +1129,55 @@ const App = () => {
               )
             )
           : null,
+        section === "rpg"
+          ? h(
+              "div",
+              { className: "grid" },
+              CONTRACTS.map((contract) =>
+                h(
+                  "div",
+                  { key: contract.id, className: "card" },
+                  h(
+                    "div",
+                    { className: "section-header" },
+                    h("h3", null, contract.name),
+                    h(
+                      "span",
+                      { className: "pill" },
+                      FACTIONS.find((f) => f.id === contract.faction)?.name || "Faction"
+                    )
+                  ),
+                  h("p", null, contract.summary),
+                  h("p", null, contract.narrative),
+                  h(
+                    "p",
+                    null,
+                    `Requires: ${contract.requirements.crew ? `${contract.requirements.crew} crew` : "crew"}${contract.requirements.vehicles ? `, ${contract.requirements.vehicles} vehicle` : ""}${contract.requirements.gear ? `, ${contract.requirements.gear} gear` : ""}${contract.requirements.crafting ? ", workshop" : ""}`
+                  ),
+                  h(
+                    "p",
+                    null,
+                    `Rewards: ${Object.entries(contract.reward)
+                      .map(([key, value]) => `${value} ${key}`)
+                      .join(", ")}`
+                  ),
+                  h(
+                    "div",
+                    { className: "action" },
+                    h(
+                      "button",
+                      {
+                        className: "primary",
+                        onClick: () => startContract(contract),
+                        disabled: !canTakeContract(contract),
+                      },
+                      `Accept (${contract.duration}s)`
+                    )
+                  )
+                )
+              )
+            )
+          : null,
         h(
           "div",
           { className: "card" },
@@ -977,9 +1237,25 @@ const App = () => {
                 )
               )
             ),
+            state.activeContracts.map((contract) =>
+              h(
+                "div",
+                { key: contract.endTime, className: "card" },
+                h("h3", null, contract.name),
+                h("div", { className: "timer" }, formatTime(contract.remaining / 1000)),
+                h(
+                  "div",
+                  { className: "progress" },
+                  h("span", {
+                    style: { width: `${calculateProgress(contract.endTime, contract.duration)}%` },
+                  })
+                )
+              )
+            ),
             !state.activeBuilds.length &&
             !state.activeCrafts.length &&
-            !state.activeExpeditions.length
+            !state.activeExpeditions.length &&
+            !state.activeContracts.length
               ? h("p", null, "No active timers yet.")
               : null
           )
