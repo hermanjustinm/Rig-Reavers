@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wasteland Reclaimer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand__title">Wasteland Reclaimer</div>
+          <div class="brand__subtitle">Persistent Survival PBBG</div>
+        </div>
+        <nav class="nav">
+          <button class="nav__item nav__item--active" data-section="overview">Overview</button>
+          <button class="nav__item" data-section="scavenge">Scavenge</button>
+          <button class="nav__item" data-section="base">Base</button>
+          <button class="nav__item" data-section="training">Training</button>
+          <button class="nav__item" data-section="expeditions">Expeditions</button>
+          <button class="nav__item" data-section="crafting">Crafting</button>
+          <button class="nav__item" data-section="trading">Trading</button>
+          <button class="nav__item" data-section="achievements">Achievements</button>
+        </nav>
+        <div class="sidebar__footer">
+          <button class="ghost" id="saveGame">Save Game</button>
+          <button class="ghost" id="resetGame">Reset</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="status">
+          <div class="status__item">
+            <span class="label">Energy</span>
+            <div class="meter">
+              <div class="meter__fill" id="energyFill"></div>
+            </div>
+            <span class="value" id="energyValue"></span>
+          </div>
+          <div class="status__item">
+            <span class="label">Health</span>
+            <div class="meter">
+              <div class="meter__fill" id="healthFill"></div>
+            </div>
+            <span class="value" id="healthValue"></span>
+          </div>
+          <div class="status__item">
+            <span class="label">Reputation</span>
+            <span class="value" id="repValue"></span>
+          </div>
+          <div class="status__item">
+            <span class="label">Day</span>
+            <span class="value" id="dayValue"></span>
+          </div>
+        </header>
+
+        <section class="panel active" id="overview">
+          <div class="panel__grid">
+            <div class="card">
+              <h2>Scavenger Log</h2>
+              <p>
+                Your crew starts as a single scavenger in a ruined world. Survive by harvesting scrap, water, and
+                rations. Build your camp into a wasteland empire step by step.
+              </p>
+              <div class="card__actions">
+                <button class="primary" data-section-target="scavenge">Start Scavenging</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Resources</h2>
+              <ul class="resource-list" id="resourceList"></ul>
+            </div>
+            <div class="card">
+              <h2>Next Milestones</h2>
+              <ul class="milestone-list" id="milestoneList"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="scavenge">
+          <div class="panel__grid">
+            <div class="card">
+              <h2>Scavenge the Ruins</h2>
+              <p>Spend energy to search derelict zones. Returns are modest early but scale with facilities.</p>
+              <div class="scavenge">
+                <div>
+                  <div class="scavenge__timer" id="scavengeTimer">Ready</div>
+                  <div class="scavenge__details" id="scavengeDetails"></div>
+                </div>
+                <button class="primary" id="scavengeButton">Start Scavenge</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Daily Supplies</h2>
+              <p>Maintain food and water stocks to recover health and unlock stronger expeditions later.</p>
+              <div class="supply-grid">
+                <div>
+                  <span class="label">Rations</span>
+                  <span class="value" id="rationValue"></span>
+                </div>
+                <div>
+                  <span class="label">Clean Water</span>
+                  <span class="value" id="waterValue"></span>
+                </div>
+                <div>
+                  <span class="label">Scrap</span>
+                  <span class="value" id="scrapValue"></span>
+                </div>
+                <div>
+                  <span class="label">Credits</span>
+                  <span class="value" id="creditValue"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="base">
+          <div class="card">
+            <h2>Base Facilities</h2>
+            <p>Every facility unlocks new systems. Start with the basics before expanding your operation.</p>
+            <div class="facility-list" id="facilityList"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="training">
+          <div class="panel__grid">
+            <div class="card">
+              <h2>Stat Training</h2>
+              <p>Use energy to train core stats. Higher stats improve scavenging efficiency over time.</p>
+              <div class="training-list" id="trainingList"></div>
+            </div>
+            <div class="card">
+              <h2>Current Stats</h2>
+              <ul class="resource-list" id="statList"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="expeditions">
+          <div class="card">
+            <h2>Expeditions</h2>
+            <div class="locked" id="expeditionLock"></div>
+            <div class="expedition-list" id="expeditionList"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="crafting">
+          <div class="card">
+            <h2>Workshop</h2>
+            <div class="locked" id="craftingLock"></div>
+            <div class="crafting-list" id="craftingList"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="trading">
+          <div class="card">
+            <h2>Trading Post</h2>
+            <div class="locked" id="tradingLock"></div>
+            <div class="trading-list" id="tradingList"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="achievements">
+          <div class="card">
+            <h2>Achievements</h2>
+            <p>Track long-term progress and unlock reputation bonuses.</p>
+            <div class="achievement-list" id="achievementList"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
