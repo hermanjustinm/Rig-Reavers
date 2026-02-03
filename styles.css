@@ -131,6 +131,10 @@ body {
   background: linear-gradient(90deg, #f2c14e, #f06a26);
 }
 
+.bar.xp div {
+  background: linear-gradient(90deg, #58c2ff, #6f7bff);
+}
+
 .nav {
   display: grid;
   gap: 10px;
@@ -155,7 +159,6 @@ body {
 }
 
 .live-ops {
-  margin-top: auto;
   background: var(--panel-light);
   padding: 16px;
   border-radius: 14px;

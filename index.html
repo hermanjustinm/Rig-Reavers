@@ -23,7 +23,7 @@
       <section class="profile">
         <div>
           <h2>Rookie Scavenger</h2>
-          <p class="muted">Level 1 · District 12 Fringe</p>
+          <p class="muted">Level <span data-level>1</span> · District 12 Fringe</p>
         </div>
         <div class="profile-stats">
           <div class="stat-row">
@@ -41,6 +41,15 @@
               <strong data-stat-value="energy">0 / 0</strong>
             </div>
             <div class="bar energy" data-bar="energy">
+              <div></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span>XP Level</span>
+              <strong data-stat-value="xp">0 / 0</strong>
+            </div>
+            <div class="bar xp" data-bar="xp">
               <div></div>
             </div>
           </div>
@@ -105,7 +114,7 @@
         <header class="page-header">
           <div>
             <h2>Scavenging</h2>
-            <p>Manual scavenging uses energy and pays out instantly. More zones unlock with higher stats.</p>
+            <p>Manual scavenging uses energy and takes a short time. More zones unlock with higher stats.</p>
           </div>
         </header>
         <div class="grid">
@@ -114,9 +123,10 @@
               <h3>Quick Scavenge</h3>
               <span class="badge">Low Risk</span>
             </header>
-            <p>Search nearby debris for small salvage. Instant payout.</p>
+            <p>Search nearby debris for small salvage. Takes 30 seconds.</p>
             <div class="meta">
               <span>Cost: 5 Energy</span>
+              <span data-scavenge-status>Ready</span>
               <span>Rewards: Scrap, Food, Credits</span>
             </div>
             <button data-action="scavenge" data-cost-energy="5">Search Ruins</button>

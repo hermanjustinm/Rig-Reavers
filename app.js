@@ -11,12 +11,17 @@ const statDisplayEls = document.querySelectorAll("[data-stat-display]");
 const combatEls = document.querySelectorAll("[data-combat]");
 const activityLog = document.querySelector("#activity-log");
 const expeditionStatusEls = document.querySelectorAll("[data-expedition-status]");
+const levelEl = document.querySelector("[data-level]");
+const scavengeStatusEl = document.querySelector("[data-scavenge-status]");
 
 const state = {
   health: 40,
   maxHealth: 40,
   energy: 25,
   maxEnergy: 25,
+  level: 1,
+  xp: 0,
+  nextLevelXp: 100,
   resources: {
     scrap: 0,
     fuel: 0,
@@ -48,6 +53,10 @@ const state = {
       endsAt: 0,
     },
   },
+  scavenge: {
+    inProgress: false,
+    endsAt: 0,
+  },
   warRigBuilt: false,
 };
 
@@ -74,14 +83,17 @@ const updateBars = () => {
   const healthBar = document.querySelector("[data-bar='health'] div");
   const energyBar = document.querySelector("[data-bar='energy'] div");
   const storageBar = document.querySelector("[data-bar='storage'] div");
+  const xpBar = document.querySelector("[data-bar='xp'] div");
 
   const healthPct = (state.health / state.maxHealth) * 100;
   const energyPct = (state.energy / state.maxEnergy) * 100;
   const storagePct = (getStorageUsed() / state.storageCap) * 100;
+  const xpPct = (state.xp / state.nextLevelXp) * 100;
 
   healthBar.style.width = `${healthPct}%`;
   energyBar.style.width = `${energyPct}%`;
   storageBar.style.width = `${storagePct}%`;
+  xpBar.style.width = `${xpPct}%`;
 };
 
 const updateStats = () => {
@@ -92,7 +104,14 @@ const updateStats = () => {
     if (el.dataset.statValue === "energy") {
       el.textContent = `${state.energy} / ${state.maxEnergy}`;
     }
+    if (el.dataset.statValue === "xp") {
+      el.textContent = `${state.xp} / ${state.nextLevelXp}`;
+    }
   });
+
+  if (levelEl) {
+    levelEl.textContent = state.level;
+  }
 
   statTrainingEls.forEach((el) => {
     const key = el.dataset.trainStat;
@@ -201,15 +220,14 @@ const spendResource = (key, amount) => {
 };
 
 const doScavenge = () => {
+  if (state.scavenge.inProgress) {
+    addLog("Already scavenging. Wait for the timer to finish.");
+    return;
+  }
   spendEnergy(5);
-  const scrap = addResource("scrap", Math.floor(Math.random() * 3) + 1);
-  const food = addResource("food", Math.random() > 0.6 ? 1 : 0);
-  const credits = addResource("credits", Math.random() > 0.5 ? 1 : 0);
-  addLog(
-    `Scavenged nearby ruins: +${scrap} scrap${food ? `, +${food} food` : ""}${
-      credits ? `, +${credits} credits` : ""
-    }.`
-  );
+  state.scavenge.inProgress = true;
+  state.scavenge.endsAt = Date.now() + 30000;
+  addLog("Scavenging the nearby ruins. Stand by (30s).");
 };
 
 const doRest = () => {
@@ -309,6 +327,37 @@ const doExpedition = (key, durationSeconds) => {
   addLog("Crew dispatched. Exploration underway.");
 };
 
+const updateScavengeStatus = () => {
+  const button = document.querySelector("[data-action='scavenge']");
+  if (!scavengeStatusEl || !button) return;
+  if (!state.scavenge.inProgress) {
+    scavengeStatusEl.textContent = "Ready";
+    button.disabled = state.energy < 5;
+    button.textContent = "Search Ruins";
+    return;
+  }
+  const remaining = state.scavenge.endsAt - Date.now();
+  if (remaining <= 0) {
+    state.scavenge.inProgress = false;
+    const scrap = addResource("scrap", Math.floor(Math.random() * 3) + 1);
+    const food = addResource("food", Math.random() > 0.6 ? 1 : 0);
+    const credits = addResource("credits", Math.random() > 0.5 ? 1 : 0);
+    addLog(
+      `Scavenged nearby ruins: +${scrap} scrap${food ? `, +${food} food` : ""}${
+        credits ? `, +${credits} credits` : ""
+      }.`
+    );
+    scavengeStatusEl.textContent = "Ready";
+    button.disabled = state.energy < 5;
+    button.textContent = "Search Ruins";
+    return;
+  }
+  const seconds = Math.max(Math.ceil(remaining / 1000), 0);
+  scavengeStatusEl.textContent = `00:${String(seconds).padStart(2, "0")}`;
+  button.disabled = true;
+  button.textContent = "Searching...";
+};
+
 const doBuildShelter = () => {
   if (state.facilities.shelter) return;
   spendResource("scrap", 20);
@@ -349,6 +398,7 @@ const updateUI = () => {
   updateFacilities();
   updateBars();
   updateButtons();
+  updateScavengeStatus();
   updateExpeditionStatus();
 };
 
@@ -373,3 +423,4 @@ addLog("You wake up in the slums with nothing but a busted rig.");
 updateUI();
 startEnergyRegen();
 setInterval(updateExpeditionStatus, 1000);
+setInterval(updateScavengeStatus, 500);
