@@ -37,11 +37,19 @@ const state = {
     inProgress: false,
     endsAt: 0,
     key: null,
+    duration: 0,
   },
   work: {
     inProgress: false,
     endsAt: 0,
     key: null,
+    duration: 0,
+  },
+  scavenging: {
+    inProgress: false,
+    endsAt: 0,
+    key: null,
+    duration: 0,
   },
   training: {
     inProgress: false,
@@ -55,6 +63,7 @@ const state = {
     firstExploration: false,
     reachRep10: false,
   },
+  activityLog: [],
 };
 
 const baseCosts = {
@@ -164,8 +173,9 @@ const manualScavengeAreas = [
   {
     key: "scrap-alley",
     label: "Scrap Alley",
-    cost: 12,
+    cost: 5,
     multiplier: 1,
+    duration: 40,
     requirement: "Always available.",
   },
   {
@@ -173,6 +183,7 @@ const manualScavengeAreas = [
     label: "Sunken Rail Yard",
     cost: 18,
     multiplier: 1.4,
+    duration: 70,
     requirement: "Unlocks at Strength 3.",
     unlock: () => state.stats.strength >= 3,
   },
@@ -181,6 +192,7 @@ const manualScavengeAreas = [
     label: "Market Bonefields",
     cost: 22,
     multiplier: 1.7,
+    duration: 90,
     requirement: "Unlocks at Awareness 3.",
     unlock: () => state.stats.awareness >= 3,
   },
@@ -189,6 +201,7 @@ const manualScavengeAreas = [
     label: "Overpass Gutters",
     cost: 26,
     multiplier: 2.1,
+    duration: 120,
     requirement: "Unlocks at Defense 4.",
     unlock: () => state.stats.defense >= 4,
   },
@@ -278,6 +291,10 @@ const manualScavengeList = document.getElementById("manualScavengeList");
 const workList = document.getElementById("workList");
 const workStatus = document.getElementById("workStatus");
 const workButton = document.getElementById("workButton");
+const scavengeProgressFill = document.getElementById("scavengeProgressFill");
+const scavengeProgressValue = document.getElementById("scavengeProgressValue");
+const workProgressFill = document.getElementById("workProgressFill");
+const workProgressValue = document.getElementById("workProgressValue");
 
 const rationValue = document.getElementById("rationValue");
 const waterValue = document.getElementById("waterValue");
@@ -295,6 +312,7 @@ const craftingContainer = document.getElementById("craftingList");
 const tradingLock = document.getElementById("tradingLock");
 const tradingContainer = document.getElementById("tradingList");
 const achievementList = document.getElementById("achievementList");
+const activityLog = document.getElementById("activityLog");
 
 const saveButton = document.getElementById("saveGame");
 const resetButton = document.getElementById("resetGame");
@@ -332,6 +350,29 @@ const updateResources = () => {
   waterValue.textContent = formatNumber(state.resources.water);
   scrapValue.textContent = formatNumber(state.resources.scrap);
   creditValue.textContent = formatNumber(state.resources.credits);
+};
+
+const addLogEntry = (message) => {
+  state.activityLog = state.activityLog || [];
+  state.activityLog.unshift({ message, timestamp: Date.now() });
+  state.activityLog = state.activityLog.slice(0, 6);
+  updateActivityLog();
+};
+
+const updateActivityLog = () => {
+  if (!activityLog) {
+    return;
+  }
+  if (!state.activityLog || state.activityLog.length === 0) {
+    activityLog.innerHTML = `<div class="activity-log__entry">No activity yet.</div>`;
+    return;
+  }
+  activityLog.innerHTML = state.activityLog
+    .map((entry) => {
+      const time = new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return `<div class="activity-log__entry">${time} · ${entry.message}</div>`;
+    })
+    .join("");
 };
 
 const updateMilestones = () => {
@@ -544,14 +585,16 @@ const updateManualScavenge = () => {
     .map((area) => {
       const unlocked = area.unlock ? area.unlock() : true;
       const canAffordEnergy = state.energy >= area.cost;
+      const isActive = state.scavenging.inProgress && state.scavenging.key === area.key;
       return `
       <div class="manual-scavenge__item">
         <div>
           <strong>${area.label}</strong>
-          <div class="muted">Cost: ${area.cost} energy · ${area.requirement}</div>
+          <div class="muted">Cost: ${area.cost} energy · Duration: ${area.duration}s</div>
+          <div class="muted">${area.requirement}</div>
         </div>
-        <button class="primary" ${unlocked && canAffordEnergy ? "" : "disabled"}>
-          ${unlocked ? "Scavenge" : "Locked"}
+        <button class="primary" ${unlocked && canAffordEnergy && !state.scavenging.inProgress ? "" : "disabled"}>
+          ${isActive ? "Scavenging..." : unlocked ? "Start" : "Locked"}
         </button>
       </div>
     `;
@@ -560,7 +603,7 @@ const updateManualScavenge = () => {
 
   manualScavengeList.querySelectorAll(".manual-scavenge__item").forEach((item, index) => {
     const button = item.querySelector("button");
-    button.addEventListener("click", () => runManualScavenge(manualScavengeAreas[index]));
+    button.addEventListener("click", () => startScavenge(manualScavengeAreas[index]));
   });
 };
 
@@ -591,12 +634,17 @@ const updateWork = () => {
     workStatus.textContent = `Working: ${remaining}s remaining.`;
     workButton.disabled = true;
     workButton.textContent = "Contract Active";
+    const progress = 1 - remaining / state.work.duration;
+    workProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
+    workProgressValue.textContent = `${remaining}s remaining`;
   } else {
     workStatus.textContent = state.work.key
       ? `Ready to start: ${workContracts.find((c) => c.key === state.work.key).label}.`
       : "Select a contract to begin.";
     workButton.disabled = !state.work.key;
     workButton.textContent = "Start Contract";
+    workProgressFill.style.width = "0%";
+    workProgressValue.textContent = "Idle";
   }
 };
 
@@ -625,12 +673,26 @@ const updateAchievements = () => {
     .join("");
 };
 
-const runManualScavenge = (area) => {
+const startScavenge = (area) => {
   const unlocked = area.unlock ? area.unlock() : true;
-  if (!unlocked || state.energy < area.cost) {
+  if (!unlocked || state.energy < area.cost || state.scavenging.inProgress) {
     return;
   }
   state.energy -= area.cost;
+  state.scavenging.inProgress = true;
+  state.scavenging.key = area.key;
+  state.scavenging.duration = area.duration;
+  state.scavenging.endsAt = Date.now() + area.duration * 1000;
+  addLogEntry(`Started scavenging ${area.label}.`);
+  updateUI();
+};
+
+const finishScavenge = () => {
+  const area = manualScavengeAreas.find((item) => item.key === state.scavenging.key);
+  if (!area) {
+    state.scavenging.inProgress = false;
+    return;
+  }
   const loot = scavengingLoot(area.multiplier);
   Object.keys(loot).forEach((key) => {
     state.resources[key] += loot[key];
@@ -641,6 +703,10 @@ const runManualScavenge = (area) => {
   if (state.reputation >= 10) {
     state.achievements.reachRep10 = true;
   }
+  addLogEntry(`Scavenge complete: +${loot.scrap} scrap.`);
+  state.scavenging.inProgress = false;
+  state.scavenging.key = null;
+  state.scavenging.duration = 0;
   updateUI();
 };
 
@@ -662,6 +728,8 @@ const startWorkContract = () => {
   }
   state.work.inProgress = true;
   state.work.endsAt = Date.now() + contract.duration * 1000;
+  state.work.duration = contract.duration;
+  addLogEntry(`Started work: ${contract.label}.`);
   updateUI();
 };
 
@@ -674,7 +742,9 @@ const finishWorkContract = () => {
   state.resources.credits += contract.reward.credits;
   state.reputation += contract.reward.reputation;
   addXp(contract.reward.xp);
+  addLogEntry(`Work complete: +${contract.reward.credits} credits.`);
   state.work.inProgress = false;
+  state.work.duration = 0;
   updateUI();
 };
 
@@ -685,6 +755,8 @@ const startExploration = (expedition) => {
   state.exploration.inProgress = true;
   state.exploration.key = expedition.key;
   state.exploration.endsAt = Date.now() + expedition.duration * 1000;
+  state.exploration.duration = expedition.duration;
+  addLogEntry(`Exploration started: ${expedition.label}.`);
   updateUI();
 };
 
@@ -701,7 +773,9 @@ const finishExploration = () => {
   state.reputation += 2;
   addXp(20);
   state.achievements.firstExploration = true;
+  addLogEntry(`Exploration complete: +${loot.scrap} scrap.`);
   state.exploration.inProgress = false;
+  state.exploration.duration = 0;
   updateUI();
 };
 
@@ -713,6 +787,7 @@ const startTraining = (key, cost, duration) => {
   state.training.inProgress = true;
   state.training.statKey = key;
   state.training.endsAt = Date.now() + duration * 1000;
+  addLogEntry(`Training started: ${key}.`);
   updateUI();
 };
 
@@ -724,10 +799,14 @@ const finishTraining = () => {
   state.training.inProgress = false;
   state.training.statKey = null;
   state.achievements.trainOnce = true;
+  addLogEntry(`Training complete: ${key} +1.`);
   updateUI();
 };
 
 const updateTimers = () => {
+  if (state.scavenging.inProgress && Date.now() >= state.scavenging.endsAt) {
+    finishScavenge();
+  }
   if (state.exploration.inProgress && Date.now() >= state.exploration.endsAt) {
     finishExploration();
   }
@@ -745,9 +824,9 @@ const passiveTick = () => {
     state.resources.water += 1;
   }
   if (state.resources.rations > 0 && state.resources.water > 0) {
-    state.health = Math.min(state.maxHealth, state.health + 0.5);
-    state.resources.rations -= 0.2;
-    state.resources.water -= 0.2;
+    state.health = Math.min(state.maxHealth, state.health + 0.25);
+    state.resources.rations -= 0.15;
+    state.resources.water -= 0.15;
   }
   if (state.health < 30) {
     state.reputation = Math.max(0, state.reputation - 0.2);
@@ -765,6 +844,7 @@ const updateUI = () => {
   updateManualScavenge();
   updateWork();
   updateExplorationButtons();
+  updateActivityLog();
   updateAchievements();
   if (state.reputation >= 10) {
     state.achievements.reachRep10 = true;
@@ -791,6 +871,7 @@ const loadGame = () => {
   }
   const parsed = JSON.parse(saved);
   Object.assign(state, parsed);
+  state.activityLog = state.activityLog || [];
 };
 
 const resetGame = () => {
@@ -819,6 +900,15 @@ setInterval(() => {
   updateLockedSections();
   updateWork();
   updateExplorationButtons();
+  if (state.scavenging.inProgress) {
+    const remaining = Math.max(0, Math.ceil((state.scavenging.endsAt - Date.now()) / 1000));
+    const progress = 1 - remaining / state.scavenging.duration;
+    scavengeProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
+    scavengeProgressValue.textContent = `${remaining}s remaining`;
+  } else {
+    scavengeProgressFill.style.width = "0%";
+    scavengeProgressValue.textContent = "Idle";
+  }
 }, 1000);
 
 setInterval(() => {
