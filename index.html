@@ -13,24 +13,7 @@
           <div class="brand__title">Wasteland Reclaimer</div>
           <div class="brand__subtitle">Persistent Survival PBBG</div>
         </div>
-        <nav class="nav">
-          <button class="nav__item nav__item--active" data-section="overview">Overview</button>
-          <button class="nav__item" data-section="scavenge">Scavenge</button>
-          <button class="nav__item" data-section="base">Base</button>
-          <button class="nav__item" data-section="training">Training</button>
-          <button class="nav__item" data-section="expeditions">Expeditions</button>
-          <button class="nav__item" data-section="crafting">Crafting</button>
-          <button class="nav__item" data-section="trading">Trading</button>
-          <button class="nav__item" data-section="achievements">Achievements</button>
-        </nav>
-        <div class="sidebar__footer">
-          <button class="ghost" id="saveGame">Save Game</button>
-          <button class="ghost" id="resetGame">Reset</button>
-        </div>
-      </aside>
-
-      <main class="main">
-        <header class="status">
+        <div class="sidebar__status">
           <div class="status__item">
             <span class="label">Energy</span>
             <div class="meter">
@@ -46,12 +29,47 @@
             <span class="value" id="healthValue"></span>
           </div>
           <div class="status__item">
+            <span class="label">EXP</span>
+            <div class="meter">
+              <div class="meter__fill" id="xpFill"></div>
+            </div>
+            <span class="value" id="xpValue"></span>
+          </div>
+        </div>
+        <nav class="nav">
+          <button class="nav__item nav__item--active" data-section="overview">Overview</button>
+          <button class="nav__item" data-section="scavenge">Scavenge</button>
+          <button class="nav__item" data-section="work">Work</button>
+          <button class="nav__item" data-section="base">Base</button>
+          <button class="nav__item" data-section="training">Training</button>
+          <button class="nav__item" data-section="expeditions">Explorations</button>
+          <button class="nav__item" data-section="crafting">Crafting</button>
+          <button class="nav__item" data-section="trading">Trading</button>
+          <button class="nav__item" data-section="achievements">Achievements</button>
+        </nav>
+        <div class="sidebar__footer">
+          <button class="ghost" id="saveGame">Save Game</button>
+          <button class="ghost" id="resetGame">Reset</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="status">
+          <div class="status__item">
             <span class="label">Reputation</span>
             <span class="value" id="repValue"></span>
           </div>
           <div class="status__item">
             <span class="label">Day</span>
             <span class="value" id="dayValue"></span>
+          </div>
+          <div class="status__item">
+            <span class="label">Crew</span>
+            <span class="value" id="crewValue"></span>
+          </div>
+          <div class="status__item">
+            <span class="label">Threat</span>
+            <span class="value" id="threatValue"></span>
           </div>
         </header>
 
@@ -81,15 +99,9 @@
         <section class="panel" id="scavenge">
           <div class="panel__grid">
             <div class="card">
-              <h2>Scavenge the Ruins</h2>
-              <p>Spend energy to search derelict zones. Returns are modest early but scale with facilities.</p>
-              <div class="scavenge">
-                <div>
-                  <div class="scavenge__timer" id="scavengeTimer">Ready</div>
-                  <div class="scavenge__details" id="scavengeDetails"></div>
-                </div>
-                <button class="primary" id="scavengeButton">Start Scavenge</button>
-              </div>
+              <h2>Manual Scavenge</h2>
+              <p>Spend energy for instant haul runs. New locations unlock as your stats improve.</p>
+              <div class="manual-scavenge" id="manualScavengeList"></div>
             </div>
             <div class="card">
               <h2>Daily Supplies</h2>
@@ -112,6 +124,21 @@
                   <span class="value" id="creditValue"></span>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="work">
+          <div class="panel__grid">
+            <div class="card">
+              <h2>Work Contracts</h2>
+              <p>Take basic jobs for credits and reputation. Work is time-based and stacks with idle play.</p>
+              <div class="work-list" id="workList"></div>
+            </div>
+            <div class="card">
+              <h2>Shift Status</h2>
+              <p id="workStatus">No contract active.</p>
+              <button class="primary" id="workButton">Start Contract</button>
             </div>
           </div>
         </section>
@@ -140,7 +167,7 @@
 
         <section class="panel" id="expeditions">
           <div class="card">
-            <h2>Expeditions</h2>
+            <h2>Timed Explorations</h2>
             <div class="locked" id="expeditionLock"></div>
             <div class="expedition-list" id="expeditionList"></div>
           </div>

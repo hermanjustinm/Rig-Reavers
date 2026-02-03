@@ -6,7 +6,12 @@ const state = {
   maxEnergy: 100,
   health: 85,
   maxHealth: 100,
+  xp: 0,
+  level: 1,
+  xpToNext: 100,
   reputation: 0,
+  crew: 1,
+  threat: 2,
   resources: {
     scrap: 40,
     rations: 20,
@@ -17,6 +22,7 @@ const state = {
     strength: 1,
     awareness: 1,
     resilience: 1,
+    defense: 1,
     tech: 0,
   },
   facilities: {
@@ -25,10 +31,17 @@ const state = {
     workshop: { level: 0, label: "Workshop" },
     outpost: { level: 0, label: "Outpost" },
     tradingPost: { level: 0, label: "Trading Post" },
+    warRig: { level: 0, label: "War Rig Garage" },
   },
-  scavenging: {
+  exploration: {
     inProgress: false,
     endsAt: 0,
+    key: null,
+  },
+  work: {
+    inProgress: false,
+    endsAt: 0,
+    key: null,
   },
   training: {
     inProgress: false,
@@ -39,6 +52,7 @@ const state = {
     firstRun: false,
     buildWaterStill: false,
     trainOnce: false,
+    firstExploration: false,
     reachRep10: false,
   },
 };
@@ -48,16 +62,17 @@ const baseCosts = {
   workshop: { scrap: 120, rations: 40, credits: 60 },
   outpost: { scrap: 180, water: 60, credits: 100 },
   tradingPost: { scrap: 220, rations: 80, credits: 140 },
+  warRig: { scrap: 320, rations: 120, water: 120, credits: 240 },
 };
 
-const scavengingLoot = () => {
+const scavengingLoot = (multiplier = 1) => {
   const strengthBonus = state.stats.strength * 0.12;
   const awarenessBonus = state.stats.awareness * 0.1;
   return {
-    scrap: Math.round(12 + Math.random() * (10 + strengthBonus * 10)),
-    rations: Math.round(5 + Math.random() * (4 + awarenessBonus * 5)),
-    water: Math.round(3 + Math.random() * (4 + awarenessBonus * 4)),
-    credits: Math.random() < 0.35 ? 2 + Math.floor(Math.random() * 4) : 0,
+    scrap: Math.round((12 + Math.random() * (10 + strengthBonus * 10)) * multiplier),
+    rations: Math.round((5 + Math.random() * (4 + awarenessBonus * 5)) * multiplier),
+    water: Math.round((3 + Math.random() * (4 + awarenessBonus * 4)) * multiplier),
+    credits: Math.random() < 0.35 ? Math.round((2 + Math.floor(Math.random() * 4)) * multiplier) : 0,
   };
 };
 
@@ -76,6 +91,11 @@ const trainingData = [
     key: "resilience",
     label: "Resilience",
     description: "Recover health faster and survive longer runs.",
+  },
+  {
+    key: "defense",
+    label: "Defense",
+    description: "Reduce damage from hazards and keep health stable.",
   },
 ];
 
@@ -104,6 +124,12 @@ const facilities = [
     description: "Trade with caravans for hard-to-find materials.",
     unlocks: "Unlocks trading and market events.",
   },
+  {
+    key: "warRig",
+    label: "War Rig Garage",
+    description: "Massive project that unlocks long-range exploration.",
+    unlocks: "Unlocks advanced timed explorations.",
+  },
 ];
 
 const achievements = [
@@ -123,22 +149,90 @@ const achievements = [
     description: "Complete a training session.",
   },
   {
+    key: "firstExploration",
+    label: "Into the Dust",
+    description: "Complete a timed exploration.",
+  },
+  {
     key: "reachRep10",
     label: "Known in the Dust",
     description: "Reach 10 reputation.",
   },
 ];
 
-const expeditionList = [
+const manualScavengeAreas = [
   {
-    label: "Collapsed Metro",
-    duration: 120,
-    reward: "Rare scrap and medical finds.",
+    key: "scrap-alley",
+    label: "Scrap Alley",
+    cost: 12,
+    multiplier: 1,
+    requirement: "Always available.",
   },
   {
-    label: "Radiated Mall",
-    duration: 300,
-    reward: "Chance at vehicle parts.",
+    key: "sunken-rail",
+    label: "Sunken Rail Yard",
+    cost: 18,
+    multiplier: 1.4,
+    requirement: "Unlocks at Strength 3.",
+    unlock: () => state.stats.strength >= 3,
+  },
+  {
+    key: "market-bonefields",
+    label: "Market Bonefields",
+    cost: 22,
+    multiplier: 1.7,
+    requirement: "Unlocks at Awareness 3.",
+    unlock: () => state.stats.awareness >= 3,
+  },
+  {
+    key: "overpass-gutters",
+    label: "Overpass Gutters",
+    cost: 26,
+    multiplier: 2.1,
+    requirement: "Unlocks at Defense 4.",
+    unlock: () => state.stats.defense >= 4,
+  },
+];
+
+const expeditionList = [
+  {
+    key: "service-tunnel",
+    label: "Service Tunnel Sweep",
+    duration: 90,
+    reward: "Steady scrap and rations.",
+    requirement: "Basic exploration available.",
+    unlock: () => true,
+  },
+  {
+    key: "stormfront-pass",
+    label: "Stormfront Pass",
+    duration: 240,
+    reward: "Higher credits and salvage.",
+    requirement: "Requires War Rig Garage.",
+    unlock: () => state.facilities.warRig.level > 0,
+  },
+  {
+    key: "dust-sea",
+    label: "Dust Sea Relay",
+    duration: 420,
+    reward: "Chance at rare components.",
+    requirement: "Requires War Rig Garage + Defense 5.",
+    unlock: () => state.facilities.warRig.level > 0 && state.stats.defense >= 5,
+  },
+];
+
+const workContracts = [
+  {
+    key: "courier",
+    label: "Courier Route",
+    duration: 120,
+    reward: { credits: 12, reputation: 1, xp: 15 },
+  },
+  {
+    key: "salvage-guard",
+    label: "Salvage Guard",
+    duration: 180,
+    reward: { credits: 18, reputation: 2, xp: 20 },
   },
 ];
 
@@ -169,16 +263,21 @@ const panels = document.querySelectorAll(".panel");
 
 const energyFill = document.getElementById("energyFill");
 const healthFill = document.getElementById("healthFill");
+const xpFill = document.getElementById("xpFill");
 const energyValue = document.getElementById("energyValue");
 const healthValue = document.getElementById("healthValue");
+const xpValue = document.getElementById("xpValue");
 const repValue = document.getElementById("repValue");
 const dayValue = document.getElementById("dayValue");
+const crewValue = document.getElementById("crewValue");
+const threatValue = document.getElementById("threatValue");
 
 const resourceList = document.getElementById("resourceList");
 const milestoneList = document.getElementById("milestoneList");
-const scavengeTimer = document.getElementById("scavengeTimer");
-const scavengeDetails = document.getElementById("scavengeDetails");
-const scavengeButton = document.getElementById("scavengeButton");
+const manualScavengeList = document.getElementById("manualScavengeList");
+const workList = document.getElementById("workList");
+const workStatus = document.getElementById("workStatus");
+const workButton = document.getElementById("workButton");
 
 const rationValue = document.getElementById("rationValue");
 const waterValue = document.getElementById("waterValue");
@@ -205,11 +304,15 @@ const formatNumber = (value) => Math.max(0, Math.floor(value));
 const updateStatus = () => {
   energyValue.textContent = `${formatNumber(state.energy)}/${state.maxEnergy}`;
   healthValue.textContent = `${formatNumber(state.health)}/${state.maxHealth}`;
+  xpValue.textContent = `${formatNumber(state.xp)}/${state.xpToNext} (Lv. ${state.level})`;
   repValue.textContent = formatNumber(state.reputation);
   dayValue.textContent = state.day;
+  crewValue.textContent = state.crew;
+  threatValue.textContent = state.threat;
 
   energyFill.style.width = `${(state.energy / state.maxEnergy) * 100}%`;
   healthFill.style.width = `${(state.health / state.maxHealth) * 100}%`;
+  xpFill.style.width = `${(state.xp / state.xpToNext) * 100}%`;
 };
 
 const updateResources = () => {
@@ -246,8 +349,12 @@ const updateMilestones = () => {
       done: state.facilities.workshop.level > 0,
     },
     {
-      label: "Establish the Outpost for expeditions.",
+      label: "Establish the Outpost for explorations.",
       done: state.facilities.outpost.level > 0,
+    },
+    {
+      label: "Start the War Rig Garage for long-range expeditions.",
+      done: state.facilities.warRig.level > 0,
     },
   ];
 
@@ -265,6 +372,19 @@ const spendResources = (cost) => {
   Object.entries(cost).forEach(([key, value]) => {
     state.resources[key] -= value;
   });
+};
+
+const addXp = (amount) => {
+  state.xp += amount;
+  while (state.xp >= state.xpToNext) {
+    state.xp -= state.xpToNext;
+    state.level += 1;
+    state.xpToNext = Math.round(state.xpToNext * 1.2);
+    state.maxEnergy += 5;
+    state.maxHealth += 3;
+    state.energy = Math.min(state.energy + 10, state.maxEnergy);
+    state.health = Math.min(state.health + 5, state.maxHealth);
+  }
 };
 
 const updateFacilities = () => {
@@ -352,21 +472,29 @@ const updateLockedSections = () => {
   expeditionLock.textContent =
     state.facilities.outpost.level > 0
       ? ""
-      : "Build the Outpost to unlock expeditions.";
+      : "Build the Outpost to unlock timed explorations.";
   expeditionContainer.innerHTML = state.facilities.outpost.level
     ? expeditionList
-        .map(
-          (expedition) => `
+        .map((expedition) => {
+          const unlocked = expedition.unlock();
+          const isActive = state.exploration.inProgress && state.exploration.key === expedition.key;
+          const remaining = isActive
+            ? Math.max(0, Math.ceil((state.exploration.endsAt - Date.now()) / 1000))
+            : null;
+          return `
       <div class="expedition-item">
         <div>
           <strong>${expedition.label}</strong>
           <div class="muted">Duration: ${expedition.duration}s</div>
           <div class="muted">Reward: ${expedition.reward}</div>
+          <div class="muted">${expedition.requirement}</div>
         </div>
-        <button class="primary" disabled>Locked</button>
+        <button class="primary" ${unlocked && !state.exploration.inProgress ? "" : "disabled"}>
+          ${isActive ? `${remaining}s` : unlocked ? "Start" : "Locked"}
+        </button>
       </div>
-    `
-        )
+    `;
+        })
         .join("")
     : "";
 
@@ -411,6 +539,75 @@ const updateLockedSections = () => {
     : "";
 };
 
+const updateManualScavenge = () => {
+  manualScavengeList.innerHTML = manualScavengeAreas
+    .map((area) => {
+      const unlocked = area.unlock ? area.unlock() : true;
+      const canAffordEnergy = state.energy >= area.cost;
+      return `
+      <div class="manual-scavenge__item">
+        <div>
+          <strong>${area.label}</strong>
+          <div class="muted">Cost: ${area.cost} energy · ${area.requirement}</div>
+        </div>
+        <button class="primary" ${unlocked && canAffordEnergy ? "" : "disabled"}>
+          ${unlocked ? "Scavenge" : "Locked"}
+        </button>
+      </div>
+    `;
+    })
+    .join("");
+
+  manualScavengeList.querySelectorAll(".manual-scavenge__item").forEach((item, index) => {
+    const button = item.querySelector("button");
+    button.addEventListener("click", () => runManualScavenge(manualScavengeAreas[index]));
+  });
+};
+
+const updateWork = () => {
+  workList.innerHTML = workContracts
+    .map((contract) => {
+      const isSelected = state.work.key === contract.key;
+      return `
+      <div class="work-item">
+        <div>
+          <strong>${contract.label}</strong>
+          <div class="muted">Duration: ${contract.duration}s</div>
+          <div class="muted">Reward: ${contract.reward.credits} credits, ${contract.reward.xp} xp</div>
+        </div>
+        <button class="primary">${isSelected ? "Selected" : "Select"}</button>
+      </div>
+    `;
+    })
+    .join("");
+
+  workList.querySelectorAll(".work-item").forEach((item, index) => {
+    const button = item.querySelector("button");
+    button.addEventListener("click", () => selectWorkContract(workContracts[index].key));
+  });
+
+  if (state.work.inProgress) {
+    const remaining = Math.max(0, Math.ceil((state.work.endsAt - Date.now()) / 1000));
+    workStatus.textContent = `Working: ${remaining}s remaining.`;
+    workButton.disabled = true;
+    workButton.textContent = "Contract Active";
+  } else {
+    workStatus.textContent = state.work.key
+      ? `Ready to start: ${workContracts.find((c) => c.key === state.work.key).label}.`
+      : "Select a contract to begin.";
+    workButton.disabled = !state.work.key;
+    workButton.textContent = "Start Contract";
+  }
+};
+
+const updateExplorationButtons = () => {
+  expeditionContainer.querySelectorAll(".expedition-item").forEach((item, index) => {
+    const button = item.querySelector("button");
+    const expedition = expeditionList[index];
+    button.addEventListener("click", () => startExploration(expedition));
+  });
+};
+
 const updateAchievements = () => {
   achievementList.innerHTML = achievements
     .map((achievement) => {
@@ -428,42 +625,83 @@ const updateAchievements = () => {
     .join("");
 };
 
-const updateScavenge = () => {
-  if (!state.scavenging.inProgress) {
-    scavengeTimer.textContent = "Ready";
-    scavengeDetails.textContent = `Cost: 20 energy · Duration: 40s`;
-    scavengeButton.disabled = state.energy < 20;
+const runManualScavenge = (area) => {
+  const unlocked = area.unlock ? area.unlock() : true;
+  if (!unlocked || state.energy < area.cost) {
     return;
   }
-
-  const remaining = Math.max(0, state.scavenging.endsAt - Date.now());
-  const seconds = Math.ceil(remaining / 1000);
-  scavengeTimer.textContent = `${seconds}s`;
-  scavengeDetails.textContent = "Scavenging in progress...";
-  scavengeButton.disabled = true;
-};
-
-const startScavenge = () => {
-  if (state.scavenging.inProgress || state.energy < 20) {
-    return;
-  }
-  state.energy -= 20;
-  state.scavenging.inProgress = true;
-  state.scavenging.endsAt = Date.now() + 40000;
-  updateUI();
-};
-
-const finishScavenge = () => {
-  const loot = scavengingLoot();
+  state.energy -= area.cost;
+  const loot = scavengingLoot(area.multiplier);
   Object.keys(loot).forEach((key) => {
     state.resources[key] += loot[key];
   });
   state.reputation += 1;
+  addXp(8);
   state.achievements.firstRun = true;
   if (state.reputation >= 10) {
     state.achievements.reachRep10 = true;
   }
-  state.scavenging.inProgress = false;
+  updateUI();
+};
+
+const selectWorkContract = (key) => {
+  if (state.work.inProgress) {
+    return;
+  }
+  state.work.key = key;
+  updateUI();
+};
+
+const startWorkContract = () => {
+  if (state.work.inProgress || !state.work.key) {
+    return;
+  }
+  const contract = workContracts.find((item) => item.key === state.work.key);
+  if (!contract) {
+    return;
+  }
+  state.work.inProgress = true;
+  state.work.endsAt = Date.now() + contract.duration * 1000;
+  updateUI();
+};
+
+const finishWorkContract = () => {
+  const contract = workContracts.find((item) => item.key === state.work.key);
+  if (!contract) {
+    state.work.inProgress = false;
+    return;
+  }
+  state.resources.credits += contract.reward.credits;
+  state.reputation += contract.reward.reputation;
+  addXp(contract.reward.xp);
+  state.work.inProgress = false;
+  updateUI();
+};
+
+const startExploration = (expedition) => {
+  if (state.exploration.inProgress || !expedition.unlock()) {
+    return;
+  }
+  state.exploration.inProgress = true;
+  state.exploration.key = expedition.key;
+  state.exploration.endsAt = Date.now() + expedition.duration * 1000;
+  updateUI();
+};
+
+const finishExploration = () => {
+  const expedition = expeditionList.find((item) => item.key === state.exploration.key);
+  if (!expedition) {
+    state.exploration.inProgress = false;
+    return;
+  }
+  const loot = scavengingLoot(2.2);
+  Object.keys(loot).forEach((key) => {
+    state.resources[key] += loot[key];
+  });
+  state.reputation += 2;
+  addXp(20);
+  state.achievements.firstExploration = true;
+  state.exploration.inProgress = false;
   updateUI();
 };
 
@@ -490,8 +728,11 @@ const finishTraining = () => {
 };
 
 const updateTimers = () => {
-  if (state.scavenging.inProgress && Date.now() >= state.scavenging.endsAt) {
-    finishScavenge();
+  if (state.exploration.inProgress && Date.now() >= state.exploration.endsAt) {
+    finishExploration();
+  }
+  if (state.work.inProgress && Date.now() >= state.work.endsAt) {
+    finishWorkContract();
   }
   if (state.training.inProgress && Date.now() >= state.training.endsAt) {
     finishTraining();
@@ -521,8 +762,10 @@ const updateUI = () => {
   updateFacilities();
   updateTraining();
   updateLockedSections();
+  updateManualScavenge();
+  updateWork();
+  updateExplorationButtons();
   updateAchievements();
-  updateScavenge();
   if (state.reputation >= 10) {
     state.achievements.reachRep10 = true;
   }
@@ -563,7 +806,7 @@ document.querySelectorAll("[data-section-target]").forEach((button) => {
   button.addEventListener("click", () => handleNavigation(button.dataset.sectionTarget));
 });
 
-scavengeButton.addEventListener("click", startScavenge);
+workButton.addEventListener("click", startWorkContract);
 
 saveButton.addEventListener("click", saveGame);
 resetButton.addEventListener("click", resetGame);
@@ -573,7 +816,9 @@ updateUI();
 
 setInterval(() => {
   updateTimers();
-  updateScavenge();
+  updateLockedSections();
+  updateWork();
+  updateExplorationButtons();
 }, 1000);
 
 setInterval(() => {

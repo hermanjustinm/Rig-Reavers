@@ -40,6 +40,12 @@ body {
   gap: 24px;
 }
 
+.sidebar__status {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .brand__title {
   font-size: 18px;
   font-weight: 700;
@@ -213,6 +219,31 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+.manual-scavenge,
+.work-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.manual-scavenge__item,
+.work-item {
+  background: var(--panel-soft);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.manual-scavenge__item .muted,
+.work-item .muted {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .scavenge__timer {
