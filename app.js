@@ -31,7 +31,12 @@ const state = {
     workshop: { level: 0, label: "Workshop" },
     outpost: { level: 0, label: "Outpost" },
     tradingPost: { level: 0, label: "Trading Post" },
-    warRig: { level: 0, label: "War Rig Garage" },
+    garage: { level: 0, label: "Garage" },
+  },
+  vehicles: {
+    battleCar: { level: 0, label: "Battle Car" },
+    duneBuggy: { level: 0, label: "Dune Buggy" },
+    warRig: { level: 0, label: "War Rig" },
   },
   exploration: {
     inProgress: false,
@@ -55,6 +60,7 @@ const state = {
     inProgress: false,
     endsAt: 0,
     statKey: null,
+    duration: 0,
   },
   achievements: {
     firstRun: false,
@@ -71,9 +77,14 @@ const baseCosts = {
   workshop: { scrap: 120, rations: 40, credits: 60 },
   outpost: { scrap: 180, water: 60, credits: 100 },
   tradingPost: { scrap: 220, rations: 80, credits: 140 },
-  warRig: { scrap: 320, rations: 120, water: 120, credits: 240 },
+  garage: { scrap: 140, rations: 40, credits: 80 },
 };
 
+const vehicleCosts = {
+  battleCar: { scrap: 160, rations: 40, credits: 120 },
+  duneBuggy: { scrap: 220, water: 60, credits: 180 },
+  warRig: { scrap: 420, rations: 140, water: 140, credits: 320 },
+};
 const scavengingLoot = (multiplier = 1) => {
   const strengthBonus = state.stats.strength * 0.12;
   const awarenessBonus = state.stats.awareness * 0.1;
@@ -128,16 +139,16 @@ const facilities = [
     unlocks: "Unlocks timed expeditions.",
   },
   {
+    key: "garage",
+    label: "Garage",
+    description: "Workshop bay for vehicle upgrades.",
+    unlocks: "Unlocks the Garage and vehicle construction.",
+  },
+  {
     key: "tradingPost",
     label: "Trading Post",
     description: "Trade with caravans for hard-to-find materials.",
     unlocks: "Unlocks trading and market events.",
-  },
-  {
-    key: "warRig",
-    label: "War Rig Garage",
-    description: "Massive project that unlocks long-range exploration.",
-    unlocks: "Unlocks advanced timed explorations.",
   },
 ];
 
@@ -179,6 +190,15 @@ const manualScavengeAreas = [
     requirement: "Always available.",
   },
   {
+    key: "echo-yard",
+    label: "Echo Yard",
+    cost: 10,
+    multiplier: 1.2,
+    duration: 55,
+    requirement: "Unlocks at Resilience 2.",
+    unlock: () => state.stats.resilience >= 2,
+  },
+  {
     key: "sunken-rail",
     label: "Sunken Rail Yard",
     cost: 18,
@@ -197,6 +217,15 @@ const manualScavengeAreas = [
     unlock: () => state.stats.awareness >= 3,
   },
   {
+    key: "radio-spire",
+    label: "Radio Spire",
+    cost: 24,
+    multiplier: 1.9,
+    duration: 100,
+    requirement: "Unlocks at Tech 2.",
+    unlock: () => state.stats.tech >= 2,
+  },
+  {
     key: "overpass-gutters",
     label: "Overpass Gutters",
     cost: 26,
@@ -204,6 +233,15 @@ const manualScavengeAreas = [
     duration: 120,
     requirement: "Unlocks at Defense 4.",
     unlock: () => state.stats.defense >= 4,
+  },
+  {
+    key: "crater-district",
+    label: "Crater District",
+    cost: 32,
+    multiplier: 2.5,
+    duration: 150,
+    requirement: "Unlocks at Strength 5.",
+    unlock: () => state.stats.strength >= 5,
   },
 ];
 
@@ -221,16 +259,24 @@ const expeditionList = [
     label: "Stormfront Pass",
     duration: 240,
     reward: "Higher credits and salvage.",
-    requirement: "Requires War Rig Garage.",
-    unlock: () => state.facilities.warRig.level > 0,
+    requirement: "Requires Battle Car.",
+    unlock: () => state.vehicles.battleCar.level > 0,
   },
   {
     key: "dust-sea",
     label: "Dust Sea Relay",
     duration: 420,
     reward: "Chance at rare components.",
-    requirement: "Requires War Rig Garage + Defense 5.",
-    unlock: () => state.facilities.warRig.level > 0 && state.stats.defense >= 5,
+    requirement: "Requires War Rig + Defense 5.",
+    unlock: () => state.vehicles.warRig.level > 0 && state.stats.defense >= 5,
+  },
+  {
+    key: "iron-wastes",
+    label: "Iron Wastes Convoy",
+    duration: 520,
+    reward: "Major salvage and rare parts.",
+    requirement: "Requires War Rig + Tech 4.",
+    unlock: () => state.vehicles.warRig.level > 0 && state.stats.tech >= 4,
   },
 ];
 
@@ -246,6 +292,24 @@ const workContracts = [
     label: "Salvage Guard",
     duration: 180,
     reward: { credits: 18, reputation: 2, xp: 20 },
+  },
+  {
+    key: "water-runner",
+    label: "Water Runner",
+    duration: 150,
+    reward: { credits: 16, reputation: 1, xp: 18 },
+  },
+  {
+    key: "scrap-hauler",
+    label: "Scrap Hauler",
+    duration: 210,
+    reward: { credits: 22, reputation: 2, xp: 24 },
+  },
+  {
+    key: "perimeter-watch",
+    label: "Perimeter Watch",
+    duration: 260,
+    reward: { credits: 26, reputation: 3, xp: 28 },
   },
 ];
 
@@ -291,6 +355,8 @@ const manualScavengeList = document.getElementById("manualScavengeList");
 const workList = document.getElementById("workList");
 const workStatus = document.getElementById("workStatus");
 const workButton = document.getElementById("workButton");
+const trainingProgressFill = document.getElementById("trainingProgressFill");
+const trainingProgressValue = document.getElementById("trainingProgressValue");
 const scavengeProgressFill = document.getElementById("scavengeProgressFill");
 const scavengeProgressValue = document.getElementById("scavengeProgressValue");
 const workProgressFill = document.getElementById("workProgressFill");
@@ -307,12 +373,15 @@ const statList = document.getElementById("statList");
 
 const expeditionLock = document.getElementById("expeditionLock");
 const expeditionContainer = document.getElementById("expeditionList");
+const garageLock = document.getElementById("garageLock");
+const garageList = document.getElementById("garageList");
 const craftingLock = document.getElementById("craftingLock");
 const craftingContainer = document.getElementById("craftingList");
 const tradingLock = document.getElementById("tradingLock");
 const tradingContainer = document.getElementById("tradingList");
 const achievementList = document.getElementById("achievementList");
 const activityLog = document.getElementById("activityLog");
+const overviewOperations = document.getElementById("overviewOperations");
 
 const saveButton = document.getElementById("saveGame");
 const resetButton = document.getElementById("resetGame");
@@ -386,6 +455,10 @@ const updateMilestones = () => {
       done: state.achievements.trainOnce,
     },
     {
+      label: "Unlock the Garage to start building vehicles.",
+      done: state.facilities.garage.level > 0,
+    },
+    {
       label: "Save enough scrap to build the Workshop.",
       done: state.facilities.workshop.level > 0,
     },
@@ -394,8 +467,8 @@ const updateMilestones = () => {
       done: state.facilities.outpost.level > 0,
     },
     {
-      label: "Start the War Rig Garage for long-range expeditions.",
-      done: state.facilities.warRig.level > 0,
+      label: "Build the War Rig for long-range expeditions.",
+      done: state.vehicles.warRig.level > 0,
     },
   ];
 
@@ -459,6 +532,74 @@ const updateFacilities = () => {
   });
 };
 
+const updateGarage = () => {
+  if (state.facilities.garage.level === 0) {
+    garageLock.textContent = "Build the Garage to unlock vehicle construction.";
+    garageList.innerHTML = "";
+    return;
+  }
+  garageLock.textContent = "";
+  const vehicles = [
+    {
+      key: "battleCar",
+      label: "Battle Car",
+      description: "Armored starter vehicle for safer runs.",
+      unlock: () => true,
+    },
+    {
+      key: "duneBuggy",
+      label: "Dune Buggy",
+      description: "Faster scouting vehicle with better reach.",
+      unlock: () => state.stats.awareness >= 4,
+    },
+    {
+      key: "warRig",
+      label: "War Rig",
+      description: "Top-tier war machine for long-haul exploration.",
+      unlock: () => state.stats.defense >= 5 && state.facilities.outpost.level > 0,
+    },
+  ];
+
+  garageList.innerHTML = vehicles
+    .map((vehicle) => {
+      const current = state.vehicles[vehicle.key];
+      const cost = vehicleCosts[vehicle.key];
+      const unlocked = vehicle.unlock();
+      const affordable = canAfford(cost);
+      const built = current.level > 0;
+      return `
+      <div class="garage-item">
+        <div>
+          <strong>${vehicle.label}</strong>
+          <div class="muted">${vehicle.description}</div>
+          <div class="muted">Cost: ${formatCost(cost)}</div>
+        </div>
+        <button class="primary" ${built || !unlocked || !affordable ? "disabled" : ""}>
+          ${built ? "Built" : unlocked ? "Build" : "Locked"}
+        </button>
+      </div>
+    `;
+    })
+    .join("");
+
+  garageList.querySelectorAll(".garage-item").forEach((item, index) => {
+    const button = item.querySelector("button");
+    const vehicle = vehicles[index];
+    button.addEventListener("click", () => buildVehicle(vehicle.key));
+  });
+};
+
+const buildVehicle = (key) => {
+  const cost = vehicleCosts[key];
+  if (!canAfford(cost) || state.vehicles[key].level > 0) {
+    return;
+  }
+  spendResources(cost);
+  state.vehicles[key].level = 1;
+  addLogEntry(`Vehicle built: ${state.vehicles[key].label}.`);
+  updateUI();
+};
+
 const formatCost = (cost) =>
   Object.entries(cost)
     .map(([key, value]) => `${value} ${key}`)
@@ -507,6 +648,17 @@ const updateTraining = () => {
       ([key, value]) => `<li><span>${key}</span><strong>${value}</strong></li>`
     )
     .join("");
+
+  if (state.training.inProgress) {
+    const remaining = Math.max(0, Math.ceil((state.training.endsAt - Date.now()) / 1000));
+    const duration = Math.max(1, state.training.duration || remaining);
+    const progress = 1 - remaining / duration;
+    trainingProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
+    trainingProgressValue.textContent = `${remaining}s remaining`;
+  } else {
+    trainingProgressFill.style.width = "0%";
+    trainingProgressValue.textContent = "Idle";
+  }
 };
 
 const updateLockedSections = () => {
@@ -656,6 +808,43 @@ const updateExplorationButtons = () => {
   });
 };
 
+const updateNavIndicators = () => {
+  navButtons.forEach((button) => {
+    const section = button.dataset.section;
+    const isRunning =
+      (section === "scavenge" && state.scavenging.inProgress) ||
+      (section === "work" && state.work.inProgress) ||
+      (section === "training" && state.training.inProgress) ||
+      (section === "expeditions" && state.exploration.inProgress);
+    button.classList.toggle("nav__item--running", isRunning);
+  });
+};
+
+const updateOverviewOperations = () => {
+  if (!overviewOperations) {
+    return;
+  }
+  const entries = [];
+  if (state.scavenging.inProgress) {
+    entries.push("Scavenging run in progress.");
+  }
+  if (state.work.inProgress) {
+    entries.push("Work contract active.");
+  }
+  if (state.training.inProgress) {
+    entries.push("Training session underway.");
+  }
+  if (state.exploration.inProgress) {
+    entries.push("Exploration team deployed.");
+  }
+  if (entries.length === 0) {
+    entries.push("No active operations. Queue a scavenge or work contract.");
+  }
+  overviewOperations.innerHTML = entries
+    .map((entry) => `<div class="activity-log__entry">${entry}</div>`)
+    .join("");
+};
+
 const updateAchievements = () => {
   achievementList.innerHTML = achievements
     .map((achievement) => {
@@ -787,6 +976,7 @@ const startTraining = (key, cost, duration) => {
   state.training.inProgress = true;
   state.training.statKey = key;
   state.training.endsAt = Date.now() + duration * 1000;
+  state.training.duration = duration;
   addLogEntry(`Training started: ${key}.`);
   updateUI();
 };
@@ -798,6 +988,7 @@ const finishTraining = () => {
   }
   state.training.inProgress = false;
   state.training.statKey = null;
+  state.training.duration = 0;
   state.achievements.trainOnce = true;
   addLogEntry(`Training complete: ${key} +1.`);
   updateUI();
@@ -839,11 +1030,14 @@ const updateUI = () => {
   updateResources();
   updateMilestones();
   updateFacilities();
+  updateGarage();
   updateTraining();
   updateLockedSections();
   updateManualScavenge();
   updateWork();
   updateExplorationButtons();
+  updateNavIndicators();
+  updateOverviewOperations();
   updateActivityLog();
   updateAchievements();
   if (state.reputation >= 10) {
@@ -872,6 +1066,12 @@ const loadGame = () => {
   const parsed = JSON.parse(saved);
   Object.assign(state, parsed);
   state.activityLog = state.activityLog || [];
+  state.vehicles = state.vehicles || {
+    battleCar: { level: 0, label: "Battle Car" },
+    duneBuggy: { level: 0, label: "Dune Buggy" },
+    warRig: { level: 0, label: "War Rig" },
+  };
+  state.facilities.garage = state.facilities.garage || { level: 0, label: "Garage" };
 };
 
 const resetGame = () => {
@@ -900,6 +1100,10 @@ setInterval(() => {
   updateLockedSections();
   updateWork();
   updateExplorationButtons();
+  updateGarage();
+  updateNavIndicators();
+  updateOverviewOperations();
+  updateTraining();
   if (state.scavenging.inProgress) {
     const remaining = Math.max(0, Math.ceil((state.scavenging.endsAt - Date.now()) / 1000));
     const progress = 1 - remaining / state.scavenging.duration;

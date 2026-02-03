@@ -74,12 +74,29 @@ body {
   text-align: left;
   font-size: 14px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .nav__item:hover,
 .nav__item--active {
   border-color: var(--border);
   background: var(--panel);
+}
+
+.nav__indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent-strong);
+  opacity: 0;
+  box-shadow: 0 0 6px rgba(242, 160, 101, 0.6);
+}
+
+.nav__item--running .nav__indicator {
+  opacity: 1;
 }
 
 .sidebar__footer {
@@ -249,14 +266,16 @@ body {
 }
 
 .manual-scavenge,
-.work-list {
+.work-list,
+.garage-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .manual-scavenge__item,
-.work-item {
+.work-item,
+.garage-item {
   background: var(--panel-soft);
   border: 1px solid transparent;
   border-radius: 12px;
@@ -268,7 +287,8 @@ body {
 }
 
 .manual-scavenge__item .muted,
-.work-item .muted {
+.work-item .muted,
+.garage-item .muted {
   color: var(--muted);
   font-size: 12px;
 }

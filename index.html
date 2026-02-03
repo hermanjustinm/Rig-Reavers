@@ -37,15 +37,36 @@
           </div>
         </div>
         <nav class="nav">
-          <button class="nav__item nav__item--active" data-section="overview">Overview</button>
-          <button class="nav__item" data-section="scavenge">Scavenge</button>
-          <button class="nav__item" data-section="work">Work</button>
-          <button class="nav__item" data-section="base">Base</button>
-          <button class="nav__item" data-section="training">Training</button>
-          <button class="nav__item" data-section="expeditions">Explorations</button>
-          <button class="nav__item" data-section="crafting">Crafting</button>
-          <button class="nav__item" data-section="trading">Trading</button>
-          <button class="nav__item" data-section="achievements">Achievements</button>
+          <button class="nav__item nav__item--active" data-section="overview">
+            Overview <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="scavenge">
+            Scavenge <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="work">
+            Work <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="base">
+            Base <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="garage">
+            Garage <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="training">
+            Training <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="expeditions">
+            Explorations <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="crafting">
+            Crafting <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="trading">
+            Trading <span class="nav__indicator"></span>
+          </button>
+          <button class="nav__item" data-section="achievements">
+            Achievements <span class="nav__indicator"></span>
+          </button>
         </nav>
         <div class="sidebar__footer">
           <button class="ghost" id="saveGame">Save Game</button>
@@ -58,13 +79,29 @@
           <section class="panel active" id="overview">
             <div class="panel__grid">
               <div class="card">
-                <h2>Scavenger Log</h2>
+                <h2>Command Overview</h2>
                 <p>
-                  Your crew starts as a single scavenger in a ruined world. Survive by harvesting scrap, water, and
-                  rations. Build your camp into a wasteland empire step by step.
+                  Track live operations and keep momentum. Focus on timed scavenges, work contracts, and stat training
+                  before branching into deeper exploration.
                 </p>
+                <div class="panel__grid">
+                  <div>
+                    <div class="label">Active Operations</div>
+                    <div class="activity-log" id="overviewOperations"></div>
+                  </div>
+                  <div>
+                    <div class="label">Strategy Brief</div>
+                    <div class="activity-log__entry">
+                      Keep energy above 40 before committing to work or training.
+                    </div>
+                    <div class="activity-log__entry">
+                      Build the Garage to unlock vehicles and long-haul exploration.
+                    </div>
+                  </div>
+                </div>
                 <div class="card__actions">
                   <button class="primary" data-section-target="scavenge">Start Scavenging</button>
+                  <button class="ghost" data-section-target="work">Pick Work Contract</button>
                 </div>
               </div>
               <div class="card">
@@ -149,12 +186,27 @@
               <h2>Stat Training</h2>
               <p>Use energy to train core stats. Higher stats improve scavenging efficiency over time.</p>
               <div class="training-list" id="trainingList"></div>
+              <div class="progress">
+                <div class="label">Training Progress</div>
+                <div class="meter">
+                  <div class="meter__fill" id="trainingProgressFill"></div>
+                </div>
+                <span class="value" id="trainingProgressValue">Idle</span>
+              </div>
             </div>
             <div class="card">
               <h2>Current Stats</h2>
               <ul class="resource-list" id="statList"></ul>
             </div>
           </div>
+          </section>
+
+          <section class="panel" id="garage">
+            <div class="card">
+              <h2>Garage</h2>
+              <div class="locked" id="garageLock"></div>
+              <div class="garage-list" id="garageList"></div>
+            </div>
           </section>
 
           <section class="panel" id="expeditions">
