@@ -18,6 +18,10 @@ const state = {
     water: 15,
     credits: 10,
   },
+  upkeep: {
+    rationsPerDay: 1,
+    waterPerDay: 1,
+  },
   stats: {
     strength: 1,
     awareness: 1,
@@ -28,6 +32,7 @@ const state = {
   facilities: {
     camp: { level: 1, label: "Camp" },
     waterStill: { level: 0, label: "Water Still" },
+    canteen: { level: 0, label: "Canteen" },
     workshop: { level: 0, label: "Workshop" },
     outpost: { level: 0, label: "Outpost" },
     tradingPost: { level: 0, label: "Trading Post" },
@@ -74,6 +79,7 @@ const state = {
 
 const baseCosts = {
   waterStill: { scrap: 60, credits: 20 },
+  canteen: { scrap: 90, rations: 20, credits: 40 },
   workshop: { scrap: 120, rations: 40, credits: 60 },
   outpost: { scrap: 180, water: 60, credits: 100 },
   tradingPost: { scrap: 220, rations: 80, credits: 140 },
@@ -125,6 +131,12 @@ const facilities = [
     label: "Water Still",
     description: "Produces clean water daily and unlocks health recovery.",
     unlocks: "Unlocks passive water generation.",
+  },
+  {
+    key: "canteen",
+    label: "Canteen",
+    description: "Turns scavenged supplies into steady rations.",
+    unlocks: "Unlocks passive ration production.",
   },
   {
     key: "workshop",
@@ -286,30 +298,72 @@ const workContracts = [
     label: "Courier Route",
     duration: 120,
     reward: { credits: 12, reputation: 1, xp: 15 },
+    requirement: "Always available.",
+    unlock: () => true,
   },
   {
     key: "salvage-guard",
     label: "Salvage Guard",
     duration: 180,
     reward: { credits: 18, reputation: 2, xp: 20 },
+    requirement: "Unlocks at Defense 3.",
+    unlock: () => state.stats.defense >= 3,
   },
   {
     key: "water-runner",
     label: "Water Runner",
     duration: 150,
-    reward: { credits: 16, reputation: 1, xp: 18 },
+    reward: { credits: 16, reputation: 1, xp: 18, water: 6 },
+    requirement: "Unlocks at Awareness 2.",
+    unlock: () => state.stats.awareness >= 2,
   },
   {
     key: "scrap-hauler",
     label: "Scrap Hauler",
     duration: 210,
-    reward: { credits: 22, reputation: 2, xp: 24 },
+    reward: { credits: 22, reputation: 2, xp: 24, scrap: 18 },
+    requirement: "Unlocks at Strength 3.",
+    unlock: () => state.stats.strength >= 3,
   },
   {
     key: "perimeter-watch",
     label: "Perimeter Watch",
     duration: 260,
     reward: { credits: 26, reputation: 3, xp: 28 },
+    requirement: "Unlocks at Defense 4.",
+    unlock: () => state.stats.defense >= 4,
+  },
+  {
+    key: "canteen-supply",
+    label: "Canteen Supply Run",
+    duration: 300,
+    reward: { credits: 30, reputation: 2, xp: 32, rations: 10 },
+    requirement: "Requires Canteen + Resilience 3.",
+    unlock: () => state.facilities.canteen.level > 0 && state.stats.resilience >= 3,
+  },
+  {
+    key: "convoy-lead",
+    label: "Convoy Lead",
+    duration: 420,
+    reward: { credits: 44, reputation: 4, xp: 40 },
+    requirement: "Requires Battle Car + Strength 4.",
+    unlock: () => state.vehicles.battleCar.level > 0 && state.stats.strength >= 4,
+  },
+  {
+    key: "outpost-escort",
+    label: "Outpost Escort",
+    duration: 520,
+    reward: { credits: 52, reputation: 5, xp: 48 },
+    requirement: "Requires Outpost + Defense 5.",
+    unlock: () => state.facilities.outpost.level > 0 && state.stats.defense >= 5,
+  },
+  {
+    key: "rig-haul",
+    label: "War Rig Haul",
+    duration: 700,
+    reward: { credits: 70, reputation: 6, xp: 60, water: 12, rations: 12 },
+    requirement: "Requires War Rig.",
+    unlock: () => state.vehicles.warRig.level > 0,
   },
 ];
 
@@ -366,6 +420,9 @@ const rationValue = document.getElementById("rationValue");
 const waterValue = document.getElementById("waterValue");
 const scrapValue = document.getElementById("scrapValue");
 const creditValue = document.getElementById("creditValue");
+const rationNeedValue = document.getElementById("rationNeedValue");
+const waterNeedValue = document.getElementById("waterNeedValue");
+const upkeepStatus = document.getElementById("upkeepStatus");
 
 const facilityList = document.getElementById("facilityList");
 const trainingList = document.getElementById("trainingList");
@@ -419,6 +476,14 @@ const updateResources = () => {
   waterValue.textContent = formatNumber(state.resources.water);
   scrapValue.textContent = formatNumber(state.resources.scrap);
   creditValue.textContent = formatNumber(state.resources.credits);
+
+  if (rationNeedValue && waterNeedValue && upkeepStatus) {
+    rationNeedValue.textContent = state.upkeep.rationsPerDay;
+    waterNeedValue.textContent = state.upkeep.waterPerDay;
+    const hasFood = state.resources.rations >= state.upkeep.rationsPerDay;
+    const hasWater = state.resources.water >= state.upkeep.waterPerDay;
+    upkeepStatus.textContent = hasFood && hasWater ? "Stable" : "Shortages";
+  }
 };
 
 const addLogEntry = (message) => {
@@ -453,6 +518,10 @@ const updateMilestones = () => {
     {
       label: "Train once to unlock deeper scavenging bonuses.",
       done: state.achievements.trainOnce,
+    },
+    {
+      label: "Open the Canteen to stabilize rations.",
+      done: state.facilities.canteen.level > 0,
     },
     {
       label: "Unlock the Garage to start building vehicles.",
@@ -762,15 +831,28 @@ const updateManualScavenge = () => {
 const updateWork = () => {
   workList.innerHTML = workContracts
     .map((contract) => {
+      const unlocked = contract.unlock();
       const isSelected = state.work.key === contract.key;
+      const rewards = [
+        contract.reward.credits ? `${contract.reward.credits} credits` : null,
+        contract.reward.rations ? `${contract.reward.rations} rations` : null,
+        contract.reward.water ? `${contract.reward.water} water` : null,
+        contract.reward.scrap ? `${contract.reward.scrap} scrap` : null,
+        contract.reward.xp ? `${contract.reward.xp} xp` : null,
+      ]
+        .filter(Boolean)
+        .join(", ");
       return `
       <div class="work-item">
         <div>
           <strong>${contract.label}</strong>
           <div class="muted">Duration: ${contract.duration}s</div>
-          <div class="muted">Reward: ${contract.reward.credits} credits, ${contract.reward.xp} xp</div>
+          <div class="muted">Reward: ${rewards}</div>
+          <div class="muted">${contract.requirement}</div>
         </div>
-        <button class="primary">${isSelected ? "Selected" : "Select"}</button>
+        <button class="primary" ${unlocked ? "" : "disabled"}>
+          ${isSelected ? "Selected" : unlocked ? "Select" : "Locked"}
+        </button>
       </div>
     `;
     })
@@ -778,7 +860,12 @@ const updateWork = () => {
 
   workList.querySelectorAll(".work-item").forEach((item, index) => {
     const button = item.querySelector("button");
-    button.addEventListener("click", () => selectWorkContract(workContracts[index].key));
+    const contract = workContracts[index];
+    button.addEventListener("click", () => {
+      if (contract.unlock()) {
+        selectWorkContract(contract.key);
+      }
+    });
   });
 
   if (state.work.inProgress) {
@@ -912,7 +999,7 @@ const startWorkContract = () => {
     return;
   }
   const contract = workContracts.find((item) => item.key === state.work.key);
-  if (!contract) {
+  if (!contract || !contract.unlock()) {
     return;
   }
   state.work.inProgress = true;
@@ -928,10 +1015,19 @@ const finishWorkContract = () => {
     state.work.inProgress = false;
     return;
   }
-  state.resources.credits += contract.reward.credits;
-  state.reputation += contract.reward.reputation;
-  addXp(contract.reward.xp);
-  addLogEntry(`Work complete: +${contract.reward.credits} credits.`);
+  state.resources.credits += contract.reward.credits || 0;
+  state.reputation += contract.reward.reputation || 0;
+  if (contract.reward.rations) {
+    state.resources.rations += contract.reward.rations;
+  }
+  if (contract.reward.water) {
+    state.resources.water += contract.reward.water;
+  }
+  if (contract.reward.scrap) {
+    state.resources.scrap += contract.reward.scrap;
+  }
+  addXp(contract.reward.xp || 0);
+  addLogEntry(`Work complete: +${contract.reward.credits || 0} credits.`);
   state.work.inProgress = false;
   state.work.duration = 0;
   updateUI();
@@ -1014,10 +1110,28 @@ const passiveTick = () => {
   if (state.facilities.waterStill.level > 0) {
     state.resources.water += 1;
   }
+  if (state.facilities.canteen.level > 0) {
+    state.resources.rations += 1;
+  }
   if (state.resources.rations > 0 && state.resources.water > 0) {
-    state.health = Math.min(state.maxHealth, state.health + 0.25);
-    state.resources.rations -= 0.15;
-    state.resources.water -= 0.15;
+    state.health = Math.min(state.maxHealth, state.health + 0.6);
+  }
+  const needsRations = state.upkeep.rationsPerDay;
+  const needsWater = state.upkeep.waterPerDay;
+  const hasRations = state.resources.rations >= needsRations;
+  const hasWater = state.resources.water >= needsWater;
+  if (hasRations) {
+    state.resources.rations -= needsRations;
+  }
+  if (hasWater) {
+    state.resources.water -= needsWater;
+  }
+  if (!hasRations || !hasWater) {
+    const penalty = (!hasRations && !hasWater) ? 4 : 2;
+    state.health = Math.max(0, state.health - penalty);
+    state.reputation = Math.max(0, state.reputation - 1);
+    state.threat = Math.min(10, state.threat + 1);
+    addLogEntry("Shortages hit the camp. Morale and health drop.");
   }
   if (state.health < 30) {
     state.reputation = Math.max(0, state.reputation - 0.2);
@@ -1072,6 +1186,8 @@ const loadGame = () => {
     warRig: { level: 0, label: "War Rig" },
   };
   state.facilities.garage = state.facilities.garage || { level: 0, label: "Garage" };
+  state.facilities.canteen = state.facilities.canteen || { level: 0, label: "Canteen" };
+  state.upkeep = state.upkeep || { rationsPerDay: 1, waterPerDay: 1 };
 };
 
 const resetGame = () => {
