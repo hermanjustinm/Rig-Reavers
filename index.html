@@ -26,36 +26,40 @@
           <p class="muted">Level 1 · District 12 Fringe</p>
         </div>
         <div class="profile-stats">
-          <div>
-            <span>Health</span>
-            <strong>72 / 90</strong>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span>Health</span>
+              <strong data-stat-value="health">0 / 0</strong>
+            </div>
+            <div class="bar" data-bar="health">
+              <div></div>
+            </div>
           </div>
-          <div>
-            <span>Energy</span>
-            <strong>28 / 80</strong>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span>Energy</span>
+              <strong data-stat-value="energy">0 / 0</strong>
+            </div>
+            <div class="bar energy" data-bar="energy">
+              <div></div>
+            </div>
           </div>
-        </div>
-        <div class="bar">
-          <div style="width: 80%"></div>
-        </div>
-        <div class="bar energy">
-          <div style="width: 35%"></div>
         </div>
       </section>
 
       <section class="resource-panel">
         <h2>Supplies</h2>
         <ul>
-          <li><span>Scrap</span><strong>18 / 150</strong></li>
-          <li><span>Fuel</span><strong>3 / 60</strong></li>
-          <li><span>Water</span><strong>12 / 80</strong></li>
-          <li><span>Food</span><strong>9 / 80</strong></li>
-          <li><span>Parts</span><strong>1 / 40</strong></li>
-          <li><span>Credits</span><strong>120</strong></li>
+          <li><span>Scrap</span><strong data-resource="scrap">0</strong></li>
+          <li><span>Fuel</span><strong data-resource="fuel">0</strong></li>
+          <li><span>Water</span><strong data-resource="water">0</strong></li>
+          <li><span>Food</span><strong data-resource="food">0</strong></li>
+          <li><span>Parts</span><strong data-resource="parts">0</strong></li>
+          <li><span>Credits</span><strong data-resource="credits">0</strong></li>
         </ul>
-        <div class="stat">Storage <span>150 / 150</span></div>
-        <div class="bar">
-          <div style="width: 100%"></div>
+        <div class="stat">Storage <span data-storage>0 / 0</span></div>
+        <div class="bar" data-bar="storage">
+          <div></div>
         </div>
       </section>
 
@@ -115,54 +119,56 @@
               <h3>Quick Scavenge</h3>
               <span class="badge">Low Risk</span>
             </header>
-            <p>Search nearby debris for small salvage. Great for topping off supplies and XP.</p>
+            <p>Search nearby debris for small salvage. Perfect for starting from nothing.</p>
             <div class="meta">
               <span>Cost: 5 Energy</span>
-              <span>Rewards: Scrap, Food, XP</span>
+              <span>Rewards: Scrap, Food, Credits</span>
             </div>
-            <button>Search Ruins</button>
+            <button data-action="scavenge" data-cost-energy="5">Search Ruins</button>
           </article>
 
           <article class="card">
             <header>
-              <h3>Street Contracts</h3>
-              <span class="badge warning">Crime</span>
+              <h3>Street Hustles</h3>
+              <span class="badge warning">Risky</span>
             </header>
             <div class="expedition">
               <h4>Fence Patrol</h4>
-              <p>Guard a trader’s route for a cut of the haul.</p>
+              <p>Requires a shelter to stash loot safely.</p>
               <div class="meta">
                 <span>Duration: 10m</span>
-                <span>Rewards: +30 credits, +2 scrap</span>
+                <span>Status: Locked</span>
               </div>
-              <button>Take Contract</button>
+              <button disabled>Locked</button>
             </div>
             <div class="expedition">
               <h4>Cache Heist</h4>
-              <p>Risk a high-heat raid on a local cache. Requires 10 energy.</p>
+              <p>High-heat raid. Needs a vehicle to escape.</p>
               <div class="meta">
                 <span>Duration: 20m</span>
-                <span>Rewards: +60 credits, +4 parts</span>
+                <span>Status: Locked</span>
               </div>
-              <button>Take Contract</button>
+              <button disabled>Locked</button>
             </div>
           </article>
 
           <article class="card">
             <header>
-              <h3>Neighborhood Intel</h3>
-              <span class="badge">Live</span>
+              <h3>Starter Actions</h3>
+              <span class="badge">Camp</span>
             </header>
-            <ul class="risk">
-              <li><strong>Market Guard:</strong> Crime rewards -10%.</li>
-              <li><strong>Power Outage:</strong> Workshop queue +5% speed.</li>
-              <li><strong>Rumor:</strong> A caravan is recruiting escorts.</li>
-            </ul>
+            <p>Stay alive while you build enough to upgrade your shelter.</p>
             <div class="meta">
-              <span>Next shift in 01:42</span>
+              <span>Resting removes fatigue.</span>
             </div>
+            <button data-action="rest">Catch Breath (+5 Health, +5 Energy)</button>
+            <button data-action="ration">Eat Ration (+8 Energy, +4 Health)</button>
           </article>
         </div>
+        <section class="activity-log">
+          <h3>Activity Log</h3>
+          <ul id="activity-log"></ul>
+        </section>
       </section>
 
       <section class="page" id="base" data-page="base">
@@ -171,18 +177,20 @@
             <h2>Base Operations</h2>
             <p>Start with a broken shelter. Each upgrade unlocks new systems and long-term progression.</p>
           </div>
-          <div class="status-pill">Facilities: 0/10</div>
+          <div class="status-pill" data-facility-count>Facilities: 0/10</div>
         </header>
         <div class="grid three">
           <article class="card">
             <h3>Collapsed Shelter</h3>
             <p>Currently unsafe. Build this to unlock health recovery and safe storage.</p>
             <ul>
-              <li>Level: 0</li>
+              <li data-facility-status>Level: 0</li>
               <li>Effect: +20 max health, +10 max energy.</li>
               <li>Unlocks: Basic expeditions.</li>
             </ul>
-            <button>Build (80 scrap, 10 parts)</button>
+            <button data-action="build-shelter" data-cost-scrap="20" data-cost-parts="5">
+              Build (20 scrap, 5 parts)
+            </button>
           </article>
           <article class="card">
             <h3>Water Purifier</h3>
@@ -192,7 +200,7 @@
               <li>Effect: +1 water/hour.</li>
               <li>Unlocks: Trade water contracts.</li>
             </ul>
-            <button>Build (60 scrap, 6 parts)</button>
+            <button disabled>Locked</button>
           </article>
           <article class="card">
             <h3>Workshop</h3>
@@ -202,7 +210,7 @@
               <li>Effect: Unlocks crafting tier 1.</li>
               <li>Unlocks: Repair kit crafting.</li>
             </ul>
-            <button>Build (90 scrap, 12 parts)</button>
+            <button disabled>Locked</button>
           </article>
         </div>
       </section>
@@ -222,7 +230,7 @@
             <div class="stat-block">
               <div>
                 <span>Current</span>
-                <strong>4.2</strong>
+                <strong data-train-stat="strength">0</strong>
               </div>
               <div>
                 <span>Next Gain</span>
@@ -230,10 +238,10 @@
               </div>
             </div>
             <div class="meta">
-              <span>Cost: 15 Energy</span>
+              <span>Cost: 10 Energy</span>
               <span>Duration: 30m</span>
             </div>
-            <button>Train Strength</button>
+            <button data-action="train" data-stat="strength" data-cost-energy="10">Train Strength</button>
           </article>
           <article class="card">
             <h3>Dexterity</h3>
@@ -241,45 +249,7 @@
             <div class="stat-block">
               <div>
                 <span>Current</span>
-                <strong>5.1</strong>
-              </div>
-              <div>
-                <span>Next Gain</span>
-                <strong>+0.4</strong>
-              </div>
-            </div>
-            <div class="meta">
-              <span>Cost: 15 Energy</span>
-              <span>Duration: 30m</span>
-            </div>
-            <button>Train Dexterity</button>
-          </article>
-          <article class="card">
-            <h3>Endurance</h3>
-            <p>Increases max health and reduces expedition fatigue.</p>
-            <div class="stat-block">
-              <div>
-                <span>Current</span>
-                <strong>3.6</strong>
-              </div>
-              <div>
-                <span>Next Gain</span>
-                <strong>+0.2</strong>
-              </div>
-            </div>
-            <div class="meta">
-              <span>Cost: 15 Energy</span>
-              <span>Duration: 30m</span>
-            </div>
-            <button>Train Endurance</button>
-          </article>
-          <article class="card">
-            <h3>Perception</h3>
-            <p>Unlocks rare loot and improves encounter odds.</p>
-            <div class="stat-block">
-              <div>
-                <span>Current</span>
-                <strong>4.0</strong>
+                <strong data-train-stat="dexterity">0</strong>
               </div>
               <div>
                 <span>Next Gain</span>
@@ -287,18 +257,18 @@
               </div>
             </div>
             <div class="meta">
-              <span>Cost: 15 Energy</span>
+              <span>Cost: 10 Energy</span>
               <span>Duration: 30m</span>
             </div>
-            <button>Train Perception</button>
+            <button data-action="train" data-stat="dexterity" data-cost-energy="10">Train Dexterity</button>
           </article>
           <article class="card">
-            <h3>Charisma</h3>
-            <p>Unlocks better deals, bribes, and faction reputation.</p>
+            <h3>Endurance</h3>
+            <p>Increases max health and reduces expedition fatigue.</p>
             <div class="stat-block">
               <div>
                 <span>Current</span>
-                <strong>2.8</strong>
+                <strong data-train-stat="endurance">0</strong>
               </div>
               <div>
                 <span>Next Gain</span>
@@ -306,10 +276,48 @@
               </div>
             </div>
             <div class="meta">
-              <span>Cost: 15 Energy</span>
+              <span>Cost: 10 Energy</span>
               <span>Duration: 30m</span>
             </div>
-            <button>Train Charisma</button>
+            <button data-action="train" data-stat="endurance" data-cost-energy="10">Train Endurance</button>
+          </article>
+          <article class="card">
+            <h3>Perception</h3>
+            <p>Unlocks rare loot and improves encounter odds.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="perception">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.3</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 30m</span>
+            </div>
+            <button data-action="train" data-stat="perception" data-cost-energy="10">Train Perception</button>
+          </article>
+          <article class="card">
+            <h3>Charisma</h3>
+            <p>Unlocks better deals, bribes, and faction reputation.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="charisma">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.2</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 30m</span>
+            </div>
+            <button data-action="train" data-stat="charisma" data-cost-energy="10">Train Charisma</button>
           </article>
           <article class="card">
             <h3>Current Session</h3>
@@ -318,7 +326,7 @@
               <span>Queue: 0/1</span>
               <span>Cooldown: 15m after each session.</span>
             </div>
-            <button>Start Training Plan</button>
+            <button disabled>Training Queue Locked</button>
           </article>
         </div>
       </section>
@@ -483,26 +491,26 @@
           <article class="card">
             <h3>Personal Stats</h3>
             <ul>
-              <li>Strength: 4.2</li>
-              <li>Dexterity: 5.1</li>
-              <li>Endurance: 3.6</li>
-              <li>Perception: 4.0</li>
-              <li>Charisma: 2.8</li>
+              <li>Strength: <span data-stat-display="strength">0</span></li>
+              <li>Dexterity: <span data-stat-display="dexterity">0</span></li>
+              <li>Endurance: <span data-stat-display="endurance">0</span></li>
+              <li>Perception: <span data-stat-display="perception">0</span></li>
+              <li>Charisma: <span data-stat-display="charisma">0</span></li>
             </ul>
           </article>
           <article class="card">
             <h3>Combat Profile</h3>
             <ul>
-              <li>Attack Rating: 12</li>
-              <li>Defense Rating: 9</li>
-              <li>Critical Chance: 3%</li>
-              <li>Injuries: 0</li>
+              <li>Attack Rating: <span data-combat="attack">0</span></li>
+              <li>Defense Rating: <span data-combat="defense">0</span></li>
+              <li>Critical Chance: <span data-combat="crit">0%</span></li>
+              <li>Injuries: <span data-combat="injuries">0</span></li>
             </ul>
           </article>
           <article class="card">
             <h3>Empire Status</h3>
             <ul>
-              <li>Facilities Built: 0/10</li>
+              <li>Facilities Built: <span data-facility-display>0/10</span></li>
               <li>Vehicles Owned: 0/3</li>
               <li>Expedition Slots: 0/2</li>
               <li>Faction Reputation: Neutral</li>
