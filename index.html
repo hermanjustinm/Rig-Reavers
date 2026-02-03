@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rig Reavers - Wasteland Survival PBBG</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;1,500&family=Rajdhani:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <header class="brand">
+        <p class="overline">Rig Reavers</p>
+        <h1>Wasteland Scavenging Empire</h1>
+      </header>
+
+      <section class="resource-panel">
+        <h2>Resources</h2>
+        <ul>
+          <li><span>Scrap</span><strong>420 / 1,200</strong></li>
+          <li><span>Fuel</span><strong>85 / 300</strong></li>
+          <li><span>Water</span><strong>120 / 300</strong></li>
+          <li><span>Food</span><strong>90 / 250</strong></li>
+          <li><span>Parts</span><strong>40 / 180</strong></li>
+          <li><span>Credits</span><strong>1,850</strong></li>
+        </ul>
+        <div class="stat">Health <span>98 / 140</span></div>
+        <div class="bar">
+          <div style="width: 70%"></div>
+        </div>
+        <div class="stat">Energy <span>46 / 120</span></div>
+        <div class="bar energy">
+          <div style="width: 38%"></div>
+        </div>
+      </section>
+
+      <nav class="nav">
+        <button class="active">Scavenging</button>
+        <button>Base Operations</button>
+        <button>Workshop</button>
+        <button>Garage</button>
+        <button>Trading Post</button>
+        <button>Achievements</button>
+        <button>Statistics</button>
+      </nav>
+
+      <section class="live-ops">
+        <h3>Active Expedition</h3>
+        <p class="location">Broken Highway</p>
+        <p class="timer">14:22 remaining</p>
+        <div class="bar">
+          <div style="width: 55%"></div>
+        </div>
+      </section>
+    </aside>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Core Loop</p>
+          <h2>Scavenge, Build, Expand, and Rule the Wastes</h2>
+          <p>
+            Begin as a lone scavenger. Manage energy and health while gathering salvage, build facilities to
+            unlock deeper systems, and command a growing fleet to dominate the wasteland economy.
+          </p>
+        </div>
+        <div class="hero-card">
+          <h3>Daily Cycle</h3>
+          <ul>
+            <li>Energy regenerates every 10 minutes.</li>
+            <li>Health recovers in the Shelter with Medical Bay upgrades.</li>
+            <li>Facilities produce passive income on the hour.</li>
+            <li>Faction control shifts during daily raids.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="grid" id="scavenge">
+        <article class="card">
+          <header>
+            <h3>Quick Scavenge</h3>
+            <span class="badge">Low Risk</span>
+          </header>
+          <p>Search nearby debris for small salvage. Great for topping off resources and XP.</p>
+          <div class="meta">
+            <span>Cost: 5 Energy</span>
+            <span>Rewards: Scrap, Food, XP</span>
+          </div>
+          <button>Search Ruins</button>
+        </article>
+
+        <article class="card">
+          <header>
+            <h3>Timed Expeditions</h3>
+            <span class="badge warning">Active Slots 2/4</span>
+          </header>
+          <div class="expedition">
+            <h4>Suburban Ruins</h4>
+            <p>Old residential district. Moderate danger and radiation exposure.</p>
+            <div class="tags">
+              <span>Radiation</span>
+              <span>Wild Animals</span>
+            </div>
+            <div class="meta">
+              <span>Duration: 05:00</span>
+              <span>Rewards: +15 scrap, +2 parts, +1 water</span>
+            </div>
+            <button>Launch Expedition</button>
+          </div>
+          <div class="expedition">
+            <h4>Broken Highway</h4>
+            <p>Interstate wreckage. Requires a vehicle, high fuel cost.</p>
+            <div class="tags">
+              <span>Fuel Cost</span>
+              <span>Vehicle Damage</span>
+            </div>
+            <div class="meta">
+              <span>Duration: 15:00</span>
+              <span>Rewards: +25 scrap, +8 parts, +5 fuel</span>
+            </div>
+            <button>Launch Expedition</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <header>
+            <h3>Risk Monitor</h3>
+            <span class="badge">Live</span>
+          </header>
+          <ul class="risk">
+            <li><strong>Weather Shift:</strong> Sandstorm +10% expedition time.</li>
+            <li><strong>Raider Pressure:</strong> Trading prices +8% until reset.</li>
+            <li><strong>Faction Alert:</strong> Nomads contest Scrap Yard.</li>
+          </ul>
+          <div class="meta">
+            <span>Next event in 01:42</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="section" id="base">
+        <header>
+          <h2>Base Facilities</h2>
+          <p>Facilities unlock new gameplay systems and expand your storage, energy, and crafting potential.</p>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Shelter</h3>
+            <p>Reinforced living space that increases max health and energy regeneration.</p>
+            <ul>
+              <li>Level: 2</li>
+              <li>Effect: +40 max health, +20 max energy, +3/min energy regen.</li>
+              <li>Unlocks: Tier 2 expeditions.</li>
+            </ul>
+            <button>Upgrade (200 scrap, 40 parts)</button>
+          </article>
+          <article class="card">
+            <h3>Water Purifier</h3>
+            <p>Converts contaminated water into clean supply with passive generation.</p>
+            <ul>
+              <li>Level: 1</li>
+              <li>Effect: +2.5 water/hour.</li>
+              <li>Synergy: Requires Power Grid for level 3+.</li>
+            </ul>
+            <button>Upgrade (160 scrap, 30 parts)</button>
+          </article>
+          <article class="card">
+            <h3>Workshop</h3>
+            <p>Craft equipment, repair gear, and unlock prototype blueprints.</p>
+            <ul>
+              <li>Level: 2</li>
+              <li>Effect: +2 equipment slots, -15% repair cost.</li>
+              <li>Unlocks: Vehicle mods.</li>
+            </ul>
+            <button>Upgrade (240 scrap, 60 parts)</button>
+          </article>
+          <article class="card">
+            <h3>Fuel Refinery</h3>
+            <p>Processes raw materials into usable fuel for vehicles and expeditions.</p>
+            <ul>
+              <li>Level: 1</li>
+              <li>Effect: +1.5 fuel/hour.</li>
+              <li>Unlocks: Long-range expeditions.</li>
+            </ul>
+            <button>Upgrade (210 scrap, 55 parts)</button>
+          </article>
+          <article class="card">
+            <h3>Medical Bay</h3>
+            <p>Heals injuries, reduces downtime, and allows dangerous combat sorties.</p>
+            <ul>
+              <li>Level: 0</li>
+              <li>Effect: +0.5 health/min while resting.</li>
+              <li>Unlocks: Field medic consumables.</li>
+            </ul>
+            <button>Construct (180 scrap, 25 parts)</button>
+          </article>
+          <article class="card">
+            <h3>Trade Depot</h3>
+            <p>Connects to caravan routes and market intel. Expands trading slots.</p>
+            <ul>
+              <li>Level: 1</li>
+              <li>Effect: +2 trade offers, -5% taxes.</li>
+              <li>Unlocks: Black market contracts.</li>
+            </ul>
+            <button>Upgrade (250 scrap, 50 parts)</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="crafting">
+        <header>
+          <h2>Equipment Crafting & Vehicles</h2>
+          <p>Craft gear to survive and build vehicles to expand expedition routes.</p>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Crafting Queue</h3>
+            <ul>
+              <li>1x Scrap Armor (02:20 remaining)</li>
+              <li>1x Field Scanner (05:10 remaining)</li>
+              <li>2x Fuel Cell (00:45 remaining)</li>
+            </ul>
+            <button>Open Workshop</button>
+          </article>
+          <article class="card">
+            <h3>Featured Blueprints</h3>
+            <ul>
+              <li>Rust-Runner Rifle — +12% scavenging success</li>
+              <li>Hazmat Kit — -20% radiation damage</li>
+              <li>Drone Pack — +1 expedition slot</li>
+            </ul>
+            <button>Research Blueprints</button>
+          </article>
+          <article class="card">
+            <h3>Vehicle Bay</h3>
+            <ul>
+              <li>Light Buggy (70% durability)</li>
+              <li>Hauler Rig (45% durability)</li>
+              <li>Slot 3 unlocked at Garage Level 2.</li>
+            </ul>
+            <button>Assign Vehicles</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="trading">
+        <header>
+          <h2>Trading Post</h2>
+          <p>Exchange resources, negotiate contracts, and influence wasteland prices.</p>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Active Offers</h3>
+            <ul>
+              <li>Sell 50 scrap → 180 credits</li>
+              <li>Buy 20 water → 120 credits</li>
+              <li>Trade 10 parts → 1 fuel cell</li>
+            </ul>
+            <button>Open Market</button>
+          </article>
+          <article class="card">
+            <h3>Caravan Contracts</h3>
+            <ul>
+              <li>Deliver medical supplies (8h)</li>
+              <li>Escort fuel convoy (12h)</li>
+              <li>Scout raider camp (4h)</li>
+            </ul>
+            <button>Assign Crew</button>
+          </article>
+          <article class="card">
+            <h3>Market Intel</h3>
+            <p>Scrap prices rising in the Northern Territories. Fuel demand surging.</p>
+            <button>Purchase Intel (75 credits)</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="achievements">
+        <header>
+          <h2>Achievements</h2>
+          <p>Long-term goals that reward deep progression and mastery.</p>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Scavenging</h3>
+            <ul>
+              <li>First Steps — Gain 10 XP (Unlocked)</li>
+              <li>Seasoned Scavenger — Gain 500 XP (Unlocked)</li>
+              <li>Scrap Hoarder — Accumulate 5,000 scrap (2,130/5,000)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Base Building</h3>
+            <ul>
+              <li>Foundation — Build your first facility (Unlocked)</li>
+              <li>Compound Builder — Build 8 facilities (4/8)</li>
+              <li>Industrialist — Reach level 3 in 4 facilities (1/4)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Dominion</h3>
+            <ul>
+              <li>Road Captain — Own 3 vehicles (1/3)</li>
+              <li>Trade Baron — Complete 20 trades (6/20)</li>
+              <li>Wasteland Legend — Reach level 50 (12/50)</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="progression">
+        <header>
+          <h2>50+ Hour Progression Map</h2>
+          <p>Unlock new systems steadily through facility upgrades and key milestones.</p>
+        </header>
+        <div class="timeline">
+          <div>
+            <h4>Phase 1: Scavenger (0-6h)</h4>
+            <p>Unlock Shelter level 2, basic expeditions, and build Water Purifier.</p>
+          </div>
+          <div>
+            <h4>Phase 2: Settlement (6-18h)</h4>
+            <p>Access Workshop tier 2, open Trading Post, and craft your first vehicle.</p>
+          </div>
+          <div>
+            <h4>Phase 3: Caravan Lord (18-35h)</h4>
+            <p>Manage multiple expedition teams, unlock faction contracts and raids.</p>
+          </div>
+          <div>
+            <h4>Phase 4: Wasteland Empire (35-50h+)</h4>
+            <p>Automate resources, control regional markets, and command elite fleets.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
