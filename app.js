@@ -274,9 +274,6 @@ const formatTime = (seconds) => {
   return `${secs}s`;
 };
 
-const sumResources = (resourceList) =>
-  resourceList.reduce((acc, resource) => acc + resource.amount, 0);
-
 const applyResourceDelta = (state, delta) => {
   const resources = { ...state.resources };
   Object.entries(delta).forEach(([key, value]) => {
@@ -301,6 +298,8 @@ const calculateProgress = (endTime, duration) => {
   const elapsed = Math.max(0, now - (endTime - duration * 1000));
   return Math.min(100, (elapsed / (duration * 1000)) * 100);
 };
+
+const h = React.createElement;
 
 const App = () => {
   const [section, setSection] = useState("overview");
@@ -356,6 +355,10 @@ const App = () => {
         const completedCrafts = next.activeCrafts.filter((item) => item.remaining <= 0);
         if (completedCrafts.length) {
           completedCrafts.forEach((craft) => {
+            if (craft.type === "vehicle") {
+              next.vehicles = [...new Set([...next.vehicles, craft.id])];
+              return;
+            }
             next.equipment = [...next.equipment, craft.id];
             next.stats.crafts += 1;
           });
@@ -373,8 +376,7 @@ const App = () => {
 
         const newAchievements = ACHIEVEMENTS.filter(
           (achievement) =>
-            !next.achievements.includes(achievement.id) &&
-            achievement.check(next)
+            !next.achievements.includes(achievement.id) && achievement.check(next)
         ).map((achievement) => achievement.id);
 
         if (newAchievements.length) {
@@ -507,368 +509,490 @@ const App = () => {
     }));
   }, [state.buildings]);
 
-  const craftedVehicles = state.activeCrafts
-    .filter((item) => item.type === "vehicle")
-    .map((item) => item.id);
+  const renderTag = (text) => h("span", { className: "tag" }, text);
 
-  useEffect(() => {
-    if (!craftedVehicles.length) return;
-    setState((prev) => ({
-      ...prev,
-      vehicles: [...new Set([...prev.vehicles, ...craftedVehicles])],
-    }));
-  }, [craftedVehicles.length]);
-
-  return (
-    <>
-      <aside className="sidebar">
-        <div className="brand">
-          Wasteland <span>Reavers</span>
-        </div>
-        <div className="nav-group">
-          {SECTION_LIST.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-button ${section === item.id ? "active" : ""}`}
-              onClick={() => setSection(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-        <div className="card">
-          <h3>Empire Status</h3>
-          <p>Base tier: {Object.keys(state.buildings).length + 1}</p>
-          <p>Expeditions completed: {state.stats.expeditions}</p>
-          <p>Equipment crafted: {state.stats.crafts}</p>
-          <div className="taglist">
-            {state.unlocked.operations ? (
-              <span className="tag">Long Ops Ready</span>
-            ) : (
-              <span className="tag">Early Settlement</span>
-            )}
-            {state.vehicles.length > 0 ? (
-              <span className="tag">Vehicle Fleet</span>
-            ) : (
-              <span className="tag">No Vehicles</span>
-            )}
-          </div>
-        </div>
-      </aside>
-
-      <main className="main">
-        <div className="topbar">
-          <div className="resource-bar">
-            {Object.entries(state.resources).map(([key, value]) => (
-              <div key={key} className="resource">
-                <label>{key}</label>
-                <strong>{formatNumber(value)}</strong>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="content">
-          {section === "overview" && (
-            <div className="grid">
-              <div className="card">
-                <h3>Core Loop</h3>
-                <ul>
-                  <li>Scavenge in the ruins for scrap, rations, and credits.</li>
-                  <li>Invest in facilities to unlock deeper systems.</li>
-                  <li>Deploy expeditions to gather rare resources.</li>
-                  <li>Craft equipment and vehicles to scale your empire.</li>
-                  <li>Trade with factions to earn reputation and influence.</li>
-                </ul>
-                <div className="pill">Persistent Progression</div>
-              </div>
-              <div className="card">
-                <h3>Idle Economy</h3>
-                <p>
-                  Facilities generate resources every second. Stack production to sustain long-term play
-                  sessions and 50+ hours of progression.
-                </p>
-                <div className="taglist">
-                  {longTermProjection.map((resource) => (
-                    <span key={resource.name} className="tag">
-                      +{resource.amount.toFixed(1)} {resource.name}/sec
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="card">
-                <h3>Active Operations</h3>
-                <p>
-                  Real-time timers keep expeditions, crafting queues, and base construction moving even when
-                  idle. Stack multiple timers to orchestrate a thriving wasteland empire.
-                </p>
-                <div className="taglist">
-                  <span className="tag">Build Queue: {state.activeBuilds.length}</span>
-                  <span className="tag">Craft Queue: {state.activeCrafts.length}</span>
-                  <span className="tag">Expeditions: {state.activeExpeditions.length}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {section === "scavenge" && (
-            <div className="grid">
-              <div className="card">
-                <h3>Scavenge the Ashlands</h3>
-                <p>
-                  Lead a quick run through derelict zones. Each run feeds your growing settlement and
-                  unlocks long-term upgrades.
-                </p>
-                <div className="taglist">
-                  <span className="tag">Bonus gear: {state.equipment.length}</span>
-                  <span className="tag">Crew cap: {3 + (state.buildings.habitat || 0) * 2}</span>
-                </div>
-                <div className="action">
-                  <button className="primary" onClick={scavengeResources}>
-                    Quick Scavenge
-                  </button>
-                </div>
-              </div>
-              <div className="card">
-                <h3>Scavenge Tips</h3>
-                <ul>
-                  <li>Craft equipment to improve your scavenging yields.</li>
-                  <li>Build Scrapyards to automate scrap income.</li>
-                  <li>Vehicles reduce expedition downtime and unlock auto-runs.</li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {section === "base" && (
-            <div className="grid">
-              {BUILDINGS.map((building) => (
-                <div key={building.id} className="card">
-                  <div className="section-header">
-                    <h3>{building.name}</h3>
-                    <span className="pill">Lvl {state.buildings[building.id] || 0}</span>
-                  </div>
-                  <p>{building.description}</p>
-                  <div className="taglist">
-                    {Object.entries(building.outputs).map(([key, value]) => (
-                      <span key={key} className="tag">
-                        +{value}/sec {key}
-                      </span>
-                    ))}
-                  </div>
-                  <p>
-                    Cost: {Object.entries(building.baseCost)
+  return h(
+    React.Fragment,
+    null,
+    h(
+      "aside",
+      { className: "sidebar" },
+      h(
+        "div",
+        { className: "brand" },
+        "Wasteland ",
+        h("span", null, "Reavers")
+      ),
+      h(
+        "div",
+        { className: "nav-group" },
+        SECTION_LIST.map((item) =>
+          h(
+            "button",
+            {
+              key: item.id,
+              className: `nav-button ${section === item.id ? "active" : ""}`,
+              onClick: () => setSection(item.id),
+            },
+            item.label
+          )
+        )
+      ),
+      h(
+        "div",
+        { className: "card" },
+        h("h3", null, "Empire Status"),
+        h("p", null, `Base tier: ${Object.keys(state.buildings).length + 1}`),
+        h("p", null, `Expeditions completed: ${state.stats.expeditions}`),
+        h("p", null, `Equipment crafted: ${state.stats.crafts}`),
+        h(
+          "div",
+          { className: "taglist" },
+          state.unlocked.operations
+            ? renderTag("Long Ops Ready")
+            : renderTag("Early Settlement"),
+          state.vehicles.length > 0 ? renderTag("Vehicle Fleet") : renderTag("No Vehicles")
+        )
+      )
+    ),
+    h(
+      "main",
+      { className: "main" },
+      h(
+        "div",
+        { className: "topbar" },
+        h(
+          "div",
+          { className: "resource-bar" },
+          Object.entries(state.resources).map(([key, value]) =>
+            h(
+              "div",
+              { key, className: "resource" },
+              h("label", null, key),
+              h("strong", null, formatNumber(value))
+            )
+          )
+        )
+      ),
+      h(
+        "div",
+        { className: "content" },
+        section === "overview"
+          ? h(
+              "div",
+              { className: "grid" },
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Core Loop"),
+                h(
+                  "ul",
+                  null,
+                  h("li", null, "Scavenge in the ruins for scrap, rations, and credits."),
+                  h("li", null, "Invest in facilities to unlock deeper systems."),
+                  h("li", null, "Deploy expeditions to gather rare resources."),
+                  h("li", null, "Craft equipment and vehicles to scale your empire."),
+                  h("li", null, "Trade with factions to earn reputation and influence.")
+                ),
+                h("div", { className: "pill" }, "Persistent Progression")
+              ),
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Idle Economy"),
+                h(
+                  "p",
+                  null,
+                  "Facilities generate resources every second. Stack production to sustain long-term play sessions and 50+ hours of progression."
+                ),
+                h(
+                  "div",
+                  { className: "taglist" },
+                  longTermProjection.map((resource) =>
+                    h(
+                      "span",
+                      { key: resource.name, className: "tag" },
+                      `+${resource.amount.toFixed(1)} ${resource.name}/sec`
+                    )
+                  )
+                )
+              ),
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Active Operations"),
+                h(
+                  "p",
+                  null,
+                  "Real-time timers keep expeditions, crafting queues, and base construction moving even when idle. Stack multiple timers to orchestrate a thriving wasteland empire."
+                ),
+                h(
+                  "div",
+                  { className: "taglist" },
+                  renderTag(`Build Queue: ${state.activeBuilds.length}`),
+                  renderTag(`Craft Queue: ${state.activeCrafts.length}`),
+                  renderTag(`Expeditions: ${state.activeExpeditions.length}`)
+                )
+              )
+            )
+          : null,
+        section === "scavenge"
+          ? h(
+              "div",
+              { className: "grid" },
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Scavenge the Ashlands"),
+                h(
+                  "p",
+                  null,
+                  "Lead a quick run through derelict zones. Each run feeds your growing settlement and unlocks long-term upgrades."
+                ),
+                h(
+                  "div",
+                  { className: "taglist" },
+                  renderTag(`Bonus gear: ${state.equipment.length}`),
+                  renderTag(`Crew cap: ${3 + (state.buildings.habitat || 0) * 2}`)
+                ),
+                h(
+                  "div",
+                  { className: "action" },
+                  h(
+                    "button",
+                    { className: "primary", onClick: scavengeResources },
+                    "Quick Scavenge"
+                  )
+                )
+              ),
+              h(
+                "div",
+                { className: "card" },
+                h("h3", null, "Scavenge Tips"),
+                h(
+                  "ul",
+                  null,
+                  h("li", null, "Craft equipment to improve your scavenging yields."),
+                  h("li", null, "Build Scrapyards to automate scrap income."),
+                  h("li", null, "Vehicles reduce expedition downtime and unlock auto-runs.")
+                )
+              )
+            )
+          : null,
+        section === "base"
+          ? h(
+              "div",
+              { className: "grid" },
+              BUILDINGS.map((building) =>
+                h(
+                  "div",
+                  { key: building.id, className: "card" },
+                  h(
+                    "div",
+                    { className: "section-header" },
+                    h("h3", null, building.name),
+                    h("span", { className: "pill" }, `Lvl ${state.buildings[building.id] || 0}`)
+                  ),
+                  h("p", null, building.description),
+                  h(
+                    "div",
+                    { className: "taglist" },
+                    Object.entries(building.outputs).map(([key, value]) =>
+                      h("span", { key, className: "tag" }, `+${value}/sec ${key}`)
+                    )
+                  ),
+                  h(
+                    "p",
+                    null,
+                    `Cost: ${Object.entries(building.baseCost)
                       .map(([key, value]) => `${value} ${key}`)
-                      .join(", ")}
-                  </p>
-                  <div className="action">
-                    <button
-                      className="primary"
-                      onClick={() => startBuild(building)}
-                      disabled={!canAfford(state.resources, building.baseCost)}
-                    >
-                      Build ({building.time}s)
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {section === "expeditions" && (
-            <div className="grid">
-              {EXPEDITIONS.map((expedition) => {
+                      .join(", ")}`
+                  ),
+                  h(
+                    "div",
+                    { className: "action" },
+                    h(
+                      "button",
+                      {
+                        className: "primary",
+                        onClick: () => startBuild(building),
+                        disabled: !canAfford(state.resources, building.baseCost),
+                      },
+                      `Build (${building.time}s)`
+                    )
+                  )
+                )
+              )
+            )
+          : null,
+        section === "expeditions"
+          ? h(
+              "div",
+              { className: "grid" },
+              EXPEDITIONS.map((expedition) => {
                 const locked = !isUnlocked(expedition.unlock);
-                return (
-                  <div key={expedition.id} className="card">
-                    <div className="section-header">
-                      <h3>{expedition.name}</h3>
-                      <span className={`pill ${locked ? "warning" : ""}`}>
-                        {locked ? "Locked" : expedition.risk}
-                      </span>
-                    </div>
-                    <p>Duration: {formatTime(expedition.duration)}</p>
-                    <p>
-                      Rewards: {Object.entries(expedition.rewards)
-                        .map(([key, value]) => `${value} ${key}`)
-                        .join(", ")}
-                    </p>
-                    <div className="action">
-                      <button
-                        className="primary"
-                        onClick={() => launchExpedition(expedition)}
-                        disabled={locked}
-                      >
-                        Deploy Squad
-                      </button>
-                    </div>
-                  </div>
+                return h(
+                  "div",
+                  { key: expedition.id, className: "card" },
+                  h(
+                    "div",
+                    { className: "section-header" },
+                    h("h3", null, expedition.name),
+                    h(
+                      "span",
+                      { className: `pill ${locked ? "warning" : ""}` },
+                      locked ? "Locked" : expedition.risk
+                    )
+                  ),
+                  h("p", null, `Duration: ${formatTime(expedition.duration)}`),
+                  h(
+                    "p",
+                    null,
+                    `Rewards: ${Object.entries(expedition.rewards)
+                      .map(([key, value]) => `${value} ${key}`)
+                      .join(", ")}`
+                  ),
+                  h(
+                    "div",
+                    { className: "action" },
+                    h(
+                      "button",
+                      {
+                        className: "primary",
+                        onClick: () => launchExpedition(expedition),
+                        disabled: locked,
+                      },
+                      "Deploy Squad"
+                    )
+                  )
                 );
-              })}
-            </div>
-          )}
-
-          {section === "crafting" && (
-            <div className="grid">
-              {CRAFTING_RECIPES.map((recipe) => (
-                <div key={recipe.id} className="card">
-                  <div className="section-header">
-                    <h3>{recipe.name}</h3>
-                    <span className="pill">{recipe.type}</span>
-                  </div>
-                  <p>{recipe.effect}</p>
-                  <p>
-                    Cost: {Object.entries(recipe.cost)
+              })
+            )
+          : null,
+        section === "crafting"
+          ? h(
+              "div",
+              { className: "grid" },
+              CRAFTING_RECIPES.map((recipe) =>
+                h(
+                  "div",
+                  { key: recipe.id, className: "card" },
+                  h(
+                    "div",
+                    { className: "section-header" },
+                    h("h3", null, recipe.name),
+                    h("span", { className: "pill" }, recipe.type)
+                  ),
+                  h("p", null, recipe.effect),
+                  h(
+                    "p",
+                    null,
+                    `Cost: ${Object.entries(recipe.cost)
                       .map(([key, value]) => `${value} ${key}`)
-                      .join(", ")}
-                  </p>
-                  <div className="action">
-                    <button
-                      className="primary"
-                      onClick={() => startCraft(recipe)}
-                      disabled={!state.unlocked.crafting || !canAfford(state.resources, recipe.cost)}
-                    >
-                      Craft ({recipe.time}s)
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {section === "vehicles" && (
-            <div className="grid">
-              {VEHICLES.map((vehicle) => (
-                <div key={vehicle.id} className="card">
-                  <div className="section-header">
-                    <h3>{vehicle.name}</h3>
-                    {state.vehicles.includes(vehicle.id) ? (
-                      <span className="pill">Owned</span>
-                    ) : (
-                      <span className="pill warning">Prototype</span>
-                    )}
-                  </div>
-                  <p>{vehicle.bonus}</p>
-                  <p>
-                    Cost: {Object.entries(vehicle.cost)
+                      .join(", ")}`
+                  ),
+                  h(
+                    "div",
+                    { className: "action" },
+                    h(
+                      "button",
+                      {
+                        className: "primary",
+                        onClick: () => startCraft(recipe),
+                        disabled: !state.unlocked.crafting || !canAfford(state.resources, recipe.cost),
+                      },
+                      `Craft (${recipe.time}s)`
+                    )
+                  )
+                )
+              )
+            )
+          : null,
+        section === "vehicles"
+          ? h(
+              "div",
+              { className: "grid" },
+              VEHICLES.map((vehicle) =>
+                h(
+                  "div",
+                  { key: vehicle.id, className: "card" },
+                  h(
+                    "div",
+                    { className: "section-header" },
+                    h("h3", null, vehicle.name),
+                    state.vehicles.includes(vehicle.id)
+                      ? h("span", { className: "pill" }, "Owned")
+                      : h("span", { className: "pill warning" }, "Prototype")
+                  ),
+                  h("p", null, vehicle.bonus),
+                  h(
+                    "p",
+                    null,
+                    `Cost: ${Object.entries(vehicle.cost)
                       .map(([key, value]) => `${value} ${key}`)
-                      .join(", ")}
-                  </p>
-                  <div className="action">
-                    <button
-                      className="primary"
-                      onClick={() => startVehicle(vehicle)}
-                      disabled={!state.unlocked.vehicles || !canAfford(state.resources, vehicle.cost)}
-                    >
-                      Build ({vehicle.time}s)
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {section === "trading" && (
-            <div className="grid">
-              {TRADES.map((trade) => (
-                <div key={trade.id} className="card">
-                  <div className="section-header">
-                    <h3>{trade.name}</h3>
-                    <span className="pill">Deal</span>
-                  </div>
-                  <p>{trade.description}</p>
-                  <p>
-                    Cost: {Object.entries(trade.cost)
+                      .join(", ")}`
+                  ),
+                  h(
+                    "div",
+                    { className: "action" },
+                    h(
+                      "button",
+                      {
+                        className: "primary",
+                        onClick: () => startVehicle(vehicle),
+                        disabled: !state.unlocked.vehicles || !canAfford(state.resources, vehicle.cost),
+                      },
+                      `Build (${vehicle.time}s)`
+                    )
+                  )
+                )
+              )
+            )
+          : null,
+        section === "trading"
+          ? h(
+              "div",
+              { className: "grid" },
+              TRADES.map((trade) =>
+                h(
+                  "div",
+                  { key: trade.id, className: "card" },
+                  h(
+                    "div",
+                    { className: "section-header" },
+                    h("h3", null, trade.name),
+                    h("span", { className: "pill" }, "Deal")
+                  ),
+                  h("p", null, trade.description),
+                  h(
+                    "p",
+                    null,
+                    `Cost: ${Object.entries(trade.cost)
                       .map(([key, value]) => `${value} ${key}`)
-                      .join(", ")}
-                  </p>
-                  <p>
-                    Reward: {Object.entries(trade.reward)
+                      .join(", ")}`
+                  ),
+                  h(
+                    "p",
+                    null,
+                    `Reward: ${Object.entries(trade.reward)
                       .map(([key, value]) => `${value} ${key}`)
-                      .join(", ")}
-                  </p>
-                  <div className="action">
-                    <button
-                      className="primary"
-                      onClick={() => executeTrade(trade)}
-                      disabled={!state.unlocked.trading || !canAfford(state.resources, trade.cost)}
-                    >
-                      Execute Trade
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {section === "achievements" && (
-            <div className="grid">
-              {ACHIEVEMENTS.map((achievement) => (
-                <div key={achievement.id} className="card">
-                  <div className="section-header">
-                    <h3>{achievement.title}</h3>
-                    <span className="pill">
-                      {state.achievements.includes(achievement.id) ? "Unlocked" : "Locked"}
-                    </span>
-                  </div>
-                  <p>{achievement.description}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="card">
-            <div className="section-header">
-              <h3>Active Timers</h3>
-              <span className="pill">Real-time</span>
-            </div>
-            <div className="grid">
-              {state.activeBuilds.map((build) => (
-                <div key={build.endTime} className="card">
-                  <h3>{build.name}</h3>
-                  <div className="timer">{formatTime(build.remaining / 1000)}</div>
-                  <div className="progress">
-                    <span style={{ width: `${calculateProgress(build.endTime, build.duration)}%` }} />
-                  </div>
-                </div>
-              ))}
-              {state.activeCrafts.map((craft) => (
-                <div key={craft.endTime} className="card">
-                  <h3>{craft.name}</h3>
-                  <div className="timer">{formatTime(craft.remaining / 1000)}</div>
-                  <div className="progress">
-                    <span style={{ width: `${calculateProgress(craft.endTime, craft.duration)}%` }} />
-                  </div>
-                </div>
-              ))}
-              {state.activeExpeditions.map((expedition) => (
-                <div key={expedition.endTime} className="card">
-                  <h3>{expedition.name}</h3>
-                  <div className="timer">{formatTime(expedition.remaining / 1000)}</div>
-                  <div className="progress">
-                    <span
-                      style={{
-                        width: `${calculateProgress(expedition.endTime, expedition.duration)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-              {!state.activeBuilds.length &&
-                !state.activeCrafts.length &&
-                !state.activeExpeditions.length && <p>No active timers yet.</p>}
-            </div>
-          </div>
-
-          <div className="footer-note">
-            Progress is saved automatically in local storage. Keep pushing through the wasteland and
-            unlock ever deeper systems.
-          </div>
-        </div>
-      </main>
-    </>
+                      .join(", ")}`
+                  ),
+                  h(
+                    "div",
+                    { className: "action" },
+                    h(
+                      "button",
+                      {
+                        className: "primary",
+                        onClick: () => executeTrade(trade),
+                        disabled: !state.unlocked.trading || !canAfford(state.resources, trade.cost),
+                      },
+                      "Execute Trade"
+                    )
+                  )
+                )
+              )
+            )
+          : null,
+        section === "achievements"
+          ? h(
+              "div",
+              { className: "grid" },
+              ACHIEVEMENTS.map((achievement) =>
+                h(
+                  "div",
+                  { key: achievement.id, className: "card" },
+                  h(
+                    "div",
+                    { className: "section-header" },
+                    h("h3", null, achievement.title),
+                    h(
+                      "span",
+                      { className: "pill" },
+                      state.achievements.includes(achievement.id) ? "Unlocked" : "Locked"
+                    )
+                  ),
+                  h("p", null, achievement.description)
+                )
+              )
+            )
+          : null,
+        h(
+          "div",
+          { className: "card" },
+          h(
+            "div",
+            { className: "section-header" },
+            h("h3", null, "Active Timers"),
+            h("span", { className: "pill" }, "Real-time")
+          ),
+          h(
+            "div",
+            { className: "grid" },
+            state.activeBuilds.map((build) =>
+              h(
+                "div",
+                { key: build.endTime, className: "card" },
+                h("h3", null, build.name),
+                h("div", { className: "timer" }, formatTime(build.remaining / 1000)),
+                h(
+                  "div",
+                  { className: "progress" },
+                  h("span", {
+                    style: { width: `${calculateProgress(build.endTime, build.duration)}%` },
+                  })
+                )
+              )
+            ),
+            state.activeCrafts.map((craft) =>
+              h(
+                "div",
+                { key: craft.endTime, className: "card" },
+                h("h3", null, craft.name),
+                h("div", { className: "timer" }, formatTime(craft.remaining / 1000)),
+                h(
+                  "div",
+                  { className: "progress" },
+                  h("span", {
+                    style: { width: `${calculateProgress(craft.endTime, craft.duration)}%` },
+                  })
+                )
+              )
+            ),
+            state.activeExpeditions.map((expedition) =>
+              h(
+                "div",
+                { key: expedition.endTime, className: "card" },
+                h("h3", null, expedition.name),
+                h("div", { className: "timer" }, formatTime(expedition.remaining / 1000)),
+                h(
+                  "div",
+                  { className: "progress" },
+                  h("span", {
+                    style: {
+                      width: `${calculateProgress(expedition.endTime, expedition.duration)}%`,
+                    },
+                  })
+                )
+              )
+            ),
+            !state.activeBuilds.length &&
+            !state.activeCrafts.length &&
+            !state.activeExpeditions.length
+              ? h("p", null, "No active timers yet.")
+              : null
+          )
+        ),
+        h(
+          "div",
+          { className: "footer-note" },
+          "Progress is saved automatically in local storage. Keep pushing through the wasteland and unlock ever deeper systems."
+        )
+      )
+    )
   );
 };
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+root.render(h(App));
