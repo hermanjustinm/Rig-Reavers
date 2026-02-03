@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rig Reavers - Wasteland Survival PBBG</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;1,500&family=Rajdhani:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <header class="brand">
+        <p class="overline">Rig Reavers</p>
+        <h1>Wasteland Scavenging Empire</h1>
+      </header>
+
+      <section class="profile">
+        <div>
+          <h2>Rookie Scavenger</h2>
+          <p class="muted">Level <span data-level>1</span> · District 12 Fringe</p>
+        </div>
+        <div class="profile-stats">
+          <div class="stat-row">
+            <div class="stat-header">
+              <span>Health</span>
+              <strong data-stat-value="health">0 / 0</strong>
+            </div>
+            <div class="bar" data-bar="health">
+              <div></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span>Energy</span>
+              <strong data-stat-value="energy">0 / 0</strong>
+            </div>
+            <div class="bar energy" data-bar="energy">
+              <div></div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-header">
+              <span>XP Level</span>
+              <strong data-stat-value="xp">0 / 0</strong>
+            </div>
+            <div class="bar xp" data-bar="xp">
+              <div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="live-ops">
+        <h3>Activity Log</h3>
+        <ul id="activity-log" class="compact-log"></ul>
+      </section>
+
+      <section class="resource-panel" data-collapsible="supplies">
+        <div class="panel-header">
+          <h2>Supplies</h2>
+          <button class="ghost-button" type="button" data-action="toggle-supplies">
+            Collapse
+          </button>
+        </div>
+        <ul>
+          <li><span>Scrap</span><strong data-resource="scrap">0</strong></li>
+          <li><span>Fuel</span><strong data-resource="fuel">0</strong></li>
+          <li><span>Water</span><strong data-resource="water">0</strong></li>
+          <li><span>Food</span><strong data-resource="food">0</strong></li>
+          <li><span>Parts</span><strong data-resource="parts">0</strong></li>
+          <li><span>Credits</span><strong data-resource="credits">0</strong></li>
+        </ul>
+        <div class="stat">Storage <span data-storage>0 / 0</span></div>
+        <div class="bar" data-bar="storage">
+          <div></div>
+        </div>
+      </section>
+
+      <nav class="nav">
+        <button class="active" data-page="scavenging">Scavenging</button>
+        <button data-page="base">Base Operations</button>
+        <button data-page="training">Training</button>
+        <button data-page="workshop">Workshop</button>
+        <button data-page="garage">Garage</button>
+        <button data-page="trading">Trading Post</button>
+        <button data-page="achievements">Achievements</button>
+        <button data-page="statistics">Statistics</button>
+      </nav>
+
+    </aside>
+
+    <main>
+      <section class="page active" id="scavenging" data-page="scavenging">
+        <header class="page-header">
+          <div>
+            <h2>Scavenging</h2>
+            <p>Manual scavenging uses energy and takes a short time. More zones unlock with higher stats.</p>
+          </div>
+        </header>
+        <div class="grid">
+          <article class="card">
+            <header>
+              <h3>Quick Scavenge</h3>
+              <span class="badge">Low Risk</span>
+            </header>
+            <p>Search nearby debris for small salvage. Takes 30 seconds.</p>
+            <div class="meta">
+              <span>Cost: 5 Energy</span>
+              <span data-scavenge-status>Ready</span>
+              <span>Rewards: Scrap, Food, Credits</span>
+            </div>
+            <div class="progress-bar" data-progress="scavenge">
+              <div class="progress-fill"></div>
+              <span class="progress-label" data-progress-label="scavenge">Ready</span>
+            </div>
+            <button data-action="scavenge" data-cost-energy="5">Search Ruins</button>
+          </article>
+
+          <article class="card">
+            <header>
+              <h3>Locked Scavenge Zones</h3>
+              <span class="badge warning">Stats</span>
+            </header>
+            <div class="expedition">
+              <h4>Sunken Market</h4>
+              <p>Requires Dexterity 3.0 to navigate the wreckage.</p>
+              <div class="meta">
+                <span>Cost: 8 Energy</span>
+                <span>Status: Locked</span>
+              </div>
+              <button
+                data-action="scavenge-locked"
+                data-required-stat="dexterity"
+                data-required-value="3"
+                data-cost-energy="8"
+              >
+                Locked
+              </button>
+            </div>
+            <div class="expedition">
+              <h4>Collapsed Depot</h4>
+              <p>Requires Strength 3.5 to pry open sealed containers.</p>
+              <div class="meta">
+                <span>Cost: 10 Energy</span>
+                <span>Status: Locked</span>
+              </div>
+              <button
+                data-action="scavenge-locked"
+                data-required-stat="strength"
+                data-required-value="3.5"
+                data-cost-energy="10"
+              >
+                Locked
+              </button>
+            </div>
+          </article>
+
+          <article class="card">
+            <header>
+              <h3>Timed Explorations</h3>
+              <span class="badge">Timers</span>
+            </header>
+            <p>Send a crew into the wastes. Rewards arrive when the timer ends.</p>
+            <div class="meta">
+              <span>Basic exploration unlocked.</span>
+            </div>
+            <div class="expedition">
+              <h4>Dry Flats Recon</h4>
+              <p>Low risk scouting run. No energy cost.</p>
+              <div class="meta">
+                <span>Duration: 5m</span>
+                <span data-expedition-status="dry-flats">Ready</span>
+              </div>
+              <div class="progress-bar" data-expedition-progress="dry-flats">
+                <div class="progress-fill"></div>
+                <span class="progress-label" data-progress-label="dry-flats">Ready</span>
+              </div>
+              <button data-action="expedition" data-expedition="dry-flats" data-duration="300">
+                Dispatch Crew
+              </button>
+            </div>
+            <div class="expedition">
+              <h4>Rust Ridge Run</h4>
+              <p>Requires a war rig to survive the trip.</p>
+              <div class="meta">
+                <span>Duration: 20m</span>
+                <span data-expedition-status="rust-ridge">Requires: War Rig</span>
+              </div>
+              <button disabled>Requires War Rig</button>
+            </div>
+          </article>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <header>
+              <h3>Work Board</h3>
+              <span class="badge">Daily</span>
+            </header>
+            <p>Take steady jobs to earn credits and rations.</p>
+            <div class="meta">
+              <span>Cooldown: 15m</span>
+              <span>Rewards: Credits, Food</span>
+            </div>
+            <button data-action="work">Take Shift (15m)</button>
+          </article>
+          <article class="card">
+            <header>
+              <h3>Survival Actions</h3>
+              <span class="badge">Camp</span>
+            </header>
+            <p>Recover between runs.</p>
+            <div class="meta">
+              <span>Resting removes fatigue.</span>
+            </div>
+            <button data-action="rest">Catch Breath (+5 Health, +5 Energy)</button>
+            <button data-action="ration">Eat Ration (+8 Energy, +4 Health)</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="base" data-page="base">
+        <header class="page-header">
+          <div>
+            <h2>Base Operations</h2>
+            <p>Start with a broken shelter. Each upgrade unlocks new systems and long-term progression.</p>
+          </div>
+          <div class="status-pill" data-facility-count>Facilities: 0/10</div>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Collapsed Shelter</h3>
+            <p>Currently unsafe. Build this to unlock health recovery and safe storage.</p>
+            <ul>
+              <li data-facility-status>Level: 0</li>
+              <li>Effect: +20 max health, +10 max energy.</li>
+              <li>Unlocks: Basic expeditions.</li>
+            </ul>
+            <button data-action="build-shelter" data-cost-scrap="20" data-cost-parts="5">
+              Build (20 scrap, 5 parts)
+            </button>
+          </article>
+          <article class="card">
+            <h3>Water Purifier</h3>
+            <p>Required before water storage upgrades can be used.</p>
+            <ul>
+              <li>Level: 0</li>
+              <li>Effect: +1 water/hour.</li>
+              <li>Unlocks: Trade water contracts.</li>
+            </ul>
+            <button disabled>Locked</button>
+          </article>
+          <article class="card">
+            <h3>Workshop</h3>
+            <p>Opens the crafting system and equipment repair bench.</p>
+            <ul>
+              <li>Level: 0</li>
+              <li>Effect: Unlocks crafting tier 1.</li>
+              <li>Unlocks: Repair kit crafting.</li>
+            </ul>
+            <button disabled>Locked</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="training" data-page="training">
+        <header class="page-header">
+          <div>
+            <h2>Personal Training</h2>
+            <p>Train stats like a Torn City-style RPG. Training consumes energy and takes real time.</p>
+          </div>
+          <div class="status-pill" data-training-summary>Training Slots: 0/1</div>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Strength</h3>
+            <p>Boosts melee damage and carrying capacity.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="strength">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.3</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 20m</span>
+            </div>
+            <button
+              data-action="train"
+              data-stat="strength"
+              data-cost-energy="10"
+              data-duration="1200"
+            >
+              Train Strength
+            </button>
+          </article>
+          <article class="card">
+            <h3>Dexterity</h3>
+            <p>Improves scavenging success and vehicle handling.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="dexterity">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.3</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 20m</span>
+            </div>
+            <button
+              data-action="train"
+              data-stat="dexterity"
+              data-cost-energy="10"
+              data-duration="1200"
+            >
+              Train Dexterity
+            </button>
+          </article>
+          <article class="card">
+            <h3>Endurance</h3>
+            <p>Increases max health and reduces expedition fatigue.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="endurance">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.2</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 20m</span>
+            </div>
+            <button
+              data-action="train"
+              data-stat="endurance"
+              data-cost-energy="10"
+              data-duration="1200"
+            >
+              Train Endurance
+            </button>
+          </article>
+          <article class="card">
+            <h3>Defense</h3>
+            <p>Improves damage mitigation and survival odds.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="defense">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.3</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 20m</span>
+            </div>
+            <button
+              data-action="train"
+              data-stat="defense"
+              data-cost-energy="10"
+              data-duration="1200"
+            >
+              Train Defense
+            </button>
+          </article>
+          <article class="card">
+            <h3>Perception</h3>
+            <p>Unlocks rare loot and improves encounter odds.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="perception">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.3</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 20m</span>
+            </div>
+            <button
+              data-action="train"
+              data-stat="perception"
+              data-cost-energy="10"
+              data-duration="1200"
+            >
+              Train Perception
+            </button>
+          </article>
+          <article class="card">
+            <h3>Charisma</h3>
+            <p>Unlocks better deals, bribes, and faction reputation.</p>
+            <div class="stat-block">
+              <div>
+                <span>Current</span>
+                <strong data-train-stat="charisma">0</strong>
+              </div>
+              <div>
+                <span>Next Gain</span>
+                <strong>+0.2</strong>
+              </div>
+            </div>
+            <div class="meta">
+              <span>Cost: 10 Energy</span>
+              <span>Duration: 20m</span>
+            </div>
+            <button
+              data-action="train"
+              data-stat="charisma"
+              data-cost-energy="10"
+              data-duration="1200"
+            >
+              Train Charisma
+            </button>
+          </article>
+          <article class="card">
+            <h3>Current Session</h3>
+            <p data-training-status>No active training. Start a session to queue a stat gain.</p>
+            <div class="meta">
+              <span data-training-timer>Queue: 0/1</span>
+              <span>Cooldown: 15m after each session.</span>
+            </div>
+            <div class="progress-bar" data-training-progress>
+              <div class="progress-fill"></div>
+              <span class="progress-label" data-progress-label="training">Idle</span>
+            </div>
+            <button disabled data-training-button>Training Queue Locked</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="workshop" data-page="workshop">
+        <header class="page-header">
+          <div>
+            <h2>Workshop</h2>
+            <p>Craft gear, repair equipment, and unlock blueprints as your facility grows.</p>
+          </div>
+          <div class="status-pill">Queue: Locked</div>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Crafting Queue</h3>
+            <p>Build the Workshop to begin crafting.</p>
+            <div class="meta">
+              <span>Unlock: Workshop Level 1</span>
+              <span>Slots: 0/2</span>
+            </div>
+            <button disabled>Requires: 40 scrap, 10 parts</button>
+          </article>
+          <article class="card">
+            <h3>Starter Blueprints</h3>
+            <ul data-blueprint-list class="is-hidden">
+              <li>Scrap Knife — +2% scavenging success</li>
+              <li>Patch Kit — +5 health on use</li>
+              <li>Light Armor — +10 max health</li>
+            </ul>
+            <button data-action="toggle-blueprints">View Blueprints</button>
+          </article>
+          <article class="card">
+            <h3>Repair Bench</h3>
+            <p>Repairing gear reduces loss in combat and expeditions.</p>
+            <div class="meta">
+              <span>Durability Loss: High</span>
+              <span>Repair Materials: Parts + Scrap</span>
+            </div>
+            <button disabled>Requires: Workshop Level 1 (40 scrap, 10 parts)</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="garage" data-page="garage">
+        <header class="page-header">
+          <div>
+            <h2>Garage</h2>
+            <p>Vehicles unlock deeper wasteland expeditions and expand carrying capacity.</p>
+          </div>
+          <div class="status-pill">Vehicles: 0/3</div>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Starter Slot</h3>
+            <p>No vehicle assigned. Build the garage to unlock your first rig.</p>
+            <div class="meta">
+              <span>Unlock: Garage Level 1</span>
+              <span>Fuel Cost: 2 per hour</span>
+            </div>
+            <button disabled>Requires: 35 scrap, 8 parts, 5 fuel</button>
+          </article>
+          <article class="card">
+            <h3>Vehicle Mods</h3>
+            <ul>
+              <li>Reinforced Axle — +10% durability</li>
+              <li>Solar Kit — -1 fuel upkeep</li>
+              <li>Expanded Cargo — +20 storage</li>
+            </ul>
+            <button>View Mods</button>
+          </article>
+          <article class="card">
+            <h3>Salvage Yard</h3>
+            <p>Trade scrap for hulls once your reputation reaches Trusted.</p>
+            <div class="meta">
+              <span>Reputation: 120 / 500</span>
+            </div>
+            <button disabled>Requires: Garage Level 1</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="trading" data-page="trading">
+        <header class="page-header">
+          <div>
+            <h2>Trading Post</h2>
+            <p>Barter directly with stall owners. Every exchange updates your stock immediately.</p>
+          </div>
+          <div class="status-pill">Market Tier: 0</div>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Scrap Broker</h3>
+            <p>Sell scrap for quick credits.</p>
+            <div class="meta">
+              <span>Requires: 20 scrap</span>
+              <span>Reward: 60 credits</span>
+            </div>
+            <button data-action="trade" data-trade="sell-scrap">Sell 20 Scrap</button>
+          </article>
+          <article class="card">
+            <h3>Water Merchants</h3>
+            <p>Buy clean water from traveling caravans.</p>
+            <div class="meta">
+              <span>Requires: 35 credits</span>
+              <span>Reward: +10 water</span>
+            </div>
+            <button data-action="trade" data-trade="buy-water">Buy Water</button>
+          </article>
+          <article class="card">
+            <h3>Fuel Swaps</h3>
+            <p>Trade rations for fuel canisters.</p>
+            <div class="meta">
+              <span>Requires: 5 food</span>
+              <span>Reward: +2 fuel</span>
+            </div>
+            <button data-action="trade" data-trade="trade-food">Trade Food</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="achievements" data-page="achievements">
+        <header class="page-header">
+          <div>
+            <h2>Achievements</h2>
+            <p>Complete milestones to earn titles and unlock new zones.</p>
+          </div>
+          <div class="status-pill" data-achievement-summary>Unlocked: 0/6</div>
+        </header>
+        <div class="grid two">
+          <article class="card">
+            <h3>Progress Milestones</h3>
+            <ul class="achievement-list">
+              <li data-achievement="xp">First Steps — Gain 10 XP (0/10)</li>
+              <li data-achievement="scavenge">Street Runner — Complete 5 scavenges (0/5)</li>
+              <li data-achievement="work">Shift Regular — Complete 3 work shifts (0/3)</li>
+              <li data-achievement="trade">Barter Boss — Complete 3 trades (0/3)</li>
+              <li data-achievement="training">Gym Rat — Finish 3 training sessions (0/3)</li>
+              <li data-achievement="expedition">Dust Drifter — Finish 2 expeditions (0/2)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Unlocked Rewards</h3>
+            <ul id="achievement-rewards" class="achievement-list">
+              <li>No rewards unlocked yet.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="statistics" data-page="statistics">
+        <header class="page-header">
+          <div>
+            <h2>Statistics</h2>
+            <p>Live totals for your scavenger career.</p>
+          </div>
+          <div class="status-pill" data-playtime>Playtime: 0m</div>
+        </header>
+        <div class="grid three">
+          <article class="card">
+            <h3>Core Stats</h3>
+            <ul>
+              <li>Strength: <span data-stat-display="strength">0</span></li>
+              <li>Dexterity: <span data-stat-display="dexterity">0</span></li>
+              <li>Endurance: <span data-stat-display="endurance">0</span></li>
+              <li>Defense: <span data-stat-display="defense">0</span></li>
+              <li>Perception: <span data-stat-display="perception">0</span></li>
+              <li>Charisma: <span data-stat-display="charisma">0</span></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Activity Totals</h3>
+            <ul>
+              <li>Manual Scavenges: <span data-stat-total="scavenge">0</span></li>
+              <li>Timed Explorations: <span data-stat-total="expedition">0</span></li>
+              <li>Work Shifts: <span data-stat-total="work">0</span></li>
+              <li>Training Sessions: <span data-stat-total="training">0</span></li>
+              <li>Trades Completed: <span data-stat-total="trade">0</span></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Combat Readiness</h3>
+            <ul>
+              <li>Attack Rating: <span data-combat="attack">0</span></li>
+              <li>Defense Rating: <span data-combat="defense">0</span></li>
+              <li>Critical Chance: <span data-combat="crit">0%</span></li>
+              <li>Injuries: <span data-combat="injuries">0</span></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
