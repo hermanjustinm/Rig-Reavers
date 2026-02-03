@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rig Reavers</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>Rig Reavers</h1>
+          <p>Wasteland Scavenging Empire</p>
+        </div>
+        <div class="stat-block">
+          <h2>Resources</h2>
+          <div class="stat-row"><span>Scrap</span><span id="scrap">0</span></div>
+          <div class="stat-row"><span>Water</span><span id="water">0</span></div>
+          <div class="stat-row"><span>Fuel</span><span id="fuel">0</span></div>
+          <div class="stat-row"><span>Armor</span><span id="armor">0</span></div>
+        </div>
+        <div class="stat-block">
+          <h2>Status</h2>
+          <div class="stat-row"><span>Level</span><span id="level">1</span></div>
+          <div class="stat-row"><span>XP</span><span id="xp">0 / 20</span></div>
+          <div class="progress-bar"><span id="xp-progress"></span></div>
+          <div class="stat-row"><span>Energy</span><span id="energy">10 / 10</span></div>
+          <div class="progress-bar"><span id="energy-progress"></span></div>
+          <div class="stat-row"><span>Next Unlock</span><span id="next-unlock">Ash Dunes @ Lv 2</span></div>
+        </div>
+        <div class="stat-block">
+          <h2>Scout Log</h2>
+          <ul id="log"></ul>
+        </div>
+      </aside>
+
+      <section class="content">
+        <header class="hero">
+          <p class="tag">Core Loop</p>
+          <h2>Scavenge → Craft → Improve Base</h2>
+          <p class="hint">
+            Spend energy to scavenge, craft gear from salvage, and upgrade your camp for bigger
+            runs.
+          </p>
+        </header>
+
+        <section class="card">
+          <div class="card-header">
+            <h3>Quick Scavenging</h3>
+            <span class="chip">Low risk</span>
+          </div>
+          <p class="hint">Search nearby debris for small salvage.</p>
+          <div class="action-row">
+            <button type="button" id="scavenge-rust">Search Debris (2 Energy)</button>
+            <button type="button" id="scavenge-ash" disabled>Scavenge Ash Dunes (3 Energy)</button>
+          </div>
+          <p class="note" id="latest-scavenge">Ready to send a scout party.</p>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h3>Workshop</h3>
+            <span class="chip">Crafting</span>
+          </div>
+          <p class="hint">Turn scrap + water into armor plates.</p>
+          <div class="action-row">
+            <button type="button" id="craft-armor">Forge Armor (8 Scrap + 2 Water)</button>
+          </div>
+          <p class="note" id="craft-status">No active craft.</p>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h3>Base Operations</h3>
+            <span class="chip">Upgrades</span>
+          </div>
+          <p class="hint">Invest salvage to expand your camp and increase max energy.</p>
+          <div class="action-row">
+            <button type="button" id="upgrade-camp">Upgrade Camp (15 Scrap)</button>
+          </div>
+          <p class="note" id="camp-status">Camp Level 1 · Max Energy 10</p>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
