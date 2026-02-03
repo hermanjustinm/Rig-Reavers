@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wasteland Reavers - Persistent Scavenger Empire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0c0f12;
+        --panel: #141a20;
+        --panel-strong: #1a232c;
+        --accent: #ef7d24;
+        --accent-soft: rgba(239, 125, 36, 0.2);
+        --text: #e8eef2;
+        --text-muted: #a3b0ba;
+        --border: #283341;
+        --success: #3bd671;
+        --warning: #efc624;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Rajdhani", sans-serif;
+        background: radial-gradient(circle at top, #141b22, #0c0f12 60%);
+        color: var(--text);
+      }
+
+      #root {
+        min-height: 100vh;
+        display: flex;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #0f1318 0%, #131a21 100%);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 24px 20px;
+        gap: 16px;
+      }
+
+      .brand {
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .brand span {
+        color: var(--accent);
+      }
+
+      .nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .nav-button {
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-muted);
+        text-align: left;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .nav-button.active {
+        background: var(--accent-soft);
+        color: var(--text);
+        border-color: rgba(239, 125, 36, 0.4);
+      }
+
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .topbar {
+        padding: 18px 28px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        background: rgba(12, 15, 18, 0.9);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .resource-bar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        width: 100%;
+      }
+
+      .resource {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+
+      .resource label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+      }
+
+      .resource strong {
+        display: block;
+        font-size: 18px;
+      }
+
+      .content {
+        padding: 28px;
+        display: grid;
+        gap: 20px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+
+      .card {
+        background: var(--panel-strong);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 180px;
+      }
+
+      .card h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--text-muted);
+        line-height: 1.4;
+      }
+
+      .card ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--text-muted);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(59, 214, 113, 0.2);
+        color: var(--success);
+      }
+
+      .pill.warning {
+        background: rgba(239, 198, 36, 0.2);
+        color: var(--warning);
+      }
+
+      .action {
+        margin-top: auto;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button.primary {
+        background: var(--accent);
+        border: none;
+        color: #130a02;
+        font-weight: 700;
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .timer {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .taglist {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: #1a2530;
+        border: 1px solid var(--border);
+      }
+
+      .progress {
+        height: 8px;
+        border-radius: 999px;
+        background: #1b242d;
+        overflow: hidden;
+      }
+
+      .progress span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #ef7d24, #f2b45a);
+        width: 0;
+      }
+
+      .footer-note {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 900px) {
+        .sidebar {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
