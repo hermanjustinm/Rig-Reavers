@@ -75,12 +75,8 @@
       </nav>
 
       <section class="live-ops">
-        <h3>Neighborhood Heat</h3>
-        <p class="location">Market District Patrol</p>
-        <p class="timer" data-heat-timer>Quiet for 00:00</p>
-        <div class="bar" data-heat-bar>
-          <div></div>
-        </div>
+        <h3>Activity Log</h3>
+        <ul id="activity-log" class="compact-log"></ul>
       </section>
     </aside>
 
@@ -100,7 +96,7 @@
             <li>Energy regenerates every minute.</li>
             <li>Health recovers at the Shelter once built.</li>
             <li>Training locks you in for timed sessions.</li>
-            <li>District heat affects crime rewards.</li>
+            <li>Timed explorations return loot when they finish.</li>
           </ul>
         </div>
       </section>
@@ -109,9 +105,8 @@
         <header class="page-header">
           <div>
             <h2>Scavenging</h2>
-            <p>Low-level scavenging and city jobs. Earn basic supplies while you are still unknown.</p>
+            <p>Manual scavenging uses energy and pays out instantly. More zones unlock with higher stats.</p>
           </div>
-          <div class="status-pill">Heat: Low</div>
         </header>
         <div class="grid">
           <article class="card">
@@ -119,7 +114,7 @@
               <h3>Quick Scavenge</h3>
               <span class="badge">Low Risk</span>
             </header>
-            <p>Search nearby debris for small salvage. Perfect for starting from nothing.</p>
+            <p>Search nearby debris for small salvage. Instant payout.</p>
             <div class="meta">
               <span>Cost: 5 Energy</span>
               <span>Rewards: Scrap, Food, Credits</span>
@@ -129,35 +124,93 @@
 
           <article class="card">
             <header>
-              <h3>Street Hustles</h3>
-              <span class="badge warning">Risky</span>
+              <h3>Locked Scavenge Zones</h3>
+              <span class="badge warning">Stats</span>
             </header>
             <div class="expedition">
-              <h4>Fence Patrol</h4>
-              <p>Requires a shelter to stash loot safely.</p>
+              <h4>Sunken Market</h4>
+              <p>Requires Dexterity 3.0 to navigate the wreckage.</p>
               <div class="meta">
-                <span>Duration: 10m</span>
+                <span>Cost: 8 Energy</span>
                 <span>Status: Locked</span>
               </div>
-              <button disabled>Locked</button>
+              <button
+                data-action="scavenge-locked"
+                data-required-stat="dexterity"
+                data-required-value="3"
+                data-cost-energy="8"
+              >
+                Locked
+              </button>
             </div>
             <div class="expedition">
-              <h4>Cache Heist</h4>
-              <p>High-heat raid. Needs a vehicle to escape.</p>
+              <h4>Collapsed Depot</h4>
+              <p>Requires Strength 3.5 to pry open sealed containers.</p>
               <div class="meta">
-                <span>Duration: 20m</span>
+                <span>Cost: 10 Energy</span>
                 <span>Status: Locked</span>
               </div>
-              <button disabled>Locked</button>
+              <button
+                data-action="scavenge-locked"
+                data-required-stat="strength"
+                data-required-value="3.5"
+                data-cost-energy="10"
+              >
+                Locked
+              </button>
             </div>
           </article>
 
           <article class="card">
             <header>
-              <h3>Starter Actions</h3>
+              <h3>Timed Explorations</h3>
+              <span class="badge">Timers</span>
+            </header>
+            <p>Send a crew into the wastes. Rewards arrive when the timer ends.</p>
+            <div class="meta">
+              <span>Basic exploration unlocked.</span>
+            </div>
+            <div class="expedition">
+              <h4>Dry Flats Recon</h4>
+              <p>Low risk scouting run. No energy cost.</p>
+              <div class="meta">
+                <span>Duration: 5m</span>
+                <span data-expedition-status="dry-flats">Ready</span>
+              </div>
+              <button data-action="expedition" data-expedition="dry-flats" data-duration="300">
+                Dispatch Crew
+              </button>
+            </div>
+            <div class="expedition">
+              <h4>Rust Ridge Run</h4>
+              <p>Requires a war rig to survive the trip.</p>
+              <div class="meta">
+                <span>Duration: 20m</span>
+                <span data-expedition-status="rust-ridge">Locked</span>
+              </div>
+              <button disabled>Requires War Rig</button>
+            </div>
+          </article>
+        </div>
+        <div class="grid two">
+          <article class="card">
+            <header>
+              <h3>Work Board</h3>
+              <span class="badge">Daily</span>
+            </header>
+            <p>Take steady jobs to earn credits and rations.</p>
+            <div class="meta">
+              <span>Cooldown: 15m</span>
+              <span>Rewards: Credits, Food</span>
+            </div>
+            <button data-action="work">Take Shift (15m)</button>
+          </article>
+          <article class="card">
+            <header>
+              <h3>Survival Actions</h3>
               <span class="badge">Camp</span>
             </header>
-            <p>Stay alive while you build enough to upgrade your shelter.</p>
+            <p>Recover between runs.</p>
             <div class="meta">
               <span>Resting removes fatigue.</span>
             </div>
@@ -165,10 +218,6 @@
             <button data-action="ration">Eat Ration (+8 Energy, +4 Health)</button>
           </article>
         </div>
-        <section class="activity-log">
-          <h3>Activity Log</h3>
-          <ul id="activity-log"></ul>
-        </section>
       </section>
 
       <section class="page" id="base" data-page="base">

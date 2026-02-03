@@ -10,8 +10,7 @@ const statTrainingEls = document.querySelectorAll("[data-train-stat]");
 const statDisplayEls = document.querySelectorAll("[data-stat-display]");
 const combatEls = document.querySelectorAll("[data-combat]");
 const activityLog = document.querySelector("#activity-log");
-const heatTimerEl = document.querySelector("[data-heat-timer]");
-const heatBar = document.querySelector("[data-heat-bar] div");
+const expeditionStatusEls = document.querySelectorAll("[data-expedition-status]");
 
 const state = {
   health: 40,
@@ -41,11 +40,15 @@ const state = {
   },
   cooldowns: {
     rest: 0,
+    work: 0,
   },
-  heat: {
-    durationMs: 180000,
-    endsAt: Date.now() + 180000,
+  expeditions: {
+    "dry-flats": {
+      inProgress: false,
+      endsAt: 0,
+    },
   },
+  warRigBuilt: false,
 };
 
 const setActivePage = (pageId) => {
@@ -151,6 +154,20 @@ const updateButtons = () => {
   document.querySelectorAll("[data-action='ration']").forEach((button) => {
     button.disabled = state.resources.food < 1;
   });
+
+  document.querySelectorAll("[data-action='work']").forEach((button) => {
+    button.disabled = Date.now() < state.cooldowns.work;
+  });
+
+  document.querySelectorAll("[data-action='scavenge-locked']").forEach((button) => {
+    const stat = button.dataset.requiredStat;
+    const requiredValue = Number(button.dataset.requiredValue);
+    const unlocked = state.stats[stat] >= requiredValue;
+    const cost = Number(button.dataset.costEnergy || 0);
+    button.disabled = !unlocked || state.energy < cost;
+    button.textContent = unlocked ? "Scavenge" : "Locked";
+    button.dataset.action = unlocked ? "scavenge-advanced" : "scavenge-locked";
+  });
 };
 
 const addLog = (message) => {
@@ -225,6 +242,73 @@ const doTrain = (statKey) => {
   addLog(`Training complete: ${statKey} +${gain.toFixed(2)}.`);
 };
 
+const doAdvancedScavenge = (statKey, cost) => {
+  spendEnergy(cost);
+  const scrap = addResource("scrap", Math.floor(Math.random() * 5) + 2);
+  const parts = addResource("parts", Math.random() > 0.6 ? 1 : 0);
+  const credits = addResource("credits", Math.random() > 0.4 ? 2 : 1);
+  addLog(
+    `Scavenged a tougher zone: +${scrap} scrap${parts ? `, +${parts} parts` : ""}, +${credits} credits.`
+  );
+};
+
+const doWork = () => {
+  const now = Date.now();
+  if (now < state.cooldowns.work) {
+    addLog("You already took a shift. Check back later.");
+    return;
+  }
+  state.cooldowns.work = now + 15 * 60 * 1000;
+  const credits = addResource("credits", 12);
+  const food = addResource("food", 1);
+  addLog(`Worked a shift: +${credits} credits, +${food} food.`);
+};
+
+const updateExpeditionStatus = () => {
+  expeditionStatusEls.forEach((el) => {
+    const key = el.dataset.expeditionStatus;
+    const expedition = state.expeditions[key];
+    if (!expedition) return;
+    const button = document.querySelector(`[data-expedition='${key}']`);
+    if (!expedition.inProgress) {
+      el.textContent = "Ready";
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Dispatch Crew";
+      }
+      return;
+    }
+    const remaining = expedition.endsAt - Date.now();
+    if (remaining <= 0) {
+      expedition.inProgress = false;
+      el.textContent = "Complete";
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Dispatch Crew";
+      }
+      addResource("scrap", 4);
+      addResource("water", 1);
+      addLog("Exploration complete: +4 scrap, +1 water.");
+      return;
+    }
+    const minutes = Math.max(Math.floor(remaining / 60000), 0);
+    const seconds = Math.max(Math.floor((remaining % 60000) / 1000), 0);
+    el.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    if (button) {
+      button.disabled = true;
+      button.textContent = "En Route";
+    }
+  });
+};
+
+const doExpedition = (key, durationSeconds) => {
+  const expedition = state.expeditions[key];
+  if (!expedition || expedition.inProgress) return;
+  expedition.inProgress = true;
+  expedition.endsAt = Date.now() + durationSeconds * 1000;
+  addLog("Crew dispatched. Exploration underway.");
+};
+
 const doBuildShelter = () => {
   if (state.facilities.shelter) return;
   spendResource("scrap", 20);
@@ -243,9 +327,16 @@ const bindActions = () => {
     button.addEventListener("click", () => {
       const action = button.dataset.action;
       if (action === "scavenge") doScavenge();
+      if (action === "scavenge-advanced") {
+        doAdvancedScavenge(button.dataset.requiredStat, Number(button.dataset.costEnergy));
+      }
       if (action === "rest") doRest();
       if (action === "ration") doRation();
       if (action === "train") doTrain(button.dataset.stat);
+      if (action === "work") doWork();
+      if (action === "expedition") {
+        doExpedition(button.dataset.expedition, Number(button.dataset.duration));
+      }
       if (action === "build-shelter") doBuildShelter();
       updateUI();
     });
@@ -258,25 +349,7 @@ const updateUI = () => {
   updateFacilities();
   updateBars();
   updateButtons();
-};
-
-const formatTimer = (ms) => {
-  const totalSeconds = Math.max(Math.floor(ms / 1000), 0);
-  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
-  return `${minutes}:${seconds}`;
-};
-
-const updateHeat = () => {
-  const now = Date.now();
-  const remaining = state.heat.endsAt - now;
-  if (remaining <= 0) {
-    state.heat.endsAt = now + state.heat.durationMs;
-  }
-  const activeRemaining = state.heat.endsAt - now;
-  heatTimerEl.textContent = `Quiet for ${formatTimer(activeRemaining)}`;
-  const pct = clamp((activeRemaining / state.heat.durationMs) * 100, 0, 100);
-  heatBar.style.width = `${pct}%`;
+  updateExpeditionStatus();
 };
 
 const startEnergyRegen = () => {
@@ -298,6 +371,5 @@ bindActions();
 setActivePage("scavenging");
 addLog("You wake up in the slums with nothing but a busted rig.");
 updateUI();
-updateHeat();
-setInterval(updateHeat, 1000);
 startEnergyRegen();
+setInterval(updateExpeditionStatus, 1000);
