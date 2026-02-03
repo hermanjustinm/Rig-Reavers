@@ -85,7 +85,6 @@ const state = {
     training: 0,
     trade: 0,
   },
-  marketIntel: false,
   startTime: Date.now(),
   warRigBuilt: false,
 };
@@ -233,13 +232,6 @@ const updateButtons = () => {
     }
   });
 
-  document.querySelectorAll("[data-action='buy-intel']").forEach((button) => {
-    button.disabled = state.marketIntel || state.resources.credits < 100;
-    if (state.marketIntel) {
-      button.textContent = "Intel Purchased";
-    }
-  });
-
   document.querySelectorAll("[data-action='scavenge-locked']").forEach((button) => {
     const stat = button.dataset.requiredStat;
     const requiredValue = Number(button.dataset.requiredValue);
@@ -372,8 +364,10 @@ const updateExpeditionStatus = () => {
     if (!expedition) return;
     const button = document.querySelector(`[data-expedition='${key}']`);
     const progressEl = document.querySelector(`[data-expedition-progress='${key}']`);
+    const progressLabel = document.querySelector(`[data-progress-label='${key}']`);
     if (!expedition.inProgress) {
       el.textContent = "Ready";
+      if (progressLabel) progressLabel.textContent = "Ready";
       if (progressEl) {
         progressEl.classList.remove("is-active");
         progressEl.querySelector(".progress-fill").style.width = "0%";
@@ -388,6 +382,7 @@ const updateExpeditionStatus = () => {
     if (remaining <= 0) {
       expedition.inProgress = false;
       el.textContent = "Complete";
+      if (progressLabel) progressLabel.textContent = "Complete";
       if (progressEl) {
         progressEl.classList.remove("is-active");
         progressEl.querySelector(".progress-fill").style.width = "100%";
@@ -410,6 +405,12 @@ const updateExpeditionStatus = () => {
     }
     const minutes = Math.max(Math.floor(remaining / 60000), 0);
     const seconds = Math.max(Math.floor((remaining % 60000) / 1000), 0);
+    if (progressLabel) {
+      progressLabel.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+        2,
+        "0"
+      )}`;
+    }
     el.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     if (button) {
       button.disabled = true;
@@ -430,9 +431,11 @@ const doExpedition = (key, durationSeconds) => {
 const updateScavengeStatus = () => {
   const button = document.querySelector("[data-action='scavenge']");
   const progressEl = document.querySelector("[data-progress='scavenge']");
+  const progressLabel = document.querySelector("[data-progress-label='scavenge']");
   if (!scavengeStatusEl || !button) return;
   if (!state.scavenge.inProgress) {
     scavengeStatusEl.textContent = "Ready";
+    if (progressLabel) progressLabel.textContent = "Ready";
     if (progressEl) {
       progressEl.classList.remove("is-active");
       progressEl.querySelector(".progress-fill").style.width = "0%";
@@ -455,6 +458,7 @@ const updateScavengeStatus = () => {
       }.`
     );
     scavengeStatusEl.textContent = "Ready";
+    if (progressLabel) progressLabel.textContent = "Ready";
     if (progressEl) {
       progressEl.classList.remove("is-active");
       progressEl.querySelector(".progress-fill").style.width = "100%";
@@ -469,6 +473,9 @@ const updateScavengeStatus = () => {
     progressEl.classList.add("is-active");
     progressEl.querySelector(".progress-fill").style.width = `${percent}%`;
   }
+  if (progressLabel) {
+    progressLabel.textContent = `00:${String(seconds).padStart(2, "0")}`;
+  }
   scavengeStatusEl.textContent = `00:${String(seconds).padStart(2, "0")}`;
   button.disabled = true;
   button.textContent = "Searching...";
@@ -478,11 +485,13 @@ const updateTrainingStatus = () => {
   if (!trainingStatusEl || !trainingProgressEl || !trainingTimerEl || !trainingButtonEl) {
     return;
   }
+  const progressLabel = document.querySelector("[data-progress-label='training']");
   if (!state.training.inProgress) {
     trainingStatusEl.textContent = "No active training. Start a session to queue a stat gain.";
     trainingTimerEl.textContent = "Queue: 0/1";
     trainingProgressEl.classList.remove("is-active");
     trainingProgressEl.querySelector(".progress-fill").style.width = "0%";
+    if (progressLabel) progressLabel.textContent = "Idle";
     trainingButtonEl.textContent = "Training Queue Locked";
     if (trainingSummaryEl) trainingSummaryEl.textContent = "Training Slots: 0/1";
     return;
@@ -499,6 +508,7 @@ const updateTrainingStatus = () => {
     state.totals.training += 1;
     addXp(12);
     addLog(`Training complete: +${gain.toFixed(2)}.`);
+    if (progressLabel) progressLabel.textContent = "Complete";
     updateTrainingStatus();
     return;
   }
@@ -511,6 +521,12 @@ const updateTrainingStatus = () => {
   trainingTimerEl.textContent = `Time Left: ${String(minutes).padStart(2, "0")}:${String(
     seconds
   ).padStart(2, "0")}`;
+  if (progressLabel) {
+    progressLabel.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
+  }
   trainingButtonEl.textContent = "Training In Progress";
   if (trainingSummaryEl) trainingSummaryEl.textContent = "Training Slots: 1/1";
 };
@@ -596,19 +612,6 @@ const handleTrade = (type) => {
   addLog("Trade completed.");
 };
 
-const handleIntelPurchase = () => {
-  if (state.marketIntel) {
-    addLog("Market intel already purchased.");
-    return;
-  }
-  if (state.resources.credits < 100) {
-    addLog("Not enough credits for market intel.");
-    return;
-  }
-  spendResource("credits", 100);
-  state.marketIntel = true;
-  addLog("Market intel acquired. Prices will shift soon.");
-};
 
 const doBuildShelter = () => {
   if (state.facilities.shelter) return;
@@ -652,7 +655,6 @@ const bindActions = () => {
           : "Hide Blueprints";
       }
       if (action === "trade") handleTrade(button.dataset.trade);
-      if (action === "buy-intel") handleIntelPurchase();
       updateUI();
     });
   });

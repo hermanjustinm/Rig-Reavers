@@ -206,7 +206,7 @@ body {
   display: grid;
   gap: 8px;
   font-size: 0.85rem;
-  max-height: 180px;
+  height: 180px;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -343,6 +343,7 @@ main {
 }
 
 .progress-bar {
+  position: relative;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 999px;
   height: 8px;
@@ -355,6 +356,16 @@ main {
   width: 0%;
   background: linear-gradient(90deg, #e4541d, #f39f50);
   transition: width 0.3s ease;
+}
+
+.progress-label {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .progress-bar.is-active .progress-fill {

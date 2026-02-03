@@ -117,6 +117,7 @@
             </div>
             <div class="progress-bar" data-progress="scavenge">
               <div class="progress-fill"></div>
+              <span class="progress-label" data-progress-label="scavenge">Ready</span>
             </div>
             <button data-action="scavenge" data-cost-energy="5">Search Ruins</button>
           </article>
@@ -178,6 +179,7 @@
               </div>
               <div class="progress-bar" data-expedition-progress="dry-flats">
                 <div class="progress-fill"></div>
+                <span class="progress-label" data-progress-label="dry-flats">Ready</span>
               </div>
               <button data-action="expedition" data-expedition="dry-flats" data-duration="300">
                 Dispatch Crew
@@ -440,6 +442,7 @@
             </div>
             <div class="progress-bar" data-training-progress>
               <div class="progress-fill"></div>
+              <span class="progress-label" data-progress-label="training">Idle</span>
             </div>
             <button disabled data-training-button>Training Queue Locked</button>
           </article>
@@ -527,43 +530,37 @@
         <header class="page-header">
           <div>
             <h2>Trading Post</h2>
-            <p>Trade supplies for credits and favors. Every deal updates your stock immediately.</p>
+            <p>Barter directly with stall owners. Every exchange updates your stock immediately.</p>
           </div>
           <div class="status-pill">Market Tier: 0</div>
         </header>
         <div class="grid three">
           <article class="card">
-            <h3>Active Offers</h3>
-            <ul class="trade-list">
-              <li>
-                <span>Sell 20 scrap → 60 credits</span>
-                <button data-action="trade" data-trade="sell-scrap">Sell</button>
-              </li>
-              <li>
-                <span>Buy 10 water → 35 credits</span>
-                <button data-action="trade" data-trade="buy-water">Buy</button>
-              </li>
-              <li>
-                <span>Trade 5 food → 2 fuel</span>
-                <button data-action="trade" data-trade="trade-food">Trade</button>
-              </li>
-            </ul>
+            <h3>Scrap Broker</h3>
+            <p>Sell scrap for quick credits.</p>
+            <div class="meta">
+              <span>Requires: 20 scrap</span>
+              <span>Reward: 60 credits</span>
+            </div>
+            <button data-action="trade" data-trade="sell-scrap">Sell 20 Scrap</button>
           </article>
           <article class="card">
-            <h3>Caravan Contracts</h3>
-            <p>Locked until Workshop Level 1.</p>
+            <h3>Water Merchants</h3>
+            <p>Buy clean water from traveling caravans.</p>
             <div class="meta">
-              <span>Requires: Workshop Level 1</span>
+              <span>Requires: 35 credits</span>
+              <span>Reward: +10 water</span>
             </div>
-            <button disabled>Requires: 40 scrap, 10 parts</button>
+            <button data-action="trade" data-trade="buy-water">Buy Water</button>
           </article>
           <article class="card">
-            <h3>Market Intel</h3>
-            <p>Unlock with 100 credits to see price swings.</p>
+            <h3>Fuel Swaps</h3>
+            <p>Trade rations for fuel canisters.</p>
             <div class="meta">
-              <span>Requires: 100 credits</span>
+              <span>Requires: 5 food</span>
+              <span>Reward: +2 fuel</span>
             </div>
-            <button data-action="buy-intel">Purchase Intel (100 credits)</button>
+            <button data-action="trade" data-trade="trade-food">Trade Food</button>
           </article>
         </div>
       </section>
