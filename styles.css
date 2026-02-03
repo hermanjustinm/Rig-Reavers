@@ -60,6 +60,28 @@ body {
   gap: 12px;
 }
 
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ghost-button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.ghost-button:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
 .profile h2 {
   font-size: 1.1rem;
   font-family: "Rajdhani", sans-serif;
@@ -98,6 +120,12 @@ body {
   display: grid;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.resource-panel.collapsed ul,
+.resource-panel.collapsed .stat,
+.resource-panel.collapsed .bar {
+  display: none;
 }
 
 .resource-panel li {
@@ -312,6 +340,47 @@ main {
 .card h4 {
   font-size: 1.05rem;
   margin-bottom: 4px;
+}
+
+.progress-bar {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #e4541d, #f39f50);
+  transition: width 0.3s ease;
+}
+
+.progress-bar.is-active .progress-fill {
+  box-shadow: 0 0 10px rgba(228, 84, 29, 0.6);
+}
+
+.trade-list,
+.achievement-list {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.trade-list li,
+.achievement-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.is-hidden {
+  display: none;
 }
 
 .card button {
