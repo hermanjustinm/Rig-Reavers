@@ -112,19 +112,19 @@ const state = {
 };
 
 const baseCosts = {
-  waterStill: { scrap: 60, credits: 20 },
-  canteen: { scrap: 90, rations: 20, credits: 40 },
-  workshop: { scrap: 120, rations: 40, credits: 60 },
-  infirmary: { scrap: 140, rations: 30, credits: 70 },
-  outpost: { scrap: 180, water: 60, credits: 100 },
-  tradingPost: { scrap: 220, rations: 80, credits: 140 },
-  garage: { scrap: 140, rations: 40, credits: 80 },
+  waterStill: { scrap: 140, credits: 50 },
+  canteen: { scrap: 220, rations: 50, credits: 90 },
+  workshop: { scrap: 300, rations: 90, credits: 150 },
+  infirmary: { scrap: 340, rations: 70, credits: 180 },
+  outpost: { scrap: 460, water: 140, credits: 260 },
+  tradingPost: { scrap: 560, rations: 180, credits: 340 },
+  garage: { scrap: 320, rations: 90, credits: 200 },
 };
 
 const vehicleCosts = {
-  battleCar: { scrap: 160, rations: 40, credits: 120 },
-  duneBuggy: { scrap: 220, water: 60, credits: 180 },
-  warRig: { scrap: 420, rations: 140, water: 140, credits: 320 },
+  battleCar: { scrap: 320, rations: 90, credits: 240 },
+  duneBuggy: { scrap: 440, water: 140, credits: 340 },
+  warRig: { scrap: 820, rations: 280, water: 280, credits: 620 },
 };
 
 const vehicleUpkeep = {
@@ -175,7 +175,7 @@ const equipmentCatalog = [
     rarity: "common",
     sources: ["scavenge"],
     craftable: true,
-    recipe: { scrap: 50, components: 4 },
+    recipe: { scrap: 120, components: 10 },
     bonuses: { awareness: 1 },
   },
   {
@@ -186,7 +186,7 @@ const equipmentCatalog = [
     rarity: "rare",
     sources: ["exploration"],
     craftable: true,
-    recipe: { scrap: 120, components: 12, salvageCores: 1, credits: 25 },
+    recipe: { scrap: 260, components: 30, salvageCores: 1, credits: 60 },
     bonuses: { awareness: 2, defense: 1 },
   },
   {
@@ -197,7 +197,7 @@ const equipmentCatalog = [
     rarity: "common",
     sources: ["scavenge"],
     craftable: true,
-    recipe: { scrap: 40, components: 3 },
+    recipe: { scrap: 100, components: 8 },
     bonuses: { strength: 1 },
   },
   {
@@ -217,7 +217,7 @@ const equipmentCatalog = [
     rarity: "rare",
     sources: ["exploration"],
     craftable: true,
-    recipe: { scrap: 110, components: 10, salvageCores: 1, credits: 20 },
+    recipe: { scrap: 240, components: 26, salvageCores: 1, credits: 55 },
     bonuses: { strength: 2, defense: 1 },
   },
   {
@@ -228,7 +228,7 @@ const equipmentCatalog = [
     rarity: "common",
     sources: ["scavenge"],
     craftable: true,
-    recipe: { scrap: 45, rations: 12, components: 3 },
+    recipe: { scrap: 110, rations: 28, components: 8 },
     bonuses: { resilience: 1, defense: 1 },
   },
   {
@@ -239,7 +239,7 @@ const equipmentCatalog = [
     rarity: "uncommon",
     sources: ["exploration"],
     craftable: true,
-    recipe: { scrap: 140, components: 12, salvageCores: 1, credits: 30 },
+    recipe: { scrap: 300, components: 30, salvageCores: 1, credits: 70 },
     bonuses: { resilience: 2, defense: 1 },
   },
   {
@@ -478,9 +478,9 @@ const rollEquipmentDrop = (source, difficulty = 1) => {
 };
 
 const getUpgradeCost = (item) => ({
-  scrap: 30 + item.tier * 20,
-  components: 6 + item.tier * 4,
-  credits: 10 + item.tier * 8,
+  scrap: 70 + item.tier * 50,
+  components: 14 + item.tier * 10,
+  credits: 22 + item.tier * 18,
   salvageCores: item.tier >= 2 ? 1 : 0,
 });
 
@@ -495,7 +495,7 @@ const manualScavengeAreas = [
     label: "Scrap Alley",
     cost: 5,
     multiplier: 1,
-    duration: 60,
+    duration: 1,
     foodChance: 0.1,
     waterChance: 0.12,
     requirement: "Unlocks at Level 1.",
@@ -506,7 +506,7 @@ const manualScavengeAreas = [
     label: "Echo Yard",
     cost: 10,
     multiplier: 1.2,
-    duration: 120,
+    duration: 2,
     foodChance: 0.12,
     waterChance: 0.14,
     requirement: "Unlocks at Level 2 + Resilience 2.",
@@ -517,7 +517,7 @@ const manualScavengeAreas = [
     label: "Sunken Rail Yard",
     cost: 18,
     multiplier: 1.4,
-    duration: 180,
+    duration: 3,
     foodChance: 0.14,
     waterChance: 0.16,
     requirement: "Unlocks at Level 3 + Strength 2.",
@@ -528,7 +528,7 @@ const manualScavengeAreas = [
     label: "Market Bonefields",
     cost: 22,
     multiplier: 1.7,
-    duration: 270,
+    duration: 4.5,
     foodChance: 0.16,
     waterChance: 0.18,
     requirement: "Unlocks at Level 4 + Awareness 3.",
@@ -539,7 +539,7 @@ const manualScavengeAreas = [
     label: "Radio Spire",
     cost: 24,
     multiplier: 1.9,
-    duration: 360,
+    duration: 6,
     foodChance: 0.18,
     waterChance: 0.2,
     requirement: "Unlocks at Level 5 + Tech 2.",
@@ -550,7 +550,7 @@ const manualScavengeAreas = [
     label: "Overpass Gutters",
     cost: 26,
     multiplier: 2.1,
-    duration: 540,
+    duration: 9,
     foodChance: 0.2,
     waterChance: 0.22,
     requirement: "Unlocks at Level 6 + Defense 4.",
@@ -561,7 +561,7 @@ const manualScavengeAreas = [
     label: "Crater District",
     cost: 32,
     multiplier: 2.5,
-    duration: 720,
+    duration: 12,
     foodChance: 0.24,
     waterChance: 0.26,
     requirement: "Unlocks at Level 7 + Strength 5.",
@@ -573,7 +573,7 @@ const expeditionList = [
   {
     key: "service-tunnel",
     label: "Service Tunnel Sweep",
-    duration: 300,
+    duration: 5,
     lootMultiplier: 1.6,
     riskBase: 0.08,
     reward: "Steady scrap and rations.",
@@ -583,7 +583,7 @@ const expeditionList = [
   {
     key: "glassway-haul",
     label: "Glassway Haul",
-    duration: 900,
+    duration: 15,
     lootMultiplier: 2.2,
     riskBase: 0.12,
     reward: "Longer haul with more supplies.",
@@ -593,7 +593,7 @@ const expeditionList = [
   {
     key: "stormfront-pass",
     label: "Stormfront Pass",
-    duration: 1200,
+    duration: 20,
     lootMultiplier: 2.6,
     riskBase: 0.16,
     reward: "Higher credits and salvage.",
@@ -603,7 +603,7 @@ const expeditionList = [
   {
     key: "dust-sea",
     label: "Dust Sea Relay",
-    duration: 3600,
+    duration: 60,
     lootMultiplier: 3.4,
     riskBase: 0.22,
     reward: "Chance at rare components.",
@@ -613,7 +613,7 @@ const expeditionList = [
   {
     key: "iron-wastes",
     label: "Iron Wastes Convoy",
-    duration: 5400,
+    duration: 90,
     lootMultiplier: 3.9,
     riskBase: 0.28,
     reward: "Major salvage and rare parts.",
@@ -626,7 +626,7 @@ const workContracts = [
   {
     key: "courier",
     label: "Courier Route",
-    duration: 1800,
+    duration: 30,
     tier: "tier1",
     reward: { credits: [50, 90], reputation: 2, xp: [35, 55], water: [4, 8] },
     bonusDrops: {
@@ -638,7 +638,7 @@ const workContracts = [
   {
     key: "salvage-guard",
     label: "Salvage Guard",
-    duration: 3600,
+    duration: 60,
     tier: "tier1",
     reward: { credits: [95, 150], reputation: 3, xp: [70, 110], scrap: [20, 40] },
     bonusDrops: {
@@ -650,7 +650,7 @@ const workContracts = [
   {
     key: "water-runner",
     label: "Water Runner",
-    duration: 2700,
+    duration: 45,
     tier: "tier1",
     reward: { credits: [80, 130], reputation: 2, xp: [55, 90], water: [12, 20] },
     bonusDrops: {
@@ -662,7 +662,7 @@ const workContracts = [
   {
     key: "scrap-hauler",
     label: "Scrap Hauler",
-    duration: 5400,
+    duration: 90,
     tier: "tier2",
     reward: { credits: [160, 240], reputation: 3, xp: [110, 160], scrap: [60, 110] },
     bonusDrops: {
@@ -674,7 +674,7 @@ const workContracts = [
   {
     key: "perimeter-watch",
     label: "Perimeter Watch",
-    duration: 7200,
+    duration: 120,
     tier: "tier2",
     reward: { credits: [200, 300], reputation: 4, xp: [140, 200], rations: [12, 20] },
     bonusDrops: {
@@ -686,7 +686,7 @@ const workContracts = [
   {
     key: "canteen-supply",
     label: "Canteen Supply Run",
-    duration: 9000,
+    duration: 150,
     tier: "tier2",
     reward: { credits: [240, 360], reputation: 4, xp: [160, 230], rations: [24, 40], water: [14, 24] },
     bonusDrops: {
@@ -698,7 +698,7 @@ const workContracts = [
   {
     key: "convoy-lead",
     label: "Convoy Lead",
-    duration: 14400,
+    duration: 240,
     tier: "tier3",
     reward: { credits: [380, 520], reputation: 6, xp: [240, 340], scrap: [110, 180], water: [20, 35] },
     bonusDrops: {
@@ -711,7 +711,7 @@ const workContracts = [
   {
     key: "outpost-escort",
     label: "Outpost Escort",
-    duration: 18000,
+    duration: 300,
     tier: "tier3",
     reward: { credits: [480, 680], reputation: 7, xp: [300, 420], water: [26, 45], rations: [18, 30] },
     bonusDrops: {
@@ -724,7 +724,7 @@ const workContracts = [
   {
     key: "rig-haul",
     label: "War Rig Haul",
-    duration: 28800,
+    duration: 480,
     tier: "tier4",
     reward: { credits: [820, 1100], reputation: 10, xp: [480, 640], water: [60, 90], rations: [60, 90], scrap: [160, 240] },
     bonusDrops: {
@@ -740,50 +740,50 @@ const craftingList = [
   {
     key: "craft-scrap-bow",
     label: "Craft: Scrap Bow",
-    cost: { scrap: 50, components: 4 },
+    cost: { scrap: 120, components: 10 },
     creates: "scrap-bow",
-    recipe: "50 scrap, 4 components",
-    duration: 90,
+    recipe: "120 scrap, 10 components",
+    duration: 2,
   },
   {
     key: "craft-spike-bat",
     label: "Craft: Spike Bat",
-    cost: { scrap: 40, components: 3 },
+    cost: { scrap: 100, components: 8 },
     creates: "spike-bat",
-    recipe: "40 scrap, 3 components",
-    duration: 75,
+    recipe: "100 scrap, 8 components",
+    duration: 2,
   },
   {
     key: "craft-padded-vest",
     label: "Craft: Padded Vest",
-    cost: { scrap: 45, rations: 12, components: 3 },
+    cost: { scrap: 110, rations: 28, components: 8 },
     creates: "padded-vest",
-    recipe: "45 scrap, 12 rations, 3 components",
-    duration: 110,
+    recipe: "110 scrap, 28 rations, 8 components",
+    duration: 3,
   },
   {
     key: "craft-handmade-rifle",
     label: "Craft: Handmade Rifle",
-    cost: { scrap: 120, components: 12, salvageCores: 1, credits: 25 },
+    cost: { scrap: 260, components: 30, salvageCores: 1, credits: 60 },
     creates: "handmade-rifle",
-    recipe: "120 scrap, 12 components, 1 salvage core, 25 credits",
-    duration: 180,
+    recipe: "260 scrap, 30 components, 1 salvage core, 60 credits",
+    duration: 3,
   },
   {
     key: "craft-cleaver-spear",
     label: "Craft: Cleaver Spear",
-    cost: { scrap: 110, components: 10, salvageCores: 1, credits: 20 },
+    cost: { scrap: 240, components: 26, salvageCores: 1, credits: 55 },
     creates: "cleaver-spear",
-    recipe: "110 scrap, 10 components, 1 salvage core, 20 credits",
-    duration: 165,
+    recipe: "240 scrap, 26 components, 1 salvage core, 55 credits",
+    duration: 3,
   },
   {
     key: "craft-reinforced-plate",
     label: "Craft: Reinforced Plate",
-    cost: { scrap: 140, components: 12, salvageCores: 1, credits: 30 },
+    cost: { scrap: 300, components: 30, salvageCores: 1, credits: 70 },
     creates: "reinforced-plate",
-    recipe: "140 scrap, 12 components, 1 salvage core, 30 credits",
-    duration: 200,
+    recipe: "300 scrap, 30 components, 1 salvage core, 70 credits",
+    duration: 4,
   },
 ];
 
@@ -956,6 +956,8 @@ const formatCountdown = (ms) => {
   const seconds = totalSeconds % 60;
   return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 };
+
+const formatMinutes = (value) => `${Number(value.toFixed(1))}m`;
 
 const updateActivityLog = () => {
   if (!activityLog) {
@@ -1182,14 +1184,14 @@ const updateTraining = () => {
     item.className = "training-item";
     const level = state.stats[training.key];
     const cost = 12 + level * 4;
-    const duration = Math.max(25, 45 + level * 15 - (bonuses[training.key] || 0) * 6);
+  const duration = Math.max(1, 2 + level * 0.5 - (bonuses[training.key] || 0) * 0.2);
     const disabled = state.training.inProgress || state.energy < cost || state.rest.inProgress;
 
     item.innerHTML = `
       <div>
         <strong>${training.label} (Lv. ${level})</strong>
         <div class="muted">${training.description}</div>
-        <div class="muted">Cost: ${cost} energy · Time: ${duration}s</div>
+        <div class="muted">Cost: ${cost} energy · Time: ${formatMinutes(duration)}</div>
       </div>
       <button class="primary" ${disabled ? "disabled" : ""}>Train</button>
     `;
@@ -1222,7 +1224,7 @@ const updateTraining = () => {
     const duration = Math.max(1, state.training.duration || remaining);
     const progress = 1 - remaining / duration;
     trainingProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
-    trainingProgressValue.textContent = `${remaining}s remaining`;
+    trainingProgressValue.textContent = `${formatCountdown(remaining * 1000)} remaining`;
   } else {
     trainingProgressFill.style.width = "0%";
     trainingProgressValue.textContent = "Idle";
@@ -1247,13 +1249,13 @@ const updateLockedSections = () => {
       <div class="expedition-item">
         <div>
           <strong>${expedition.label}</strong>
-          <div class="muted">Duration: ${expedition.duration}s</div>
+          <div class="muted">Duration: ${formatMinutes(expedition.duration)}</div>
           <div class="muted">Reward: ${expedition.reward}</div>
           <div class="muted">Risk: ${Math.round(expedition.riskBase * 100)}% baseline</div>
           <div class="muted">${expedition.requirement}</div>
         </div>
         <button class="primary" ${!disabled ? "" : "disabled"}>
-          ${isActive ? `${remaining}s` : unlocked ? "Start" : "Locked"}
+          ${isActive ? `${formatCountdown(remaining * 1000)}` : unlocked ? "Start" : "Locked"}
         </button>
       </div>
     `;
@@ -1282,7 +1284,7 @@ const updateLockedSections = () => {
         <div>
           <strong>${item.label}</strong>
           <div class="muted">Recipe: ${item.recipe}</div>
-          <div class="muted">Time: ${item.duration}s</div>
+          <div class="muted">Time: ${formatMinutes(item.duration)}</div>
         </div>
         <button class="primary" data-craft="${item.key}" ${disabled ? "disabled" : ""}>Craft</button>
       </div>
@@ -1326,7 +1328,7 @@ const updateManualScavenge = () => {
       <div class="manual-scavenge__item">
         <div>
           <strong>${area.label}</strong>
-          <div class="muted">Cost: ${area.cost} energy · Duration: ${area.duration}s</div>
+          <div class="muted">Cost: ${area.cost} energy · Duration: ${formatMinutes(area.duration)}</div>
           <div class="muted">${area.requirement}</div>
         </div>
         <button class="primary" ${unlocked && canAffordEnergy && !state.scavenging.inProgress && !state.rest.inProgress && !isInRecovery() ? "" : "disabled"}>
@@ -1379,13 +1381,13 @@ const updateWork = () => {
       <div class="work-item">
         <div>
           <strong>${contract.label}</strong>
-          <div class="muted">Duration: ${contract.duration}s</div>
+          <div class="muted">Duration: ${formatMinutes(contract.duration)}</div>
           <div class="muted">Tier: ${tier.label}</div>
           <div class="muted">Reward: ${rewards}</div>
           ${bonusDisplay ? `<div class="muted">Bonus drops: ${bonusDisplay}</div>` : ""}
           <div class="muted">${contract.requirement}</div>
           ${tierUnlocked ? "" : `<div class="muted">Requires ${tier.minRep} reputation.</div>`}
-          ${cooldownActive ? `<div class="muted">Cooldown: ${cooldownRemaining}s</div>` : ""}
+          ${cooldownActive ? `<div class="muted">Cooldown: ${formatCountdown(cooldownRemaining * 1000)}</div>` : ""}
         </div>
         <button class="primary" ${unlocked && !cooldownActive ? "" : "disabled"}>
           ${isSelected ? "Selected" : unlocked ? "Select" : "Locked"}
@@ -1409,12 +1411,12 @@ const updateWork = () => {
 
   if (state.work.inProgress) {
     const remaining = Math.max(0, Math.ceil((state.work.endsAt - Date.now()) / 1000));
-    workStatus.textContent = `Working: ${remaining}s remaining.`;
+    workStatus.textContent = `Working: ${formatCountdown(remaining * 1000)} remaining.`;
     workButton.disabled = true;
     workButton.textContent = "Contract Active";
     const progress = 1 - remaining / state.work.duration;
     workProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
-    workProgressValue.textContent = `${remaining}s remaining`;
+    workProgressValue.textContent = `${formatCountdown(remaining * 1000)} remaining`;
   } else {
     const selectedContract = state.work.key
       ? workContracts.find((c) => c.key === state.work.key)
@@ -1422,7 +1424,7 @@ const updateWork = () => {
     const tierCooldown = selectedContract ? getTierCooldownRemaining(selectedContract.tier) : 0;
     workStatus.textContent = state.work.key
       ? tierCooldown > 0
-        ? `Tier cooldown active: ${tierCooldown}s remaining.`
+        ? `Tier cooldown active: ${formatCountdown(tierCooldown * 1000)} remaining.`
         : `Ready to start: ${selectedContract.label}.`
       : "Select a contract to begin.";
     workButton.disabled = !state.work.key || tierCooldown > 0 || state.rest.inProgress || isInRecovery();
@@ -1521,7 +1523,7 @@ const updateRest = () => {
     const duration = Math.max(1, state.rest.duration || remaining);
     const progress = 1 - remaining / duration;
     restProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
-    restProgressValue.textContent = `${remaining}s remaining`;
+    restProgressValue.textContent = `${formatCountdown(remaining * 1000)} remaining`;
   } else {
     restProgressFill.style.width = "0%";
     restProgressValue.textContent = "Idle";
@@ -1602,10 +1604,10 @@ const updateCraftingQueue = () => {
   }
   if (state.crafting.inProgress) {
     const remaining = Math.max(0, Math.ceil((state.crafting.endsAt - Date.now()) / 1000));
-    const duration = Math.max(1, state.crafting.duration || remaining);
+  const duration = Math.max(1, state.crafting.duration || remaining);
     const progress = 1 - remaining / duration;
     craftingProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
-    craftingProgressValue.textContent = `${remaining}s remaining`;
+    craftingProgressValue.textContent = `${formatCountdown(remaining * 1000)} remaining`;
   } else {
     craftingProgressFill.style.width = "0%";
     craftingProgressValue.textContent = "Idle";
@@ -1731,8 +1733,9 @@ const startCrafting = (key) => {
   }
   spendResources(recipe.cost);
   state.crafting.inProgress = true;
-  state.crafting.duration = recipe.duration;
-  state.crafting.endsAt = Date.now() + recipe.duration * 1000;
+  const durationSeconds = recipe.duration * 60;
+  state.crafting.duration = durationSeconds;
+  state.crafting.endsAt = Date.now() + durationSeconds * 1000;
   state.crafting.itemKey = recipe.key;
   addLogEntry(`Workshop started: ${recipe.label}.`);
   updateUI();
@@ -1785,10 +1788,11 @@ const startRest = () => {
   if (state.scavenging.inProgress || state.work.inProgress || state.training.inProgress || state.exploration.inProgress || isInRecovery()) {
     return;
   }
-  const duration = 90 + state.stats.resilience * 10;
+  const duration = 2 + state.stats.resilience * 0.5;
   state.rest.inProgress = true;
-  state.rest.duration = duration;
-  state.rest.endsAt = Date.now() + duration * 1000;
+  const durationSeconds = Math.round(duration * 60);
+  state.rest.duration = durationSeconds;
+  state.rest.endsAt = Date.now() + durationSeconds * 1000;
   addLogEntry("Resting in the infirmary.");
   updateUI();
 };
@@ -1811,8 +1815,9 @@ const startScavenge = (area) => {
   state.energy -= area.cost;
   state.scavenging.inProgress = true;
   state.scavenging.key = area.key;
-  state.scavenging.duration = area.duration;
-  state.scavenging.endsAt = Date.now() + area.duration * 1000;
+  const durationSeconds = area.duration * 60;
+  state.scavenging.duration = durationSeconds;
+  state.scavenging.endsAt = Date.now() + durationSeconds * 1000;
   addLogEntry(`Started scavenging ${area.label}.`);
   updateUI();
 };
@@ -1823,7 +1828,7 @@ const finishScavenge = () => {
     state.scavenging.inProgress = false;
     return;
   }
-  const loot = scavengingLoot({ multiplier: area.multiplier, duration: area.duration, source: "scavenge" });
+  const loot = scavengingLoot({ multiplier: area.multiplier, duration: state.scavenging.duration, source: "scavenge" });
   Object.keys(loot).forEach((key) => {
     state.resources[key] += loot[key];
   });
@@ -1891,8 +1896,9 @@ const startWorkContract = () => {
     return;
   }
   state.work.inProgress = true;
-  state.work.endsAt = Date.now() + contract.duration * 1000;
-  state.work.duration = contract.duration;
+  const durationSeconds = contract.duration * 60;
+  state.work.endsAt = Date.now() + durationSeconds * 1000;
+  state.work.duration = durationSeconds;
   addLogEntry(`Started work: ${contract.label}.`);
   updateUI();
 };
@@ -1956,10 +1962,11 @@ const startExploration = (expedition) => {
   }
   const durationMultiplier = state.vehiclePenalty.active ? state.vehiclePenalty.durationMultiplier : 1;
   const lootMultiplier = state.vehiclePenalty.active ? state.vehiclePenalty.lootMultiplier : 1;
+  const durationSeconds = Math.round(expedition.duration * 60 * durationMultiplier);
   state.exploration.inProgress = true;
   state.exploration.key = expedition.key;
-  state.exploration.duration = Math.round(expedition.duration * durationMultiplier);
-  state.exploration.endsAt = Date.now() + state.exploration.duration * 1000;
+  state.exploration.duration = durationSeconds;
+  state.exploration.endsAt = Date.now() + durationSeconds * 1000;
   state.exploration.lootMultiplier = lootMultiplier;
   addLogEntry(`Exploration started: ${expedition.label}.`);
   updateUI();
@@ -1971,7 +1978,7 @@ const finishExploration = () => {
     state.exploration.inProgress = false;
     return;
   }
-  const effectiveDuration = state.exploration.duration || expedition.duration;
+  const effectiveDuration = state.exploration.duration || expedition.duration * 60;
   const loot = scavengingLoot({
     multiplier: (expedition.lootMultiplier || 2.2) * (state.exploration.lootMultiplier || 1),
     duration: effectiveDuration,
@@ -2026,8 +2033,9 @@ const startTraining = (key, cost, duration) => {
   state.energy -= cost;
   state.training.inProgress = true;
   state.training.statKey = key;
-  state.training.endsAt = Date.now() + duration * 1000;
-  state.training.duration = duration;
+  const durationSeconds = duration * 60;
+  state.training.endsAt = Date.now() + durationSeconds * 1000;
+  state.training.duration = durationSeconds;
   addLogEntry(`Training started: ${key}.`);
   updateUI();
 };
@@ -2290,7 +2298,7 @@ setInterval(() => {
     const remaining = Math.max(0, Math.ceil((state.scavenging.endsAt - Date.now()) / 1000));
     const progress = 1 - remaining / state.scavenging.duration;
     scavengeProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
-    scavengeProgressValue.textContent = `${remaining}s remaining`;
+    scavengeProgressValue.textContent = `${formatCountdown(remaining * 1000)} remaining`;
   } else {
     scavengeProgressFill.style.width = "0%";
     scavengeProgressValue.textContent = "Idle";
@@ -2300,7 +2308,7 @@ setInterval(() => {
     const remaining = Math.max(0, Math.ceil((state.rest.endsAt - Date.now()) / 1000));
     const progress = 1 - remaining / state.rest.duration;
     restProgressFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
-    restProgressValue.textContent = `${remaining}s remaining`;
+    restProgressValue.textContent = `${formatCountdown(remaining * 1000)} remaining`;
   } else if (restProgressFill && restProgressValue) {
     restProgressFill.style.width = "0%";
     restProgressValue.textContent = "Idle";
