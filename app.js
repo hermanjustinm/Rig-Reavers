@@ -150,6 +150,24 @@ const equipmentCatalog = [
     bonuses: { awareness: 1, defense: 1 },
   },
   {
+    key: "broken-knife",
+    name: "Broken Knife",
+    slot: "melee",
+    tier: 1,
+    rarity: "common",
+    sources: ["starter"],
+    bonuses: { strength: 1 },
+  },
+  {
+    key: "tattered-leather-armor",
+    name: "Tattered Leather Armor",
+    slot: "armor",
+    tier: 1,
+    rarity: "common",
+    sources: ["starter"],
+    bonuses: { resilience: 1, defense: 1 },
+  },
+  {
     key: "scrap-bow",
     name: "Scrap Bow",
     slot: "ranged",
@@ -859,9 +877,6 @@ const inventoryList = document.getElementById("inventoryList");
 const equipmentSlots = document.getElementById("equipmentSlots");
 const materialList = document.getElementById("materialList");
 const equipmentBonusSummary = document.getElementById("equipmentBonusSummary");
-
-const saveButton = document.getElementById("saveGame");
-const resetButton = document.getElementById("resetGame");
 
 const formatNumber = (value) => Math.max(0, Math.floor(value));
 
@@ -2201,6 +2216,10 @@ const loadGame = () => {
     state.energy = state.maxEnergy;
     state.health = state.maxHealth;
     state.lastTick = Date.now();
+    state.inventory = [
+      createItemInstance(getItemTemplate("broken-knife")),
+      createItemInstance(getItemTemplate("tattered-leather-armor")),
+    ];
     saveGame();
     return;
   }
@@ -2237,11 +2256,6 @@ const loadGame = () => {
   applyOfflineProgress(Date.now());
 };
 
-const resetGame = () => {
-  localStorage.removeItem(STORAGE_KEY);
-  window.location.reload();
-};
-
 navButtons.forEach((button) => {
   button.addEventListener("click", () => handleNavigation(button.dataset.section));
 });
@@ -2255,8 +2269,6 @@ if (restButton) {
   restButton.addEventListener("click", startRest);
 }
 
-saveButton.addEventListener("click", saveGame);
-resetButton.addEventListener("click", resetGame);
 window.addEventListener("beforeunload", saveGame);
 
 loadGame();
