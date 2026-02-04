@@ -251,14 +251,25 @@ const getEffectiveStats = () => {
   );
 };
 
-const scavengingLoot = (multiplier = 1, stats = getEffectiveStats()) => {
+const rollRange = (min, max) => Math.round(min + Math.random() * (max - min));
+
+const scavengingLoot = ({ multiplier = 1, duration = 60, source = "scavenge" }, stats = getEffectiveStats()) => {
   const strengthBonus = stats.strength * 0.12;
   const awarenessBonus = stats.awareness * 0.1;
+  const durationFactor = Math.max(1, duration / 60);
+  const baseScrap = 10 + durationFactor * 6;
+  const baseCredits = 2 + durationFactor * 2;
+  const baseComponentsChance = Math.min(0.25, 0.05 + durationFactor * 0.02 + awarenessBonus * 0.02);
   return {
-    scrap: Math.round((12 + Math.random() * (10 + strengthBonus * 10)) * multiplier),
-    rations: Math.round((5 + Math.random() * (4 + awarenessBonus * 5)) * multiplier),
-    water: Math.round((3 + Math.random() * (4 + awarenessBonus * 4)) * multiplier),
-    credits: Math.random() < 0.35 ? Math.round((2 + Math.floor(Math.random() * 4)) * multiplier) : 0,
+    scrap: Math.round((baseScrap + Math.random() * (6 + strengthBonus * 8)) * multiplier),
+    rations: Math.round((3 + Math.random() * (3 + awarenessBonus * 4)) * multiplier),
+    water: Math.round((2 + Math.random() * (3 + awarenessBonus * 3)) * multiplier),
+    credits: Math.random() < (source === "exploration" ? 0.45 : 0.3)
+      ? Math.round((baseCredits + Math.floor(Math.random() * 4)) * multiplier)
+      : 0,
+    components: Math.random() < baseComponentsChance
+      ? Math.round((1 + Math.random() * (1 + durationFactor * 0.5)) * multiplier)
+      : 0,
   };
 };
 
@@ -473,7 +484,7 @@ const manualScavengeAreas = [
     label: "Echo Yard",
     cost: 10,
     multiplier: 1.2,
-    duration: 90,
+    duration: 120,
     foodChance: 0.12,
     waterChance: 0.14,
     requirement: "Unlocks at Level 2 + Resilience 2.",
@@ -484,7 +495,7 @@ const manualScavengeAreas = [
     label: "Sunken Rail Yard",
     cost: 18,
     multiplier: 1.4,
-    duration: 135,
+    duration: 180,
     foodChance: 0.14,
     waterChance: 0.16,
     requirement: "Unlocks at Level 3 + Strength 2.",
@@ -495,7 +506,7 @@ const manualScavengeAreas = [
     label: "Market Bonefields",
     cost: 22,
     multiplier: 1.7,
-    duration: 200,
+    duration: 270,
     foodChance: 0.16,
     waterChance: 0.18,
     requirement: "Unlocks at Level 4 + Awareness 3.",
@@ -506,7 +517,7 @@ const manualScavengeAreas = [
     label: "Radio Spire",
     cost: 24,
     multiplier: 1.9,
-    duration: 300,
+    duration: 360,
     foodChance: 0.18,
     waterChance: 0.2,
     requirement: "Unlocks at Level 5 + Tech 2.",
@@ -517,7 +528,7 @@ const manualScavengeAreas = [
     label: "Overpass Gutters",
     cost: 26,
     multiplier: 2.1,
-    duration: 450,
+    duration: 540,
     foodChance: 0.2,
     waterChance: 0.22,
     requirement: "Unlocks at Level 6 + Defense 4.",
@@ -528,7 +539,7 @@ const manualScavengeAreas = [
     label: "Crater District",
     cost: 32,
     multiplier: 2.5,
-    duration: 675,
+    duration: 720,
     foodChance: 0.24,
     waterChance: 0.26,
     requirement: "Unlocks at Level 7 + Strength 5.",
@@ -577,7 +588,10 @@ const workContracts = [
     label: "Courier Route",
     duration: 1800,
     tier: "tier1",
-    reward: { credits: 60, reputation: 2, xp: 40 },
+    reward: { credits: [50, 90], reputation: 2, xp: [35, 55], water: [4, 8] },
+    bonusDrops: {
+      components: { chance: 0.05, range: [1, 1] },
+    },
     requirement: "Unlocks at Level 1.",
     unlock: () => state.level >= 1,
   },
@@ -586,7 +600,10 @@ const workContracts = [
     label: "Salvage Guard",
     duration: 3600,
     tier: "tier1",
-    reward: { credits: 110, reputation: 3, xp: 80 },
+    reward: { credits: [95, 150], reputation: 3, xp: [70, 110], scrap: [20, 40] },
+    bonusDrops: {
+      components: { chance: 0.12, range: [1, 2] },
+    },
     requirement: "Unlocks at Level 2 + Defense 2.",
     unlock: () => state.level >= 2 && state.stats.defense >= 2,
   },
@@ -595,7 +612,10 @@ const workContracts = [
     label: "Water Runner",
     duration: 2700,
     tier: "tier1",
-    reward: { credits: 90, reputation: 2, xp: 60, water: 14 },
+    reward: { credits: [80, 130], reputation: 2, xp: [55, 90], water: [12, 20] },
+    bonusDrops: {
+      rations: { chance: 0.15, range: [6, 10] },
+    },
     requirement: "Unlocks at Level 2 + Awareness 2.",
     unlock: () => state.level >= 2 && state.stats.awareness >= 2,
   },
@@ -604,7 +624,10 @@ const workContracts = [
     label: "Scrap Hauler",
     duration: 5400,
     tier: "tier2",
-    reward: { credits: 180, reputation: 3, xp: 120, scrap: 70 },
+    reward: { credits: [160, 240], reputation: 3, xp: [110, 160], scrap: [60, 110] },
+    bonusDrops: {
+      components: { chance: 0.18, range: [2, 3] },
+    },
     requirement: "Unlocks at Level 3 + Strength 3.",
     unlock: () => state.level >= 3 && state.stats.strength >= 3,
   },
@@ -613,7 +636,10 @@ const workContracts = [
     label: "Perimeter Watch",
     duration: 7200,
     tier: "tier2",
-    reward: { credits: 220, reputation: 4, xp: 150 },
+    reward: { credits: [200, 300], reputation: 4, xp: [140, 200], rations: [12, 20] },
+    bonusDrops: {
+      water: { chance: 0.2, range: [10, 16] },
+    },
     requirement: "Unlocks at Level 4 + Defense 3.",
     unlock: () => state.level >= 4 && state.stats.defense >= 3,
   },
@@ -622,7 +648,10 @@ const workContracts = [
     label: "Canteen Supply Run",
     duration: 9000,
     tier: "tier2",
-    reward: { credits: 260, reputation: 4, xp: 170, rations: 30, water: 18 },
+    reward: { credits: [240, 360], reputation: 4, xp: [160, 230], rations: [24, 40], water: [14, 24] },
+    bonusDrops: {
+      components: { chance: 0.2, range: [2, 4] },
+    },
     requirement: "Requires Canteen + Level 4 + Resilience 3.",
     unlock: () => state.facilities.canteen.level > 0 && state.level >= 4 && state.stats.resilience >= 3,
   },
@@ -631,7 +660,11 @@ const workContracts = [
     label: "Convoy Lead",
     duration: 14400,
     tier: "tier3",
-    reward: { credits: 420, reputation: 6, xp: 260, scrap: 120 },
+    reward: { credits: [380, 520], reputation: 6, xp: [240, 340], scrap: [110, 180], water: [20, 35] },
+    bonusDrops: {
+      components: { chance: 0.3, range: [3, 5] },
+      salvageCores: { chance: 0.05, range: [1, 1] },
+    },
     requirement: "Requires Battle Car + Level 5 + Strength 4.",
     unlock: () => state.vehicles.battleCar.level > 0 && state.level >= 5 && state.stats.strength >= 4,
   },
@@ -640,7 +673,11 @@ const workContracts = [
     label: "Outpost Escort",
     duration: 18000,
     tier: "tier3",
-    reward: { credits: 520, reputation: 7, xp: 320, water: 30 },
+    reward: { credits: [480, 680], reputation: 7, xp: [300, 420], water: [26, 45], rations: [18, 30] },
+    bonusDrops: {
+      components: { chance: 0.32, range: [3, 5] },
+      salvageCores: { chance: 0.08, range: [1, 2] },
+    },
     requirement: "Requires Outpost + Level 6 + Defense 5.",
     unlock: () => state.facilities.outpost.level > 0 && state.level >= 6 && state.stats.defense >= 5,
   },
@@ -649,7 +686,11 @@ const workContracts = [
     label: "War Rig Haul",
     duration: 28800,
     tier: "tier4",
-    reward: { credits: 900, reputation: 10, xp: 520, water: 70, rations: 70, scrap: 180 },
+    reward: { credits: [820, 1100], reputation: 10, xp: [480, 640], water: [60, 90], rations: [60, 90], scrap: [160, 240] },
+    bonusDrops: {
+      components: { chance: 0.45, range: [4, 7] },
+      salvageCores: { chance: 0.15, range: [1, 2] },
+    },
     requirement: "Requires War Rig + Level 8 + Strength 6.",
     unlock: () => state.vehicles.warRig.level > 0 && state.level >= 8 && state.stats.strength >= 6,
   },
@@ -1271,12 +1312,26 @@ const updateWork = () => {
       const cooldownRemaining = getTierCooldownRemaining(contract.tier);
       const cooldownActive = cooldownRemaining > 0;
       const isSelected = state.work.key === contract.key;
+      const rewardDisplay = (value, label) => {
+        if (!value) {
+          return null;
+        }
+        if (Array.isArray(value)) {
+          return `${value[0]}-${value[1]} ${label}`;
+        }
+        return `${value} ${label}`;
+      };
+      const bonusDisplay = contract.bonusDrops
+        ? Object.entries(contract.bonusDrops)
+            .map(([key, bonus]) => `${Math.round(bonus.chance * 100)}% ${bonus.range[0]}-${bonus.range[1]} ${key}`)
+            .join(", ")
+        : null;
       const rewards = [
-        contract.reward.credits ? `${contract.reward.credits} credits` : null,
-        contract.reward.rations ? `${contract.reward.rations} rations` : null,
-        contract.reward.water ? `${contract.reward.water} water` : null,
-        contract.reward.scrap ? `${contract.reward.scrap} scrap` : null,
-        contract.reward.xp ? `${contract.reward.xp} xp` : null,
+        rewardDisplay(contract.reward.credits, "credits"),
+        rewardDisplay(contract.reward.rations, "rations"),
+        rewardDisplay(contract.reward.water, "water"),
+        rewardDisplay(contract.reward.scrap, "scrap"),
+        rewardDisplay(contract.reward.xp, "xp"),
       ]
         .filter(Boolean)
         .join(", ");
@@ -1287,6 +1342,7 @@ const updateWork = () => {
           <div class="muted">Duration: ${contract.duration}s</div>
           <div class="muted">Tier: ${tier.label}</div>
           <div class="muted">Reward: ${rewards}</div>
+          ${bonusDisplay ? `<div class="muted">Bonus drops: ${bonusDisplay}</div>` : ""}
           <div class="muted">${contract.requirement}</div>
           ${tierUnlocked ? "" : `<div class="muted">Requires ${tier.minRep} reputation.</div>`}
           ${cooldownActive ? `<div class="muted">Cooldown: ${cooldownRemaining}s</div>` : ""}
@@ -1726,7 +1782,7 @@ const finishScavenge = () => {
     state.scavenging.inProgress = false;
     return;
   }
-  const loot = scavengingLoot(area.multiplier);
+  const loot = scavengingLoot({ multiplier: area.multiplier, duration: area.duration, source: "scavenge" });
   Object.keys(loot).forEach((key) => {
     state.resources[key] += loot[key];
   });
@@ -1744,6 +1800,12 @@ const finishScavenge = () => {
   if (gearDrop) {
     state.inventory.push(gearDrop);
     addLogEntry(`Rare find: ${formatItemName(gearDrop)} acquired.`);
+  }
+  const injuryChance = Math.max(0.04, 0.18 - getEquipmentBonuses().defense * 0.02);
+  if (Math.random() < injuryChance) {
+    const damage = Math.max(1, Math.round(3 + Math.random() * 6));
+    state.health = Math.max(1, state.health - damage);
+    addLogEntry("Scavenge injury: patched up with field supplies.");
   }
   state.reputation += 1;
   addXp(8);
@@ -1792,19 +1854,44 @@ const finishWorkContract = () => {
     state.work.inProgress = false;
     return;
   }
-  state.resources.credits += contract.reward.credits || 0;
+  const creditReward = Array.isArray(contract.reward.credits)
+    ? rollRange(contract.reward.credits[0], contract.reward.credits[1])
+    : (contract.reward.credits || 0);
+  const xpReward = Array.isArray(contract.reward.xp)
+    ? rollRange(contract.reward.xp[0], contract.reward.xp[1])
+    : (contract.reward.xp || 0);
+  const rationReward = Array.isArray(contract.reward.rations)
+    ? rollRange(contract.reward.rations[0], contract.reward.rations[1])
+    : (contract.reward.rations || 0);
+  const waterReward = Array.isArray(contract.reward.water)
+    ? rollRange(contract.reward.water[0], contract.reward.water[1])
+    : (contract.reward.water || 0);
+  const scrapReward = Array.isArray(contract.reward.scrap)
+    ? rollRange(contract.reward.scrap[0], contract.reward.scrap[1])
+    : (contract.reward.scrap || 0);
+
+  state.resources.credits += creditReward;
   state.reputation += contract.reward.reputation || 0;
-  if (contract.reward.rations) {
-    state.resources.rations += contract.reward.rations;
+  if (rationReward) {
+    state.resources.rations += rationReward;
   }
-  if (contract.reward.water) {
-    state.resources.water += contract.reward.water;
+  if (waterReward) {
+    state.resources.water += waterReward;
   }
-  if (contract.reward.scrap) {
-    state.resources.scrap += contract.reward.scrap;
+  if (scrapReward) {
+    state.resources.scrap += scrapReward;
   }
-  addXp(contract.reward.xp || 0);
-  addLogEntry(`Work complete: +${contract.reward.credits || 0} credits.`);
+  if (contract.bonusDrops) {
+    Object.entries(contract.bonusDrops).forEach(([key, bonus]) => {
+      if (Math.random() < bonus.chance) {
+        const amount = rollRange(bonus.range[0], bonus.range[1]);
+        state.resources[key] = (state.resources[key] || 0) + amount;
+        addLogEntry(`Work bonus: +${amount} ${key}.`);
+      }
+    });
+  }
+  addXp(xpReward);
+  addLogEntry(`Work complete: +${creditReward} credits.`);
   const tierData = workTiers[contract.tier];
   if (tierData) {
     state.workCooldowns[contract.tier] = Date.now() + tierData.cooldownSeconds * 1000;
@@ -1835,7 +1922,11 @@ const finishExploration = () => {
     state.exploration.inProgress = false;
     return;
   }
-  const loot = scavengingLoot(2.2 * (state.exploration.lootMultiplier || 1));
+  const loot = scavengingLoot({
+    multiplier: 2.2 * (state.exploration.lootMultiplier || 1),
+    duration: expedition.duration,
+    source: "exploration",
+  });
   Object.keys(loot).forEach((key) => {
     state.resources[key] += loot[key];
   });
@@ -1915,7 +2006,7 @@ const passiveTick = (silent = false) => {
   if (state.facilities.canteen.level > 0) {
     state.resources.rations += 1;
   }
-  if (state.resources.rations > 0 && state.resources.water > 0) {
+  if (state.resources.rations > 0 && state.resources.water > 0 && state.health > 0) {
     state.health = Math.min(state.maxHealth, state.health + 0.6);
   }
   const builtVehicles = Object.keys(state.vehicles).filter((key) => state.vehicles[key].level > 0);
@@ -1952,7 +2043,7 @@ const applyOfflineProgress = (now) => {
     passiveTick(true);
   }
   const lastUpkeep = state.lastUpkeep || now;
-  const upkeepInterval = 24 * 60 * 60 * 1000;
+  const upkeepInterval = 60 * 60 * 1000;
   const upkeepElapsed = Math.max(0, now - lastUpkeep);
   const upkeepTicks = Math.floor(upkeepElapsed / upkeepInterval);
   if (upkeepTicks > 0) {
@@ -1960,7 +2051,7 @@ const applyOfflineProgress = (now) => {
       applyDailyUpkeep(true);
     }
     state.lastUpkeep = now;
-    addLogEntry(`Offline upkeep applied: ${upkeepTicks} day${upkeepTicks === 1 ? "" : "s"}.`);
+    addLogEntry(`Offline upkeep applied: ${upkeepTicks} hour${upkeepTicks === 1 ? "" : "s"}.`);
   }
   updateTimers();
   addLogEntry(`Offline progress applied: ${ticks} tick${ticks === 1 ? "" : "s"} completed.`);
@@ -1988,11 +2079,11 @@ const applyDailyUpkeep = (silent = false) => {
   }
   if (!hasRations || !hasWater) {
     const penalty = (!hasRations && !hasWater) ? 4 : 2;
-    state.health = Math.max(0, state.health - penalty);
+    state.health = Math.max(1, state.health - penalty);
     state.reputation = Math.max(0, state.reputation - 1);
     state.threat = Math.min(10, state.threat + 1);
     if (!silent) {
-      addLogEntry("Daily shortages hit the camp. Morale and health drop.");
+      addLogEntry("Hourly shortages hit the camp. Morale and health drop.");
     }
   }
 };
@@ -2140,7 +2231,7 @@ setInterval(() => {
 setInterval(() => {
   passiveTick();
   const now = Date.now();
-  const upkeepInterval = 24 * 60 * 60 * 1000;
+  const upkeepInterval = 60 * 60 * 1000;
   if (now - state.lastUpkeep >= upkeepInterval) {
     const ticks = Math.floor((now - state.lastUpkeep) / upkeepInterval);
     for (let i = 0; i < ticks; i += 1) {
