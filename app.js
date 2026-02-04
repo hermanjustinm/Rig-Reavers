@@ -104,6 +104,7 @@ const state = {
   },
   activityLog: [],
   lastTick: Date.now(),
+  lastUpkeep: Date.now(),
 };
 
 const baseCosts = {
@@ -461,7 +462,7 @@ const manualScavengeAreas = [
     label: "Scrap Alley",
     cost: 5,
     multiplier: 1,
-    duration: 40,
+    duration: 60,
     foodChance: 0.1,
     waterChance: 0.12,
     requirement: "Unlocks at Level 1.",
@@ -472,66 +473,66 @@ const manualScavengeAreas = [
     label: "Echo Yard",
     cost: 10,
     multiplier: 1.2,
-    duration: 55,
+    duration: 90,
     foodChance: 0.12,
     waterChance: 0.14,
-    requirement: "Unlocks at Level 2.",
-    unlock: () => state.level >= 2,
+    requirement: "Unlocks at Level 2 + Resilience 2.",
+    unlock: () => state.level >= 2 && state.stats.resilience >= 2,
   },
   {
     key: "sunken-rail",
     label: "Sunken Rail Yard",
     cost: 18,
     multiplier: 1.4,
-    duration: 70,
+    duration: 135,
     foodChance: 0.14,
     waterChance: 0.16,
-    requirement: "Unlocks at Level 3.",
-    unlock: () => state.level >= 3,
+    requirement: "Unlocks at Level 3 + Strength 2.",
+    unlock: () => state.level >= 3 && state.stats.strength >= 2,
   },
   {
     key: "market-bonefields",
     label: "Market Bonefields",
     cost: 22,
     multiplier: 1.7,
-    duration: 90,
+    duration: 200,
     foodChance: 0.16,
     waterChance: 0.18,
-    requirement: "Unlocks at Level 4.",
-    unlock: () => state.level >= 4,
+    requirement: "Unlocks at Level 4 + Awareness 3.",
+    unlock: () => state.level >= 4 && state.stats.awareness >= 3,
   },
   {
     key: "radio-spire",
     label: "Radio Spire",
     cost: 24,
     multiplier: 1.9,
-    duration: 100,
+    duration: 300,
     foodChance: 0.18,
     waterChance: 0.2,
-    requirement: "Unlocks at Level 5.",
-    unlock: () => state.level >= 5,
+    requirement: "Unlocks at Level 5 + Tech 2.",
+    unlock: () => state.level >= 5 && state.stats.tech >= 2,
   },
   {
     key: "overpass-gutters",
     label: "Overpass Gutters",
     cost: 26,
     multiplier: 2.1,
-    duration: 120,
+    duration: 450,
     foodChance: 0.2,
     waterChance: 0.22,
-    requirement: "Unlocks at Level 6.",
-    unlock: () => state.level >= 6,
+    requirement: "Unlocks at Level 6 + Defense 4.",
+    unlock: () => state.level >= 6 && state.stats.defense >= 4,
   },
   {
     key: "crater-district",
     label: "Crater District",
     cost: 32,
     multiplier: 2.5,
-    duration: 150,
+    duration: 675,
     foodChance: 0.24,
     waterChance: 0.26,
-    requirement: "Unlocks at Level 7.",
-    unlock: () => state.level >= 7,
+    requirement: "Unlocks at Level 7 + Strength 5.",
+    unlock: () => state.level >= 7 && state.stats.strength >= 5,
   },
 ];
 
@@ -549,24 +550,24 @@ const expeditionList = [
     label: "Stormfront Pass",
     duration: 240,
     reward: "Higher credits and salvage.",
-    requirement: "Requires Battle Car + Level 4.",
-    unlock: () => state.vehicles.battleCar.level > 0 && state.level >= 4,
+    requirement: "Requires Battle Car + Level 4 + Defense 3.",
+    unlock: () => state.vehicles.battleCar.level > 0 && state.level >= 4 && state.stats.defense >= 3,
   },
   {
     key: "dust-sea",
     label: "Dust Sea Relay",
     duration: 420,
     reward: "Chance at rare components.",
-    requirement: "Requires War Rig + Level 7.",
-    unlock: () => state.vehicles.warRig.level > 0 && state.level >= 7,
+    requirement: "Requires War Rig + Level 7 + Resilience 4.",
+    unlock: () => state.vehicles.warRig.level > 0 && state.level >= 7 && state.stats.resilience >= 4,
   },
   {
     key: "iron-wastes",
     label: "Iron Wastes Convoy",
     duration: 520,
     reward: "Major salvage and rare parts.",
-    requirement: "Requires War Rig + Level 8.",
-    unlock: () => state.vehicles.warRig.level > 0 && state.level >= 8,
+    requirement: "Requires War Rig + Level 8 + Tech 4.",
+    unlock: () => state.vehicles.warRig.level > 0 && state.level >= 8 && state.stats.tech >= 4,
   },
 ];
 
@@ -574,83 +575,83 @@ const workContracts = [
   {
     key: "courier",
     label: "Courier Route",
-    duration: 240,
+    duration: 1800,
     tier: "tier1",
-    reward: { credits: 12, reputation: 1, xp: 15 },
+    reward: { credits: 60, reputation: 2, xp: 40 },
     requirement: "Unlocks at Level 1.",
     unlock: () => state.level >= 1,
   },
   {
     key: "salvage-guard",
     label: "Salvage Guard",
-    duration: 360,
+    duration: 3600,
     tier: "tier1",
-    reward: { credits: 18, reputation: 2, xp: 20 },
-    requirement: "Unlocks at Level 2.",
-    unlock: () => state.level >= 2,
+    reward: { credits: 110, reputation: 3, xp: 80 },
+    requirement: "Unlocks at Level 2 + Defense 2.",
+    unlock: () => state.level >= 2 && state.stats.defense >= 2,
   },
   {
     key: "water-runner",
     label: "Water Runner",
-    duration: 300,
+    duration: 2700,
     tier: "tier1",
-    reward: { credits: 16, reputation: 1, xp: 18, water: 6 },
-    requirement: "Unlocks at Level 2.",
-    unlock: () => state.level >= 2,
+    reward: { credits: 90, reputation: 2, xp: 60, water: 14 },
+    requirement: "Unlocks at Level 2 + Awareness 2.",
+    unlock: () => state.level >= 2 && state.stats.awareness >= 2,
   },
   {
     key: "scrap-hauler",
     label: "Scrap Hauler",
-    duration: 420,
+    duration: 5400,
     tier: "tier2",
-    reward: { credits: 22, reputation: 2, xp: 24, scrap: 18 },
-    requirement: "Unlocks at Level 3.",
-    unlock: () => state.level >= 3,
+    reward: { credits: 180, reputation: 3, xp: 120, scrap: 70 },
+    requirement: "Unlocks at Level 3 + Strength 3.",
+    unlock: () => state.level >= 3 && state.stats.strength >= 3,
   },
   {
     key: "perimeter-watch",
     label: "Perimeter Watch",
-    duration: 520,
+    duration: 7200,
     tier: "tier2",
-    reward: { credits: 26, reputation: 3, xp: 28 },
-    requirement: "Unlocks at Level 4.",
-    unlock: () => state.level >= 4,
+    reward: { credits: 220, reputation: 4, xp: 150 },
+    requirement: "Unlocks at Level 4 + Defense 3.",
+    unlock: () => state.level >= 4 && state.stats.defense >= 3,
   },
   {
     key: "canteen-supply",
     label: "Canteen Supply Run",
-    duration: 600,
+    duration: 9000,
     tier: "tier2",
-    reward: { credits: 30, reputation: 2, xp: 32, rations: 10 },
-    requirement: "Requires Canteen + Level 4.",
-    unlock: () => state.facilities.canteen.level > 0 && state.level >= 4,
+    reward: { credits: 260, reputation: 4, xp: 170, rations: 30, water: 18 },
+    requirement: "Requires Canteen + Level 4 + Resilience 3.",
+    unlock: () => state.facilities.canteen.level > 0 && state.level >= 4 && state.stats.resilience >= 3,
   },
   {
     key: "convoy-lead",
     label: "Convoy Lead",
-    duration: 780,
+    duration: 14400,
     tier: "tier3",
-    reward: { credits: 44, reputation: 4, xp: 40 },
-    requirement: "Requires Battle Car + Level 5.",
-    unlock: () => state.vehicles.battleCar.level > 0 && state.level >= 5,
+    reward: { credits: 420, reputation: 6, xp: 260, scrap: 120 },
+    requirement: "Requires Battle Car + Level 5 + Strength 4.",
+    unlock: () => state.vehicles.battleCar.level > 0 && state.level >= 5 && state.stats.strength >= 4,
   },
   {
     key: "outpost-escort",
     label: "Outpost Escort",
-    duration: 900,
+    duration: 18000,
     tier: "tier3",
-    reward: { credits: 52, reputation: 5, xp: 48 },
-    requirement: "Requires Outpost + Level 6.",
-    unlock: () => state.facilities.outpost.level > 0 && state.level >= 6,
+    reward: { credits: 520, reputation: 7, xp: 320, water: 30 },
+    requirement: "Requires Outpost + Level 6 + Defense 5.",
+    unlock: () => state.facilities.outpost.level > 0 && state.level >= 6 && state.stats.defense >= 5,
   },
   {
     key: "rig-haul",
     label: "War Rig Haul",
-    duration: 1200,
+    duration: 28800,
     tier: "tier4",
-    reward: { credits: 70, reputation: 6, xp: 60, water: 12, rations: 12 },
-    requirement: "Requires War Rig + Level 8.",
-    unlock: () => state.vehicles.warRig.level > 0 && state.level >= 8,
+    reward: { credits: 900, reputation: 10, xp: 520, water: 70, rations: 70, scrap: 180 },
+    requirement: "Requires War Rig + Level 8 + Strength 6.",
+    unlock: () => state.vehicles.warRig.level > 0 && state.level >= 8 && state.stats.strength >= 6,
   },
 ];
 
@@ -1908,7 +1909,6 @@ const updateTimers = () => {
 const passiveTick = (silent = false) => {
   state.energy = Math.min(state.maxEnergy, state.energy + 1);
   state.vehiclePenalty = { active: false, durationMultiplier: 1, lootMultiplier: 1 };
-  updateUpkeepScaling();
   if (state.facilities.waterStill.level > 0) {
     state.resources.water += 1;
   }
@@ -1917,25 +1917,6 @@ const passiveTick = (silent = false) => {
   }
   if (state.resources.rations > 0 && state.resources.water > 0) {
     state.health = Math.min(state.maxHealth, state.health + 0.6);
-  }
-  const needsRations = state.upkeep.rationsPerDay;
-  const needsWater = state.upkeep.waterPerDay;
-  const hasRations = state.resources.rations >= needsRations;
-  const hasWater = state.resources.water >= needsWater;
-  if (hasRations) {
-    state.resources.rations -= needsRations;
-  }
-  if (hasWater) {
-    state.resources.water -= needsWater;
-  }
-  if (!hasRations || !hasWater) {
-    const penalty = (!hasRations && !hasWater) ? 4 : 2;
-    state.health = Math.max(0, state.health - penalty);
-    state.reputation = Math.max(0, state.reputation - 1);
-    state.threat = Math.min(10, state.threat + 1);
-    if (!silent) {
-      addLogEntry("Shortages hit the camp. Morale and health drop.");
-    }
   }
   const builtVehicles = Object.keys(state.vehicles).filter((key) => state.vehicles[key].level > 0);
   builtVehicles.forEach((vehicleKey) => {
@@ -1969,7 +1950,17 @@ const applyOfflineProgress = (now) => {
   }
   for (let i = 0; i < ticks; i += 1) {
     passiveTick(true);
-    state.day += 1;
+  }
+  const lastUpkeep = state.lastUpkeep || now;
+  const upkeepInterval = 24 * 60 * 60 * 1000;
+  const upkeepElapsed = Math.max(0, now - lastUpkeep);
+  const upkeepTicks = Math.floor(upkeepElapsed / upkeepInterval);
+  if (upkeepTicks > 0) {
+    for (let i = 0; i < upkeepTicks; i += 1) {
+      applyDailyUpkeep(true);
+    }
+    state.lastUpkeep = now;
+    addLogEntry(`Offline upkeep applied: ${upkeepTicks} day${upkeepTicks === 1 ? "" : "s"}.`);
   }
   updateTimers();
   addLogEntry(`Offline progress applied: ${ticks} tick${ticks === 1 ? "" : "s"} completed.`);
@@ -1978,9 +1969,32 @@ const applyOfflineProgress = (now) => {
 };
 
 const updateUpkeepScaling = () => {
-  const levelFactor = Math.floor(state.level / 3);
+  const levelFactor = Math.floor(state.level / 4);
   state.upkeep.rationsPerDay = 1 + levelFactor;
   state.upkeep.waterPerDay = 1 + levelFactor;
+};
+
+const applyDailyUpkeep = (silent = false) => {
+  updateUpkeepScaling();
+  const needsRations = state.upkeep.rationsPerDay;
+  const needsWater = state.upkeep.waterPerDay;
+  const hasRations = state.resources.rations >= needsRations;
+  const hasWater = state.resources.water >= needsWater;
+  if (hasRations) {
+    state.resources.rations -= needsRations;
+  }
+  if (hasWater) {
+    state.resources.water -= needsWater;
+  }
+  if (!hasRations || !hasWater) {
+    const penalty = (!hasRations && !hasWater) ? 4 : 2;
+    state.health = Math.max(0, state.health - penalty);
+    state.reputation = Math.max(0, state.reputation - 1);
+    state.threat = Math.min(10, state.threat + 1);
+    if (!silent) {
+      addLogEntry("Daily shortages hit the camp. Morale and health drop.");
+    }
+  }
 };
 
 const updateUI = () => {
@@ -2051,6 +2065,7 @@ const loadGame = () => {
   state.rest = state.rest || { inProgress: false, endsAt: 0, duration: 0 };
   state.crafting = state.crafting || { inProgress: false, endsAt: 0, duration: 0, itemKey: null };
   state.lastTick = state.lastTick || Date.now();
+  state.lastUpkeep = state.lastUpkeep || Date.now();
   state.exploration.lootMultiplier = state.exploration.lootMultiplier || 1;
   state.workCooldowns = state.workCooldowns || {};
   state.tradingCounts = state.tradingCounts || Object.fromEntries(tradingList.map((item) => [item.key, 0]));
@@ -2124,7 +2139,15 @@ setInterval(() => {
 
 setInterval(() => {
   passiveTick();
-  state.day += 1;
+  const now = Date.now();
+  const upkeepInterval = 24 * 60 * 60 * 1000;
+  if (now - state.lastUpkeep >= upkeepInterval) {
+    const ticks = Math.floor((now - state.lastUpkeep) / upkeepInterval);
+    for (let i = 0; i < ticks; i += 1) {
+      applyDailyUpkeep();
+    }
+    state.lastUpkeep = now;
+  }
   resetDailyTrades();
   saveGame();
 }, 30000);
